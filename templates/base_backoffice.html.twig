@@ -89,12 +89,66 @@
 	<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
 	{% block stylesheets %}{% endblock %}
 
+	<!-- Dropdown Styles -->
+	<style>
+		.dropdown-menu {
+			z-index: 1050 !important;
+		}
+
+		.navbar .dropdown-menu {
+			z-index: 1050 !important;
+		}
+
+		.page-content-wrapper {
+			position: relative;
+			z-index: 1;
+		}
+
+		/* Ensure profile dropdown is always visible */
+		#profileDropdown {
+			position: relative;
+			z-index: 1040;
+		}
+
+		#profileDropdown ~ .dropdown-menu {
+			z-index: 1050 !important;
+		}
+	</style>
+
 	<!-- JS (base includes) -->
 	<script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
 	<script src="{{ asset('assets/vendor/purecounterjs/dist/purecounter_vanilla.js') }}"></script>
 	<script src="{{ asset('assets/vendor/apexcharts/js/apexcharts.min.js') }}"></script>
 	<script src="{{ asset('assets/vendor/overlay-scrollbar/js/overlayscrollbars.min.js') }}"></script>
 	<script src="{{ asset('assets/js/functions.js') }}"></script>
+
+	<!-- Dropdown Initialization -->
+	<script>
+		// Wait for Bootstrap to be available and initialize dropdowns
+		function initDropdowns() {
+			if (typeof bootstrap === 'undefined') {
+				setTimeout(initDropdowns, 50);
+				return;
+			}
+			
+			document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function(el) {
+				// Only create if not already initialized
+				if (!bootstrap.Dropdown.getInstance(el)) {
+					new bootstrap.Dropdown(el);
+				}
+			});
+		}
+
+		// Initialize after DOM content is loaded
+		if (document.readyState !== 'loading') {
+			initDropdowns();
+		} else {
+			document.addEventListener('DOMContentLoaded', initDropdowns);
+		}
+
+		// Also initialize after a short delay to ensure everything is loaded
+		setTimeout(initDropdowns, 500);
+	</script>
 
 </head>
 
@@ -392,9 +446,9 @@
 					{% endif %}
                 <li> <hr class="dropdown-divider"></li>
 								<!-- Links -->
-								<li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
-								<li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
-								<li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
+								<li><a class="dropdown-item" href="{{ path('user_profile_edit') }}"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
+								<li><a class="dropdown-item" href="{{ path('user_profile_settings') }}"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
+								<li><a class="dropdown-item" href="{{ path('user_profile_help') }}"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
 								<li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('app_logout') }}"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
 								<li> <hr class="dropdown-divider"></li>
 

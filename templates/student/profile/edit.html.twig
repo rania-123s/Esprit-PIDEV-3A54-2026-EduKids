@@ -1,0 +1,109 @@
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}Edit Profile - Student Dashboard{% endblock %}
+
+{% block body %}
+<section class="py-5">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h1 class="fw-bold mb-2">
+                    <i class="fas fa-user-edit me-2"></i> Edit Profile
+                </h1>
+                <p class="text-muted">Update your personal information</p>
+            </div>
+        </div>
+
+        <!-- Profile Form -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-primary text-white p-4">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-user-circle me-2"></i> Personal Information
+                        </h5>
+                    </div>
+
+                    <div class="card-body p-4">
+                        {% if app.flashes('success') %}
+                            {% for message in app.flashes('success') %}
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>{{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        {% if app.flashes('error') %}
+                            {% for message in app.flashes('error') %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        {{ form_start(form) }}
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(form.firstName, 'First Name', {'label_attr': {'class': 'form-label mb-2'}}) }}
+                                        {{ form_widget(form.firstName, {'attr': {'class': 'form-control', 'placeholder': 'Enter first name'}}) }}
+                                        {% if form.firstName.vars.errors|length > 0 %}
+                                            <div class="text-danger small mt-2">
+                                                {{ form_errors(form.firstName) }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(form.lastName, 'Last Name', {'label_attr': {'class': 'form-label mb-2'}}) }}
+                                        {{ form_widget(form.lastName, {'attr': {'class': 'form-control', 'placeholder': 'Enter last name'}}) }}
+                                        {% if form.lastName.vars.errors|length > 0 %}
+                                            <div class="text-danger small mt-2">
+                                                {{ form_errors(form.lastName) }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-group">
+                                    {{ form_label(form.email, 'Email Address', {'label_attr': {'class': 'form-label mb-2'}}) }}
+                                    {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter email address'}}) }}
+                                    {% if form.email.vars.errors|length > 0 %}
+                                        <div class="text-danger small mt-2">
+                                            {{ form_errors(form.email) }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                {{ form_widget(form.save, {'attr': {'class': 'btn btn-primary fw-bold'}}) }}
+                                <a href="javascript:history.back()" class="btn btn-outline-secondary fw-bold">Cancel</a>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                <!-- Info Card -->
+                <div class="card shadow-sm border-0 mt-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-info-circle text-primary me-3" style="font-size: 1.2rem; margin-top: 2px;"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Keep Your Profile Updated</h6>
+                                <p class="text-muted small mb-0">Keeping accurate personal information helps us provide better services and ensures you receive important notifications.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

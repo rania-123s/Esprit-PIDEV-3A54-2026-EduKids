@@ -31,6 +31,32 @@
 	<!-- Theme CSS -->
     <link rel="stylesheet"  href="{{ asset('assets/css/style.css') }}">
 
+	<!-- Dropdown Styles -->
+	<style>
+		.dropdown-menu {
+			z-index: 1050 !important;
+		}
+
+		.navbar .dropdown-menu {
+			z-index: 1050 !important;
+		}
+
+		/* Ensure profile dropdowns are always visible */
+		[data-bs-toggle="dropdown"] {
+			position: relative;
+			z-index: 1040;
+		}
+
+		[data-bs-toggle="dropdown"] ~ .dropdown-menu {
+			z-index: 1050 !important;
+		}
+
+		/* Fix for dropdowns in sticky headers */
+		.navbar-sticky .dropdown-menu {
+			z-index: 1050 !important;
+		}
+	</style>
+
 	<!-- Global site tag (gtag.js) - Google Analytics -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=G-7N7LGGGWT1"></script>
 	<script>
@@ -420,9 +446,9 @@
 							
 							<li> <a class="dropdown-item" href="admin-dashboard.html"><i class="fas fa-user-cog fa-fw me-1"></i>Admin</a> </li>
 							<li> <hr class="dropdown-divider"></li>
-							<li> <a class="dropdown-item" href="instructor-edit-profile.html"><i class="fas fa-fw fa-edit me-1"></i>Edit Profile</a> </li>
-							<li> <a class="dropdown-item" href="instructor-setting.html"><i class="fas fa-fw fa-cog me-1"></i>Settings</a> </li>
-							<li> <a class="dropdown-item" href="instructor-delete-account.html"><i class="fas fa-fw fa-trash-alt me-1"></i>Delete Profile</a> </li>
+							<li>	<a class="dropdown-item" href="{{ path('user_profile_edit') }}"><i class="fas fa-fw fa-edit me-1"></i>Edit Profile</a> </li>
+							<li> <a class="dropdown-item" href="{{ path('user_profile_settings') }}"><i class="fas fa-fw fa-cog me-1"></i>Settings</a> </li>
+							<li> <a class="dropdown-item" href="{{ path('user_profile_help') }}"><i class="fas fa-fw fa-trash-alt me-1"></i>Help</a> </li>
 							
 							<li> <hr class="dropdown-divider"></li>
 							<!-- Dropdown Level -->
@@ -653,9 +679,9 @@
 					{% endif %}
 					<li> <hr class="dropdown-divider"></li>
 					<!-- Links -->
-					<li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
-					<li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
-					<li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
+					<li><a class="dropdown-item" href="{{ path('user_profile_edit') }}"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
+					<li><a class="dropdown-item" href="{{ path('user_profile_settings') }}"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
+					<li><a class="dropdown-item" href="{{ path('user_profile_help') }}"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
 					<li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('app_logout') }}"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
 					<li> <hr class="dropdown-divider"></li>
 					<!-- Dark mode options START -->
@@ -858,6 +884,31 @@ Footer END -->
 		}
 
 		setTheme(getPreferredTheme())
+
+		// Wait for Bootstrap and initialize dropdowns
+		function initDropdowns() {
+			if (typeof bootstrap === 'undefined') {
+				setTimeout(initDropdowns, 50);
+				return;
+			}
+			
+			document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function(el) {
+				// Only create if not already initialized
+				if (!bootstrap.Dropdown.getInstance(el)) {
+					new bootstrap.Dropdown(el);
+				}
+			});
+		}
+
+		// Initialize after DOM content is loaded
+		if (document.readyState !== 'loading') {
+			initDropdowns();
+		} else {
+			document.addEventListener('DOMContentLoaded', initDropdowns);
+		}
+
+		// Also initialize after a short delay to ensure everything is loaded
+		setTimeout(initDropdowns, 500);
 
 		window.addEventListener('DOMContentLoaded', () => {
 		    var el = document.querySelector('.theme-icon-active');

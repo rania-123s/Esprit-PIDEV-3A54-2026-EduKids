@@ -1,0 +1,96 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Help - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="fw-bold mb-0">
+                <i class="bi bi-question-circle me-2"></i> Help & Support
+            </h1>
+            <p class="text-muted">Find answers to common questions and get support</p>
+        </div>
+    </div>
+
+    <!-- Search Help -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mx-auto">
+            <div class="input-group input-group-lg">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search text-primary"></i>
+                </span>
+                <input type="text" class="form-control border-start-0" placeholder="Search help topics...">
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- FAQ Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white p-4">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-chat-dots me-2"></i> Frequently Asked Questions
+                    </h5>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- FAQ Item 1 -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold mb-2">
+                            <i class="bi bi-chevron-right text-primary me-2"></i> How do I update my profile?
+                        </h6>
+                        <p class="text-muted small ms-4">
+                            Go to <strong>Edit Profile</strong> from your account settings to update your personal information.
+                        </p>
+                    </div>
+
+                    <!-- FAQ Item 2 -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold mb-2">
+                            <i class="bi bi-chevron-right text-primary me-2"></i> How can I reset my password?
+                        </h6>
+                        <p class="text-muted small ms-4">
+                            Click on <strong>Account Settings</strong> and look for the "Change Password" option to reset your password.
+                        </p>
+                    </div>
+
+                    <!-- FAQ Item 3 -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold mb-2">
+                            <i class="bi bi-chevron-right text-primary me-2"></i> What should I do if I forget my email?
+                        </h6>
+                        <p class="text-muted small ms-4">
+                            Contact our support team and we'll help you recover your account through verification questions.
+                        </p>
+                    </div>
+
+                    <!-- FAQ Item 4 -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold mb-2">
+                            <i class="bi bi-chevron-right text-primary me-2"></i> How do I manage notifications?
+                        </h6>
+                        <p class="text-muted small ms-4">
+                            Visit <strong>Account Settings</strong> and go to "Notification Settings" to customize your preferences.
+                        </p>
+                    </div>
+
+                    <!-- FAQ Item 5 -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold mb-2">
+                            <i class="bi bi-chevron-right text-primary me-2"></i> How is my data protected?
+                        </h6>
+                        <p class="text-muted small ms-4">
+                            We use industry-standard encryption and security measures to protect all your personal information.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
