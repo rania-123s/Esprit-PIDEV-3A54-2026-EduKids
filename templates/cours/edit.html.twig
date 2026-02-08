@@ -1,6 +1,6 @@
 {% extends 'base_backoffice.html.twig' %}
 
-{% block title %}Créer un nouveau cours{% endblock %}
+{% block title %}Modifier le cours{% endblock %}
 
 {% block body %}
 
@@ -11,8 +11,8 @@ Page Banner START -->
     <div class="container">
         <div class="row">
             <div class="col-12 text-center">
-                <h1 class="text-white">Créer un nouveau cours</h1>
-                <p class="text-white mb-0">Remplissez les informations essentielles pour soumettre votre cours</p>
+                <h1 class="text-white">Modifier le cours</h1>
+                <p class="text-white mb-0">Modifiez les informations de votre cours</p>
             </div>
         </div>
     </div>
@@ -33,7 +33,6 @@ Form START -->
 
                         {{ form_start(form, {
                             'attr': {
-                                'novalidate': 'novalidate',
                                 'class': 'needs-validation'
                             }
                         }) }}
@@ -42,63 +41,143 @@ Form START -->
 
                             <!-- Titre -->
                             <div class="col-12">
-                                {{ form_row(form.titre, {
-                                    'attr': {
-                                        'placeholder': 'Exemple : Mathématiques 6ème année primaire',
-                                        'class': 'form-control form-control-lg'
-                                    }
-                                }) }}
+                                <div class="mb-3">
+                                    {{ form_label(form.titre, null, {
+                                        'label_attr': {'class': 'form-label fw-bold'}
+                                    }) }}
+                                    {{ form_widget(form.titre, {
+                                        'attr': {
+                                            'placeholder': 'Exemple : Mathématiques 6ème année primaire',
+                                            'class': 'form-control form-control-lg' ~ (form.titre.vars.errors|length > 0 ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    {% if form.titre.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.titre.vars.errors %}
+                                                <div class="text-danger">{{ error.message }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
 
                             <!-- Matière -->
                             <div class="col-md-6">
-                                {{ form_row(form.matiere, {
-                                    'attr': {
-                                        'placeholder': 'Exemple : Mathématiques, Français, SVT, Arabe...',
-                                        'class': 'form-control form-control-lg'
-                                    }
-                                }) }}
+                                <div class="mb-3">
+                                    {{ form_label(form.matiere, null, {
+                                        'label_attr': {'class': 'form-label fw-bold'}
+                                    }) }}
+                                    {{ form_widget(form.matiere, {
+                                        'attr': {
+                                            'placeholder': 'Exemple : Mathématiques, Français, SVT, Arabe...',
+                                            'class': 'form-control form-control-lg' ~ (form.matiere.vars.errors|length > 0 ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    {% if form.matiere.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.matiere.vars.errors %}
+                                                <div class="text-danger">{{ error.message }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
 
                             <!-- Niveau -->
                             <div class="col-md-6">
-                                {{ form_row(form.niveau, {
-                                    'attr': {
-                                        'min': 1,
-                                        'max': 13,
-                                        'placeholder': '1 = CP, 7 = 1ère année collège, etc.',
-                                        'class': 'form-control form-control-lg'
-                                    }
-                                }) }}
+                                <div class="mb-3">
+                                    {{ form_label(form.niveau, null, {
+                                        'label_attr': {'class': 'form-label fw-bold'}
+                                    }) }}
+                                    {{ form_widget(form.niveau, {
+                                        'attr': {
+                                            'min': 1,
+                                            'max': 13,
+                                            'placeholder': '1 = CP, 7 = 1ère année collège, etc.',
+                                            'class': 'form-control form-control-lg' ~ (form.niveau.vars.errors|length > 0 ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    {% if form.niveau.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.niveau.vars.errors %}
+                                                <div class="text-danger">{{ error.message }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
 
                             <!-- Description -->
                             <div class="col-12">
-                                {{ form_row(form.description, {
-                                    'attr': {
-                                        'rows': 8,
-                                        'placeholder': 'Décrivez les objectifs pédagogiques, le contenu détaillé, le public cible, les compétences visées...',
-                                        'class': 'form-control form-control-lg'
-                                    }
-                                }) }}
+                                <div class="mb-3">
+                                    {{ form_label(form.description, null, {
+                                        'label_attr': {'class': 'form-label fw-bold'}
+                                    }) }}
+                                    {{ form_widget(form.description, {
+                                        'attr': {
+                                            'rows': 8,
+                                            'placeholder': 'Décrivez les objectifs pédagogiques, le contenu détaillé, le public cible, les compétences visées...',
+                                            'class': 'form-control form-control-lg' ~ (form.description.vars.errors|length > 0 ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    {% if form.description.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.description.vars.errors %}
+                                                <div class="text-danger">{{ error.message }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Image -->
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    {{ form_label(form.image, null, {
+                                        'label_attr': {'class': 'form-label fw-bold'}
+                                    }) }}
+                                    
+                                    {% if cours.image %}
+                                        <div class="mb-3">
+                                            <p class="text-muted small mb-2">Image actuelle :</p>
+                                            <img src="{{ asset('uploads/images/cours/' ~ cours.image) }}" 
+                                                 alt="{{ cours.titre }}" 
+                                                 class="img-thumbnail" 
+                                                 style="max-width: 200px; max-height: 200px;">
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {{ form_widget(form.image, {
+                                        'attr': {
+                                            'class': 'form-control form-control-lg' ~ (form.image.vars.errors|length > 0 ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    {% if form.image.vars.help is defined and form.image.vars.help %}
+                                        <small class="form-text text-muted d-block mt-2">{{ form.image.vars.help }}</small>
+                                    {% endif %}
+                                    <small class="form-text text-muted d-block mt-1">
+                                        Laissez vide pour conserver l'image actuelle
+                                    </small>
+                                    {% if form.image.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.image.vars.errors %}
+                                                <div class="text-danger">{{ error.message }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
 
                         </div>
 
-                        <div class="col-12">
-                                {{ form_row(form.image, {
-                                    'attr': {
-                                        'placeholder': 'Exemple : image',
-                                        'class': 'form-control form-control-lg'
-                                    }
-                                }) }}
-                            </div>
-
                         <!-- Boutons -->
                         <div class="mt-5 text-center">
                             <button type="submit" class="btn btn-primary btn-lg px-5 py-3">
-                                Créer et soumettre le cours
+                                Enregistrer les modifications
                             </button>
+                            <a href="{{ path('app_cours_index') }}" class="btn btn-secondary btn-lg px-5 py-3 ms-2">
+                                Annuler
+                            </a>
                         </div>
 
                         {{ form_end(form) }}

@@ -73,6 +73,8 @@ public function edit(Request $request, Cours $cours, EntityManagerInterface $em)
     $oldImage = $cours->getImage();
     
     $form = $this->createForm(CoursType::class, $cours);
+    // Clear the image field before handling request so form validation works properly
+    $form->get('image')->setData(null);
     $form->handleRequest($request);
     
     if ($form->isSubmitted() && $form->isValid()) {
