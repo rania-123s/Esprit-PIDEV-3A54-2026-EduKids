@@ -40,4 +40,41 @@ class CoursRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * Search courses by title, subject, or level
+     */
+    public function searchCours(string $query, ?string $sort = null): \Doctrine\ORM\QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->andWhere('c.titre LIKE :query OR c.matiere LIKE :query OR c.niveau LIKE :query')
+            ->setParameter('query', '%'.$query.'%');
+
+        $this->applySorting($qb, $sort);
+        
+        return $qb;
+    }
+
+    /**
+     * Get all courses with sorting
+     */
+    public function findAllSorted(?string $sort = null): \Doctrine\ORM\QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('c');
+        $this->applySorting($qb, $sort);
+        return $qb;
+    }
+
+    /**
+     * Apply sorting to query builder
+     */
+    private function applySorting($qb, ?string $sort = null): void
+    {
+        match($sort) {
+            'a-z' => $qb->orderBy('c.titre', 'ASC'),
+            'niveau-asc' => $qb->orderBy('c.niveau', 'ASC'),
+            'niveau-desc' => $qb->orderBy('c.niveau', 'DESC'),
+            default => $qb->orderBy('c.id', 'DESC'),
+        };
+    }
 }

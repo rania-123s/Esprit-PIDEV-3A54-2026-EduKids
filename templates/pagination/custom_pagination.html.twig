@@ -1,0 +1,52 @@
+{% if pageCount > 1 %}
+<nav class="d-flex justify-content-center mb-0" aria-label="navigation">
+    <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+
+        {# Previous button #}
+        {% if previous is defined %}
+            <li class="page-item mb-0">
+                <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): previous})) }}">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item mb-0 disabled">
+                <span class="page-link">
+                    <i class="fas fa-angle-left"></i>
+                </span>
+            </li>
+        {% endif %}
+
+        {# Page numbers #}
+        {% for page in pagesInRange %}
+            {% if page != current %}
+                <li class="page-item mb-0">
+                    <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): page})) }}">
+                        {{ page }}
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item mb-0 active">
+                    <span class="page-link">{{ page }}</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {# Next button #}
+        {% if next is defined %}
+            <li class="page-item mb-0">
+                <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): next})) }}">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item mb-0 disabled">
+                <span class="page-link">
+                    <i class="fas fa-angle-right"></i>
+                </span>
+            </li>
+        {% endif %}
+
+    </ul>
+</nav>
+{% endif %}

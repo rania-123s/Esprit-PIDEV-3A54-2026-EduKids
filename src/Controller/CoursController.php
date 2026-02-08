@@ -11,16 +11,35 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Knp\Component\Pager\PaginatorInterface;
+
 
 #[Route('/cours')]
 final class CoursController extends AbstractController
 {
     // ================= LIST =================
     #[Route('/', name: 'app_cours_index')]
-    public function index(CoursRepository $coursRepository): Response
+    public function index(CoursRepository $coursRepository, Request $request, PaginatorInterface $paginator): Response
     {
+        $searchQuery = $request->query->get('search', '');
+        $sort = $request->query->get('sort');
+
+        if ($searchQuery) {
+            $queryBuilder = $coursRepository->searchCours($searchQuery, $sort);
+        } else {
+            $queryBuilder = $coursRepository->findAllSorted($sort);
+        }
+
+        $cours = $paginator->paginate(
+            $queryBuilder, // QueryBuilder
+            $request->query->getInt('page', 1), // current page
+            3 // items per page
+        );
+
         return $this->render('cours/index.html.twig', [
-            'cours' => $coursRepository->findAll(),
+            'cours' => $cours,
+            'searchQuery' => $searchQuery,
+            'sort' => $sort,
         ]);
     }
 
