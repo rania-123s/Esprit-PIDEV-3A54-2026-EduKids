@@ -1,0 +1,119 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Liste des Leçons{% endblock %}
+
+{% block body %}
+
+<!-- =======================
+Page Banner START -->
+<section class="py-0 bg-blue h-200px align-items-center d-flex rounded-0"
+         style="background:url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size:cover;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="text-white">Leçons</h1>
+                <p class="text-white mb-0">Gérez les leçons de vos cours</p>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Page Banner END -->
+
+<!-- =======================
+Table START -->
+<section class="pt-5 pb-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12 text-end">
+                <a href="{{ path('app_lecon_new') }}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i>Ajouter une leçon
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages d'alerte -->
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Cours</th>
+                                    <th>Ordre</th>
+                                    <th>Type de média</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lecon in lecons %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ path('app_lecon_show', {'id': lecon.id}) }}" class="fw-bold text-decoration-none">
+                                                {{ lecon.titre }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            {% if lecon.cours %}
+                                                <a href="{{ path('app_cours_show', {'id': lecon.cours.id}) }}" class="text-decoration-none">
+                                                    {{ lecon.cours.titre }}
+                                                </a>
+                                            {% else %}
+                                                <span class="badge bg-warning">Sans cours</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ lecon.ordre }}</td>
+                                        <td>
+                                            <span class="badge bg-info">{{ lecon.mediaType }}</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{{ path('app_lecon_show', {'id': lecon.id}) }}" 
+                                               class="btn btn-sm btn-info me-1" 
+                                               title="Afficher">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_lecon_edit', {'id': lecon.id}) }}" 
+                                               class="btn btn-sm btn-warning me-1" 
+                                               title="Modifier">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form action="{{ path('app_lecon_delete', {'id': lecon.id}) }}" 
+                                                  method="POST" 
+                                                  class="d-inline" 
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette leçon ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecon.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <p class="text-muted mb-0">Aucune leçon trouvée.</p>
+                                            <a href="{{ path('app_lecon_new') }}" class="btn btn-sm btn-primary mt-2">
+                                                Créer la première leçon
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Table END -->
+
+{% endblock %}
