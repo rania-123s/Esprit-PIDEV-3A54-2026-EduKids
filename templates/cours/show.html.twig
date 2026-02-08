@@ -1,0 +1,420 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}{{ cours.titre }}{% endblock %}
+
+{% block body %}
+
+		<!-- Title -->
+		<div class="row mb-3">
+			<div class="col-12 d-sm-flex justify-content-between align-items-center">
+				<h1 class="h3 mb-2 mb-sm-0">Course Details</h1>
+				<a href="{{ path('app_cours_edit', {'id': cours.id}) }}" class="btn btn-sm btn-primary mb-0">Edit Course</a>
+			</div>
+		</div>
+				
+		<div class="row g-4">
+
+			<!-- Course information START -->
+			<div class="col-xxl-6">
+				<div class="card bg-transparent border rounded-3 h-100">
+
+					<!-- Catd header -->
+					<div class="card-header bg-light border-bottom">
+						<h5 class="card-header-title">{{ cours.titre }}</h5>
+					</div>
+
+					<!-- Card body START -->
+					<div class="card-body">
+
+						<!-- Course image and info START -->
+						<div class="row g-4">
+							<!-- Course image -->
+							<div class="col-md-6">
+								<img src="{{ asset('uploads/images/cours/' ~ cours.image) }}" class="rounded" alt="">
+							</div>
+							<!-- Course info and avatar -->
+							<div class="col-md-6">
+								<!-- Info -->
+								<p class="mb-3">{{ cours.description }}</p>
+
+								<!-- Price -->
+								<h5 class="mb-3">$295.55</h5>
+								
+								<!-- Avatar -->
+								<div class="d-sm-flex align-items-center">
+									<!-- Avatar image -->
+									<div class="avatar avatar-md">
+										<img class="avatar-img rounded-circle" src="assets/images/avatar/05.jpg" alt="avatar">
+									</div>
+									<div class="ms-sm-3 mt-2 mt-sm-0">
+										<h6 class="mb-0"><a href="#">By Jacqueline Miller</a></h6>
+										<p class="mb-0 small">Founder Eduport company</p>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- Course image and info END -->
+
+						<!-- Information START -->
+						<div class="row mt-3">
+
+							<!-- Information item -->
+							<div class="col-md-6">
+								<ul class="list-group list-group-borderless">
+									<li class="list-group-item">
+										<span>release date:</span>
+										<span class="h6 mb-0">29 Aug 2020</span>
+									</li>
+
+									<li class="list-group-item">
+										<span>Total Hour:</span>
+										<span class="h6 mb-0">4h 50m</span>
+									</li>
+
+									<li class="list-group-item">
+										<span>Total Enrolled:</span>
+										<span class="h6 mb-0">12,000+</span>
+									</li>
+
+									<li class="list-group-item">
+										<span>Certificate:</span>
+										<span class="h6 mb-0">Yes</span>
+									</li>
+								</ul>
+							</div>
+
+							<!-- Information item -->
+							<div class="col-md-6">
+								<ul class="list-group list-group-borderless">
+									<li class="list-group-item">
+										<span>Skills:</span>
+										<span class="h6 mb-0">All level</span>
+									</li>
+
+									<li class="list-group-item">
+										<span>Total Lecture:</span>
+										<span class="h6 mb-0">30</span>
+									</li>
+
+									<li class="list-group-item">
+										<span>Language:</span>
+										<span class="h6 mb-0">English</span>
+									</li>
+
+									<li class="list-group-item">
+										<span>Review:</span>
+										<span class="h6 mb-0">4.5<i class="fas fa-star text-warning ms-1"></i></span>
+									</li>
+									
+								</ul>
+							</div>
+						</div>
+						<!-- Information END -->
+					</div>
+					<!-- Card body END -->
+				</div>
+			</div>
+			<!-- Course information END -->
+
+			<!-- Chart START -->
+			<div class="col-xxl-6">
+				<div class="row g-4">
+
+					<!-- Active student START -->
+					<div class="col-md-6 col-xxl-12">
+						<div class="card bg-transparent border overflow-hidden">
+							<!-- Card header -->
+							<div class="card-header bg-light border-bottom">
+								<h5 class="card-header-title mb-0">Total course earning</h5>
+							</div>
+							<!-- Card body -->
+							<div class="card-body p-0">
+								<div class="d-sm-flex justify-content-between p-4">
+									<h4 class="text-blue mb-0">$12,586</h4>
+									<p class="mb-0"><span class="text-success me-1">0.20%<i class="bi bi-arrow-up"></i></span>vs last Week</p>
+								</div>
+								<!-- Apex chart -->
+								<div id="activeChartstudent"></div>
+							</div>
+						</div>
+					</div>
+					<!-- Active student END -->
+
+					<!-- Enrolled START -->
+					<div class="col-md-6 col-xxl-12">
+						<div class="card bg-transparent border overflow-hidden">
+							<!-- Card header -->
+							<div class="card-header bg-light border-bottom">
+								<h5 class="card-header-title mb-0">New Enrollment This Month</h5>
+							</div>
+							<!-- Card body -->
+							<div class="card-body p-0">
+								<div class="d-sm-flex justify-content-between p-4">
+									<h4 class="text-blue mb-0">186</h4>
+									<p class="mb-0"><span class="text-success me-1">0.35%<i class="bi bi-arrow-up"></i></span>vs last Week</p>
+								</div>
+								<!-- Apex chart -->
+								<div id="activeChartstudent2"></div>
+							</div>
+						</div>
+					</div>
+					<!-- Enrolled END -->
+
+				</div>
+			</div>
+			<!-- Chart END -->
+
+			<!-- Student review START -->
+			<div class="col-12">
+				<div class="card bg-transparent border">
+
+					<!-- Card header START -->
+					<div class="card-header bg-light border-bottom">
+						<h5 class="mb-0">Students all Reviews</h5>
+					</div>
+					<!-- Card header END -->
+		
+					<!-- Card body START -->
+					<div class="card-body pb-0">
+						<!-- Table START -->
+						<div class="table-responsive border-0">
+							<table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+								<!-- Table head -->
+								<thead>
+									<tr>
+										<th scope="col" class="border-0 rounded-start">Student Name</th>
+										<th scope="col" class="border-0">Date</th>
+										<th scope="col" class="border-0">Rating</th>
+										<th scope="col" class="border-0 rounded-end">Action</th>
+									</tr>
+								</thead>
+		
+								<!-- Table body START -->
+								<tbody>
+									<!-- Table row -->
+									<tr>
+										<!-- Table data -->
+										<td>
+											<div class="d-flex align-items-center position-relative">
+												<!-- Image -->
+												<div class="avatar avatar-xs mb-2 mb-md-0">
+													<img src="assets/images/avatar/09.jpg" class="rounded-circle" alt="">
+												</div>
+												<div class="mb-0 ms-2">
+													<!-- Title -->
+													<h6 class="mb-0"><a href="#" class="stretched-link">Lori Stevens</a></h6>
+												</div>
+											</div>
+										</td>
+		
+										<!-- Table data -->
+										<td class="text-center text-sm-start">
+											<h6 class="mb-0">29 Nov 2021</h6>
+										</td>
+		
+										<!-- Table data -->
+										<td>
+											<ul class="list-inline mb-0">
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+											</ul>
+										</td>
+		
+										<!-- Table data -->
+										<td>
+											<a href="#" class="btn btn-sm btn-info-soft mb-0" data-bs-toggle="modal" data-bs-target="#viewReview">View</a>
+											<button class="btn btn-sm btn-danger-soft me-1 mb-1 mb-md-0">Delete</button>
+										</td>
+									</tr>
+		
+									<!-- Table row -->
+									<tr>
+										<!-- Table data -->
+										<td>
+											<div class="d-flex align-items-center position-relative">
+												<!-- Image -->
+												<div class="avatar avatar-xs mb-2 mb-md-0">
+													<img src="assets/images/avatar/01.jpg" class="rounded-circle" alt="">
+												</div>
+												<div class="mb-0 ms-2">
+													<!-- Title -->
+													<h6 class="mb-0"><a href="#" class="stretched-link">Carolyn Ortiz</a></h6>
+												</div>
+											</div>
+										</td>
+		
+										<!-- Table data -->
+										<td class="text-center text-sm-start">
+											<h6 class="mb-0">15 Nov 2021</h6>
+										</td>
+		
+										<!-- Table data -->
+										<td>
+											<ul class="list-inline mb-0">
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+											</ul>
+										</td>
+		
+										<!-- Table data -->
+										<td>
+											<a href="#" class="btn btn-sm btn-info-soft mb-0" data-bs-toggle="modal" data-bs-target="#viewReview">View</a>
+											<button class="btn btn-sm btn-danger-soft me-1 mb-1 mb-md-0">Delete</button>
+										</td>
+									</tr>
+		
+									<!-- Table row -->
+									<tr>
+										<!-- Table data -->
+										<td>
+											<div class="d-flex align-items-center position-relative">
+												<!-- Image -->
+												<div class="avatar avatar-xs mb-2 mb-md-0">
+													<img src="assets/images/avatar/03.jpg" class="rounded-circle" alt="">
+												</div>
+												<div class="mb-0 ms-2">
+													<!-- Title -->
+													<h6 class="mb-0"><a href="#" class="stretched-link">Dennis Barrett</a></h6>
+												</div>
+											</div>
+										</td>
+		
+										<!-- Table data -->
+										<td class="text-center text-sm-start">
+											<h6 class="mb-0">28 Oct 2021</h6>
+										</td>
+		
+										<!-- Table data -->
+										<td>
+											<ul class="list-inline mb-0">
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star-half-alt text-warning"></i></li>
+											</ul>
+										</td>
+										<!-- Table data -->
+										<td>
+											<a href="#" class="btn btn-sm btn-info-soft mb-0" data-bs-toggle="modal" data-bs-target="#viewReview">View</a>
+											<button class="btn btn-sm btn-danger-soft me-1 mb-1 mb-md-0">Delete</button>
+										</td>
+									</tr>
+		
+									<!-- Table row -->
+									<tr>
+										<!-- Table data -->
+										<td>
+											<div class="d-flex align-items-center position-relative">
+												<!-- Image -->
+												<div class="avatar avatar-xs mb-2 mb-md-0">
+													<img src="assets/images/avatar/04.jpg" class="rounded-circle" alt="">
+												</div>
+												<div class="mb-0 ms-2">
+													<!-- Title -->
+													<h6 class="mb-0"><a href="#" class="stretched-link">Billy Vasquez</a></h6>
+												</div>
+											</div>
+										</td>
+		
+										<!-- Table data -->
+										<td class="text-center text-sm-start">
+											<h6 class="mb-0"><a href="#">12 Oct 2021</a></h6>
+										</td>
+		
+										<!-- Table data -->
+										<td>
+											<ul class="list-inline mb-0">
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star-half-alt text-warning"></i></li>
+											</ul>
+										</td>
+		
+										<!-- Table data -->
+										<td>
+											<a href="#" class="btn btn-sm btn-info-soft mb-0" data-bs-toggle="modal" data-bs-target="#viewReview">View</a>
+											<button class="btn btn-sm btn-danger-soft me-1 mb-1 mb-md-0">Delete</button>
+										</td>
+									</tr>
+		
+									<!-- Table row -->
+									<tr>
+										<!-- Table data -->
+										<td>
+											<div class="d-flex align-items-center position-relative">
+												<!-- Image -->
+												<div class="avatar avatar-xs mb-2 mb-md-0">
+													<img src="assets/images/avatar/05.jpg" class="rounded-circle" alt="">
+												</div>
+												<div class="mb-0 ms-2">
+													<!-- Title -->
+													<h6 class="mt-2"><a href="#" class="stretched-link">Jacqueline Miller</a></h6>
+												</div>
+											</div>
+										</td>
+		
+										<!-- Table data -->
+										<td class="text-center text-sm-start">
+											<h6 class="mb-0"><a href="#">31 Sep 2021</a></h6>
+										</td>
+		
+										<!-- Table data -->
+										<td>
+											<ul class="list-inline mb-0">
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+												<li class="list-inline-item me-0 small"><i class="far fa-star text-warning"></i></li>
+											</ul>
+										</td>
+		
+										<!-- Table data -->
+										<td>
+											<a href="#" class="btn btn-sm btn-info-soft mb-0" data-bs-toggle="modal" data-bs-target="#viewReview">View</a>
+											<button class="btn btn-sm btn-danger-soft me-1 mb-1 mb-md-0">Delete</button>
+										</td>
+									</tr>
+								</tbody>
+								<!-- Table body END -->
+							</table>
+						</div>
+						<!-- Table END -->
+					</div>
+					<!-- Card body END -->
+		
+					<!-- Card footer START -->
+					<div class="card-footer bg-transparent">
+						<!-- Pagination START -->
+						<div class="d-sm-flex justify-content-sm-between align-items-sm-center">
+							<!-- Content -->
+							<p class="mb-0 text-center text-sm-start">Showing 1 to 8 of 20 entries</p>
+							<!-- Pagination -->
+							<nav class="d-flex justify-content-center mb-0" aria-label="navigation">
+								<ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+									<li class="page-item mb-0"><a class="page-link" href="#" tabindex="-1"><i class="fas fa-angle-left"></i></a></li>
+									<li class="page-item mb-0"><a class="page-link" href="#">1</a></li>
+									<li class="page-item mb-0 active"><a class="page-link" href="#">2</a></li>
+									<li class="page-item mb-0"><a class="page-link" href="#">3</a></li>
+									<li class="page-item mb-0"><a class="page-link" href="#"><i class="fas fa-angle-right"></i></a></li>
+								</ul>
+							</nav>
+						</div>
+						<!-- Pagination END -->
+					</div>
+					<!-- Card footer END -->
+				</div>
+			</div>
+			<!-- Student review END -->
+
+		</div> <!-- Row END -->
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}{{ lecon.titre }} - Leçon{% endblock %}
+
+{% block body %}
+
+<!-- =======================
+Page Banner START -->
+<section class="py-0 bg-blue h-200px align-items-center d-flex rounded-0"
+         style="background:url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size:cover;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="text-white">{{ lecon.titre }}</h1>
+                <p class="text-white mb-0">Détails de la leçon</p>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Page Banner END -->
+
+<!-- =======================
+Content START -->
+<section class="pt-5 pb-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+
+                <div class="card shadow">
+                    <div class="card-body p-4 p-lg-5">
+
+                        <h3 class="mb-4">Informations de la leçon</h3>
+
+                        <div class="row g-4">
+
+                            <!-- Titre -->
+                            <div class="col-12">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-muted">Titre</label>
+                                    <p class="h5 mb-0">{{ lecon.titre }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Cours associé -->
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-muted">Cours associé</label>
+                                    {% if lecon.cours %}
+                                        <p class="mb-0">
+                                            <a href="{{ path('app_cours_show', {'id': lecon.cours.id}) }}" class="btn btn-sm btn-outline-primary">
+                                                {{ lecon.cours.titre }}
+                                            </a>
+                                        </p>
+                                    {% else %}
+                                        <span class="badge bg-warning">Sans cours</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Ordre -->
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-muted">Ordre d'affichage</label>
+                                    <p class="h5 mb-0">{{ lecon.ordre }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Type de média -->
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-muted">Type de média</label>
+                                    <p class="mb-0">
+                                        <span class="badge bg-info text-dark">{{ lecon.mediaType }}</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- URL du média -->
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-muted">URL du média</label>
+                                    <p class="mb-0">
+                                        <a href="{{ lecon.mediaUrl }}" target="_blank" class="text-truncate">
+                                            {{ lecon.mediaUrl }}
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="mt-5 d-flex gap-2 justify-content-center">
+                            <a href="{{ path('app_lecon_edit', {'id': lecon.id}) }}" class="btn btn-warning btn-lg px-4">
+                                <i class="bi bi-pencil me-2"></i>Modifier
+                            </a>
+                            <form action="{{ path('app_lecon_delete', {'id': lecon.id}) }}" 
+                                  method="POST" 
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette leçon ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecon.id) }}">
+                                <button type="submit" class="btn btn-danger btn-lg px-4">
+                                    <i class="bi bi-trash me-2"></i>Supprimer
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ path('app_lecon_index') }}" class="text-muted small">
+                        ← Retour à la liste des leçons
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Content END -->
+
+{% endblock %}

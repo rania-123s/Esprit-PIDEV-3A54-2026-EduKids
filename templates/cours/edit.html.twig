@@ -1,0 +1,200 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Modifier le cours{% endblock %}
+
+{% block body %}
+
+<!-- =======================
+Page Banner START -->
+<section class="py-0 bg-blue h-200px align-items-center d-flex rounded-0"
+         style="background:url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size:cover;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="text-white">Modifier le cours</h1>
+                <p class="text-white mb-0">Modifiez les informations de votre cours</p>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Page Banner END -->
+
+<!-- =======================
+Form START -->
+<section class="pt-5 pb-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+
+                <div class="card bg-transparent border rounded-3 shadow">
+                    <div class="card-body p-4 p-lg-5">
+
+                        <h3 class="mb-4 text-center">Informations du cours</h3>
+
+                        {{ form_start(form, {
+                            'attr': {
+                                'class': 'needs-validation'
+                            }
+                        }) }}
+
+                        <div class="row g-4">
+
+                            <!-- Titre -->
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    {{ form_label(form.titre, null, {
+                                        'label_attr': {'class': 'form-label fw-bold'}
+                                    }) }}
+                                    {{ form_widget(form.titre, {
+                                        'attr': {
+                                            'placeholder': 'Exemple : Mathématiques 6ème année primaire',
+                                            'class': 'form-control form-control-lg' ~ (form.titre.vars.errors|length > 0 ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    {% if form.titre.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.titre.vars.errors %}
+                                                <div class="text-danger">{{ error.message }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Matière -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.matiere, null, {
+                                        'label_attr': {'class': 'form-label fw-bold'}
+                                    }) }}
+                                    {{ form_widget(form.matiere, {
+                                        'attr': {
+                                            'placeholder': 'Exemple : Mathématiques, Français, SVT, Arabe...',
+                                            'class': 'form-control form-control-lg' ~ (form.matiere.vars.errors|length > 0 ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    {% if form.matiere.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.matiere.vars.errors %}
+                                                <div class="text-danger">{{ error.message }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Niveau -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.niveau, null, {
+                                        'label_attr': {'class': 'form-label fw-bold'}
+                                    }) }}
+                                    {{ form_widget(form.niveau, {
+                                        'attr': {
+                                            'min': 1,
+                                            'max': 13,
+                                            'placeholder': '1 = CP, 7 = 1ère année collège, etc.',
+                                            'class': 'form-control form-control-lg' ~ (form.niveau.vars.errors|length > 0 ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    {% if form.niveau.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.niveau.vars.errors %}
+                                                <div class="text-danger">{{ error.message }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    {{ form_label(form.description, null, {
+                                        'label_attr': {'class': 'form-label fw-bold'}
+                                    }) }}
+                                    {{ form_widget(form.description, {
+                                        'attr': {
+                                            'rows': 8,
+                                            'placeholder': 'Décrivez les objectifs pédagogiques, le contenu détaillé, le public cible, les compétences visées...',
+                                            'class': 'form-control form-control-lg' ~ (form.description.vars.errors|length > 0 ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    {% if form.description.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.description.vars.errors %}
+                                                <div class="text-danger">{{ error.message }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Image -->
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    {{ form_label(form.image, null, {
+                                        'label_attr': {'class': 'form-label fw-bold'}
+                                    }) }}
+                                    
+                                    {% if cours.image %}
+                                        <div class="mb-3">
+                                            <p class="text-muted small mb-2">Image actuelle :</p>
+                                            <img src="{{ asset('uploads/images/cours/' ~ cours.image) }}" 
+                                                 alt="{{ cours.titre }}" 
+                                                 class="img-thumbnail" 
+                                                 style="max-width: 200px; max-height: 200px;">
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {{ form_widget(form.image, {
+                                        'attr': {
+                                            'class': 'form-control form-control-lg' ~ (form.image.vars.errors|length > 0 ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    {% if form.image.vars.help is defined and form.image.vars.help %}
+                                        <small class="form-text text-muted d-block mt-2">{{ form.image.vars.help }}</small>
+                                    {% endif %}
+                                    <small class="form-text text-muted d-block mt-1">
+                                        Laissez vide pour conserver l'image actuelle
+                                    </small>
+                                    {% if form.image.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.image.vars.errors %}
+                                                <div class="text-danger">{{ error.message }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Boutons -->
+                        <div class="mt-5 text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 py-3">
+                                Enregistrer les modifications
+                            </button>
+                            <a href="{{ path('app_cours_index') }}" class="btn btn-secondary btn-lg px-5 py-3 ms-2">
+                                Annuler
+                            </a>
+                        </div>
+
+                        {{ form_end(form) }}
+
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ path('app_cours_index') }}" class="text-muted small">
+                        ← Retour à la liste des cours
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Form END -->
+
+{% endblock %}
