@@ -77,7 +77,12 @@ class ProfileController extends AbstractController
             }
         }
 
-        return $this->render('profile/edit.html.twig', [
+        // Render different template based on role
+        $template = $this->isGranted('ROLE_ADMIN') 
+            ? 'admin/profile/edit.html.twig' 
+            : 'profile/edit.html.twig';
+
+        return $this->render($template, [
             'form' => $form->createView(),
             'user' => $user,
         ]);
@@ -92,7 +97,12 @@ class ProfileController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        return $this->render('profile/settings.html.twig', [
+        // Render different template based on role
+        $template = $this->isGranted('ROLE_ADMIN') 
+            ? 'admin/profile/settings.html.twig' 
+            : 'profile/settings.html.twig';
+
+        return $this->render($template, [
             'user' => $user,
         ]);
     }
@@ -100,6 +110,11 @@ class ProfileController extends AbstractController
     #[Route('/help', name: 'user_profile_help')]
     public function help(): Response
     {
-        return $this->render('profile/help.html.twig');
+        // Render different template based on role
+        $template = $this->isGranted('ROLE_ADMIN') 
+            ? 'admin/profile/help.html.twig' 
+            : 'profile/help.html.twig';
+
+        return $this->render($template);
     }
 }

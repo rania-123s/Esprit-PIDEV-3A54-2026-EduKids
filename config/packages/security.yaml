@@ -34,9 +34,16 @@ security:
                 enable_csrf: true
                 success_handler: App\Security\LoginSuccessHandler
 
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800  # 1 week in seconds
+                path: /
+                always_remember_me: false
+
             logout:
                 path: app_logout
                 target: app_login
+                csrf_token_generator: security.csrf.token_manager
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -47,10 +54,22 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        # Public authentication routes
+        - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/register$, roles: PUBLIC_ACCESS }
+        - { path: ^/forgot-password$, roles: PUBLIC_ACCESS }
+        - { path: ^/verify-otp$, roles: PUBLIC_ACCESS }
+        - { path: ^/reset-password$, roles: PUBLIC_ACCESS }
+        
+        # API authentication
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        
+        # Admin area - only for administrators
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        
+        # User profile area - requires authentication
+        - { path: ^/profile, roles: ROLE_USER }
 
 when@test:
     security:

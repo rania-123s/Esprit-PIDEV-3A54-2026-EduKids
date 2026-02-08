@@ -9,11 +9,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Constraints\UniqueEntity;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-#[Assert\UniqueEntity(fields: ['email'], message: 'This email address is already registered. Please try another email or sign in.')]
+#[UniqueEntity(fields: ['email'], message: 'This email address is already registered. Please try another email or sign in.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -45,7 +45,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Commande>
      */
-    #[ORM\OneToMany(targetEntity: Commande::class, mappedBy: 'user_id')]
+    #[ORM\OneToMany(targetEntity: Commande::class, mappedBy: 'user')]
     private Collection $commandes;
 
     public function __construct()
@@ -171,7 +171,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->commandes->contains($commande)) {
             $this->commandes->add($commande);
-            $commande->setUserId($this);
+            $commande->setUser($this);
         }
 
         return $this;
@@ -181,8 +181,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->commandes->removeElement($commande)) {
             // set the owning side to null (unless already changed)
-            if ($commande->getUserId() === $this) {
-                $commande->setUserId(null);
+            if ($commande->getUser() === $this) {
+                $commande->setUser(null);
             }
         }
 

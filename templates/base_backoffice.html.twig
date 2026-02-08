@@ -260,7 +260,7 @@
 						<a class="h5 mb-0 text-body" href="index.html" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">
 							<i class="bi bi-globe"></i>
 						</a>
-						<a class="h5 mb-0 text-body" href="{{ path('app_logout') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Sign out">
+						<a class="h5 mb-0 text-body" href="{{ path('app_logout', {'_csrf_token': csrf_token('logout')}) }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Sign out">
 							<i class="bi bi-power"></i>
 						</a>
 				</div>
@@ -449,7 +449,7 @@
 								<li><a class="dropdown-item" href="{{ path('user_profile_edit') }}"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
 								<li><a class="dropdown-item" href="{{ path('user_profile_settings') }}"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
 								<li><a class="dropdown-item" href="{{ path('user_profile_help') }}"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
-								<li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('app_logout') }}"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
+								<li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('app_logout', {'_csrf_token': csrf_token('logout')}) }}"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
 								<li> <hr class="dropdown-divider"></li>
 
 								<!-- Dark mode options START -->
