@@ -10,6 +10,10 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -190,35 +194,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($commande->getUser() === $this) {
                 $commande->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, UserCoursProgress>
-     */
-    public function getUserCoursProgress(): Collection
-    {
-        return $this->userCoursProgress;
-    }
-
-    public function addUserCoursProgress(UserCoursProgress $userCoursProgress): static
-    {
-        if (!$this->userCoursProgress->contains($userCoursProgress)) {
-            $this->userCoursProgress->add($userCoursProgress);
-            $userCoursProgress->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserCoursProgress(UserCoursProgress $userCoursProgress): static
-    {
-        if ($this->userCoursProgress->removeElement($userCoursProgress)) {
-            if ($userCoursProgress->getUser() === $this) {
-                $userCoursProgress->setUser(null);
             }
         }
 

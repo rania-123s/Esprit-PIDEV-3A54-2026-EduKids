@@ -42,6 +42,32 @@
 	<!-- Theme CSS -->
     <link rel="stylesheet"  href="{{ asset('assets/css/style.css') }}">
 
+	<!-- Dropdown Styles -->
+	<style>
+		.dropdown-menu {
+			z-index: 1050 !important;
+		}
+
+		.navbar .dropdown-menu {
+			z-index: 1050 !important;
+		}
+
+		/* Ensure profile dropdowns are always visible */
+		[data-bs-toggle="dropdown"] {
+			position: relative;
+			z-index: 1040;
+		}
+
+		[data-bs-toggle="dropdown"] ~ .dropdown-menu {
+			z-index: 1050 !important;
+		}
+
+		/* Fix for dropdowns in sticky headers */
+		.navbar-sticky .dropdown-menu {
+			z-index: 1050 !important;
+		}
+	</style>
+
 	<!-- Global site tag (gtag.js) - Google Analytics -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=G-7N7LGGGWT1"></script>
 	<script>
@@ -259,9 +285,9 @@
 							</li>
 							<li> <a class="dropdown-item" href="{{ path('app_cours_index') }}"><i class="fas fa-user-cog fa-fw me-1"></i>{{ 'nav.admin'|trans }}</a> </li>
 							<li> <hr class="dropdown-divider"></li>
-							<li> <a class="dropdown-item" href="instructor-edit-profile.html"><i class="fas fa-fw fa-edit me-1"></i>Edit Profile</a> </li>
-							<li> <a class="dropdown-item" href="instructor-setting.html"><i class="fas fa-fw fa-cog me-1"></i>Settings</a> </li>
-							<li> <a class="dropdown-item" href="instructor-delete-account.html"><i class="fas fa-fw fa-trash-alt me-1"></i>Delete Profile</a> </li>
+							<li>	<a class="dropdown-item" href="{{ path('user_profile_edit') }}"><i class="fas fa-fw fa-edit me-1"></i>Edit Profile</a> </li>
+							<li> <a class="dropdown-item" href="{{ path('user_profile_settings') }}"><i class="fas fa-fw fa-cog me-1"></i>Settings</a> </li>
+							<li> <a class="dropdown-item" href="{{ path('user_profile_help') }}"><i class="fas fa-fw fa-trash-alt me-1"></i>Help</a> </li>
 							
 							<li> <hr class="dropdown-divider"></li>
 							<!-- Dropdown Level -->
@@ -497,24 +523,24 @@
 				</a>
 				<ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
 					<!-- Profile info -->
+					{% if app.user %}
 					<li class="px-3 mb-3">
 						<div class="d-flex align-items-center">
 							<!-- Avatar -->
-							<div class="avatar me-3">
-								<img class="avatar-img rounded-circle shadow" src="assets/images/avatar/01.jpg" alt="avatar">
-							</div>
+							
 							<div>
-								<a class="h6" href="#">Lori Ferguson</a>
-								<p class="small m-0">example@gmail.com</p>
+								<a class="h6" href="#">{{ app.user.firstName }} {{ app.user.lastName }}</a>
+								<p class="small m-0">{{ app.user.email }}</p>
 							</div>
 						</div>
 					</li>
+					{% endif %}
 					<li> <hr class="dropdown-divider"></li>
 					<!-- Links -->
-					<li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
-					<li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
-					<li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
-					<li><a class="dropdown-item bg-danger-soft-hover" href="#"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
+					<li><a class="dropdown-item" href="{{ path('user_profile_edit') }}"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
+					<li><a class="dropdown-item" href="{{ path('user_profile_settings') }}"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
+					<li><a class="dropdown-item" href="{{ path('user_profile_help') }}"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
+					<li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('app_logout', {'_csrf_token': csrf_token('logout')}) }}"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
 					<li> <hr class="dropdown-divider"></li>
 					<!-- Dark mode options START -->
 					<li>
@@ -700,6 +726,89 @@ Footer END -->
 <script src="{{ asset('assets/js/functions.js') }}"></script>
 <script src="{{ asset('assets/js/theme.js') }}"></script>
 {{ importmap('app') }}
+<script>
+		const storedTheme = localStorage.getItem('theme')
+ 
+		const getPreferredTheme = () => {
+			if (storedTheme) {
+				return storedTheme
+			}
+			return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'light'
+		}
+
+		const setTheme = function (theme) {
+			if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+				document.documentElement.setAttribute('data-bs-theme', 'dark')
+			} else {
+				document.documentElement.setAttribute('data-bs-theme', theme)
+			}
+		}
+
+		setTheme(getPreferredTheme())
+
+		// Wait for Bootstrap and initialize dropdowns
+		function initDropdowns() {
+			if (typeof bootstrap === 'undefined') {
+				setTimeout(initDropdowns, 50);
+				return;
+			}
+			
+			document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function(el) {
+				// Only create if not already initialized
+				if (!bootstrap.Dropdown.getInstance(el)) {
+					new bootstrap.Dropdown(el);
+				}
+			});
+		}
+
+		// Initialize after DOM content is loaded
+		if (document.readyState !== 'loading') {
+			initDropdowns();
+		} else {
+			document.addEventListener('DOMContentLoaded', initDropdowns);
+		}
+
+		// Also initialize after a short delay to ensure everything is loaded
+		setTimeout(initDropdowns, 500);
+
+		window.addEventListener('DOMContentLoaded', () => {
+		    var el = document.querySelector('.theme-icon-active');
+			if(el != 'undefined' && el != null) {
+				const showActiveTheme = theme => {
+				const activeThemeIcon = document.querySelector('.theme-icon-active use')
+				const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
+				const svgOfActiveBtn = btnToActive.querySelector('.mode-switch use').getAttribute('href')
+
+				document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
+					element.classList.remove('active')
+				})
+
+				btnToActive.classList.add('active')
+				activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+			}
+
+			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+				if (storedTheme !== 'light' || storedTheme !== 'dark') {
+					setTheme(getPreferredTheme())
+				}
+			})
+
+			showActiveTheme(getPreferredTheme())
+
+			document.querySelectorAll('[data-bs-theme-value]')
+				.forEach(toggle => {
+					toggle.addEventListener('click', () => {
+						const theme = toggle.getAttribute('data-bs-theme-value')
+						localStorage.setItem('theme', theme)
+						setTheme(theme)
+						showActiveTheme(theme)
+					})
+				})
+
+			}
+		})
+		
+	</script>
 
 </body>
 

@@ -40,5 +40,20 @@ services:
           $appEnv: '%env(APP_ENV)%'
           $logger: '@logger'
 
-  # add more service definitions when explicit configuration is needed
-  # please note that last definitions always *replace* previous ones
+    # Mailtrap Email Service
+    App\Service\MailtrapEmailService:
+        arguments:
+            $mailtrapApiToken: '%env(MAILTRAP_API_TOKEN)%'
+            $logger: '@logger'
+
+    # Mailtrap Send Mail Command
+    App\Command\SendMailCommand:
+        arguments:
+            $mailtrapApiToken: '%env(MAILTRAP_API_TOKEN)%'
+            $logger: '@logger'
+
+    # Forgot Password Controller
+    App\Controller\ForgotPasswordController:
+        arguments:
+            $appEnv: '%env(APP_ENV)%'
+            $logger: '@logger'

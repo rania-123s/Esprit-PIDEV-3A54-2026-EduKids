@@ -417,4 +417,22 @@
 			<!-- Student review END -->
 
 		</div> <!-- Row END -->
+{% endblock %}{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}{{ cours.titre }}{% endblock %}
+
+{% block body %}
+<h1>{{ cours.titre }}</h1>
+
+<p><strong>Description :</strong> {{ cours.description }}</p>
+<p><strong>Niveau :</strong> {{ cours.niveau }}</p>
+<p><strong>Matière :</strong> {{ cours.matiere }}</p>
+<p><strong>Image :</strong> {{ cours.image }}</p>
+
+<a href="{{ path('app_cours_edit', {'id': cours.id}) }}">✏️ Éditer</a>
+<form method="post" action="{{ path('app_cours_delete', {'id': cours.id}) }}" style="display:inline;">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cours.id) }}">
+    <button type="submit" onclick="return confirm('Supprimer ce cours ?')">❌ Supprimer</button>
+</form>
+<a href="{{ path('app_cours_index') }}">⬅ Retour à la liste</a>
 {% endblock %}

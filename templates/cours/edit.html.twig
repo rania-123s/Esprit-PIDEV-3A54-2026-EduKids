@@ -1,3 +1,17 @@
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}Modifier cours{% endblock %}
+
+{% block body %}
+<h1>Modifier le cours</h1>
+
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button type="submit">Mettre à jour</button>
+{{ form_end(form) }}
+
+<a href="{{ path('app_cours_index') }}">⬅ Retour à la liste</a>
+{% endblock %}
 {% extends 'base_backoffice.html.twig' %}
 
 {% block title %}Modifier le cours{% endblock %}

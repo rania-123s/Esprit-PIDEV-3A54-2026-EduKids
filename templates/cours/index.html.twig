@@ -296,3 +296,46 @@
 		<!-- Card END -->
     </div>
 {% endblock %}
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}Liste des cours{% endblock %}
+
+{% block body %}
+<h1>Liste des cours</h1>
+
+<a href="{{ path('app_cours_new') }}">➕ Ajouter un cours</a>
+
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Titre</th>
+            <th>Niveau</th>
+            <th>Matière</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in cours %}
+            <tr>
+                <td>{{ c.id }}</td>
+                <td>{{ c.titre }}</td>
+                <td>{{ c.niveau }}</td>
+                <td>{{ c.matiere }}</td>
+                <td>
+                    <a href="{{ path('app_cours_show', {'id': c.id}) }}">Voir</a> |
+                    <a href="{{ path('app_cours_edit', {'id': c.id}) }}">Éditer</a> |
+                    <form method="post" action="{{ path('app_cours_delete', {'id': c.id}) }}" style="display:inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ c.id) }}">
+                        <button type="submit" onclick="return confirm('Supprimer ce cours ?')">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">Aucun cours trouvé.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

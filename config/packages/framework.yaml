@@ -11,6 +11,10 @@ framework:
         handler_id: null
         cookie_secure: auto
         cookie_samesite: lax
+        cookie_lifetime: 3600  # Session expires after 1 hour of inactivity
+        cookie_httponly: true  # Prevent JavaScript access to session cookie
+        gc_maxlifetime: 3600   # Garbage collection after 1 hour
+        save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
 
     #esi: true
     #fragments: true
