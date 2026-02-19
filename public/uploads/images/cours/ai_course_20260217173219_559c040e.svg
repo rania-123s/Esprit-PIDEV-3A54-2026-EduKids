@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Course image">
+    <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f97316"/>
+            <stop offset="55%" stop-color="#ec4899"/>
+            <stop offset="100%" stop-color="#334155"/>
+        </linearGradient>
+        <linearGradient id="panel" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22"/>
+            <stop offset="100%" stop-color="#0f172a" stop-opacity="0.28"/>
+        </linearGradient>
+        <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="8"/>
+        </filter>
+    </defs>
+    <rect width="1024" height="1024" rx="64" fill="url(#bg)"/>
+    <rect x="649" y="60" width="649" height="42" rx="21" fill="#e0f2fe" fill-opacity="0.14" transform="rotate(-15 649 60)"/>
+<rect x="182" y="280" width="396" height="42" rx="21" fill="#fde68a" fill-opacity="0.14" transform="rotate(4 182 280)"/>
+<rect x="355" y="500" width="463" height="42" rx="21" fill="#e0f2fe" fill-opacity="0.14" transform="rotate(-9 355 500)"/>
+<rect x="528" y="720" width="530" height="42" rx="21" fill="#fde68a" fill-opacity="0.14" transform="rotate(10 528 720)"/>
+    <circle cx="893" cy="439" r="85" fill="#fde68a" fill-opacity="0.19" filter="url(#softBlur)"/>
+<circle cx="206" cy="690" r="62" fill="#e0f2fe" fill-opacity="0.24" filter="url(#softBlur)"/>
+<circle cx="343" cy="71" r="39" fill="#fde68a" fill-opacity="0.11" filter="url(#softBlur)"/>
+<circle cx="480" cy="322" r="128" fill="#e0f2fe" fill-opacity="0.16" filter="url(#softBlur)"/>
+<circle cx="617" cy="573" r="105" fill="#fde68a" fill-opacity="0.21" filter="url(#softBlur)"/>
+<circle cx="754" cy="824" r="82" fill="#e0f2fe" fill-opacity="0.26" filter="url(#softBlur)"/>
+<circle cx="891" cy="205" r="59" fill="#fde68a" fill-opacity="0.13" filter="url(#softBlur)"/>
+<circle cx="204" cy="456" r="36" fill="#e0f2fe" fill-opacity="0.18" filter="url(#softBlur)"/>
+    <rect x="74" y="308" width="876" height="458" rx="40" fill="url(#panel)" stroke="#ffffff" stroke-opacity="0.22"/>
+    <text x="96" y="372" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#dbeafe">SVT • Creative cover</text>
+    <text x="96" y="462" font-family="Arial, sans-serif" font-size="54" font-weight="700" fill="#ffffff">english</text>
+    <text x="96" y="664" font-family="Arial, sans-serif" font-size="34" font-weight="500" fill="#eef2ff">svt</text>
+    <rect x="96" y="706" width="260" height="58" rx="16" fill="#ffffff" fill-opacity="0.24"/>
+    <text x="126" y="738" font-family="Arial, sans-serif" font-size="28" font-weight="600" fill="#ffffff">EduKids</text>
+</svg>

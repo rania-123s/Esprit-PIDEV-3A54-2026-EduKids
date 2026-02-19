@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Course image">
+    <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0ea5a3"/>
+            <stop offset="55%" stop-color="#2563eb"/>
+            <stop offset="100%" stop-color="#1e293b"/>
+        </linearGradient>
+        <linearGradient id="panel" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22"/>
+            <stop offset="100%" stop-color="#0f172a" stop-opacity="0.28"/>
+        </linearGradient>
+        <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="8"/>
+        </filter>
+    </defs>
+    <rect width="1024" height="1024" rx="64" fill="url(#bg)"/>
+    <rect x="209" y="60" width="529" height="42" rx="21" fill="#f59e0b" fill-opacity="0.14" transform="rotate(-7 209 60)"/>
+<rect x="382" y="280" width="596" height="42" rx="21" fill="#ffffff" fill-opacity="0.14" transform="rotate(12 382 280)"/>
+<rect x="555" y="500" width="663" height="42" rx="21" fill="#f59e0b" fill-opacity="0.14" transform="rotate(-1 555 500)"/>
+<rect x="88" y="720" width="410" height="42" rx="21" fill="#ffffff" fill-opacity="0.14" transform="rotate(-14 88 720)"/>
+    <circle cx="357" cy="589" r="141" fill="#ffffff" fill-opacity="0.13" filter="url(#softBlur)"/>
+<circle cx="494" cy="840" r="118" fill="#f59e0b" fill-opacity="0.18" filter="url(#softBlur)"/>
+<circle cx="631" cy="221" r="95" fill="#ffffff" fill-opacity="0.23" filter="url(#softBlur)"/>
+<circle cx="768" cy="472" r="72" fill="#f59e0b" fill-opacity="0.10" filter="url(#softBlur)"/>
+<circle cx="905" cy="723" r="49" fill="#ffffff" fill-opacity="0.15" filter="url(#softBlur)"/>
+<circle cx="218" cy="104" r="138" fill="#f59e0b" fill-opacity="0.20" filter="url(#softBlur)"/>
+<circle cx="355" cy="355" r="115" fill="#ffffff" fill-opacity="0.25" filter="url(#softBlur)"/>
+<circle cx="492" cy="606" r="92" fill="#f59e0b" fill-opacity="0.12" filter="url(#softBlur)"/>
+    <rect x="74" y="308" width="876" height="458" rx="40" fill="url(#panel)" stroke="#ffffff" stroke-opacity="0.22"/>
+    <text x="96" y="372" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#dbeafe">ENGLISH • Creative cover</text>
+    <text x="96" y="462" font-family="Arial, sans-serif" font-size="54" font-weight="700" fill="#ffffff">الفصل الأول4</text>
+    <text x="96" y="664" font-family="Arial, sans-serif" font-size="34" font-weight="500" fill="#eef2ff">english</text>
+    <rect x="96" y="706" width="260" height="58" rx="16" fill="#ffffff" fill-opacity="0.24"/>
+    <text x="126" y="738" font-family="Arial, sans-serif" font-size="28" font-weight="600" fill="#ffffff">EduKids</text>
+</svg>

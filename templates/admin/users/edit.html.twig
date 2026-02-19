@@ -1,0 +1,212 @@
+{# templates/admin/users/edit.html.twig #}
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Edit User - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0 fw-bold">
+                        <i class="bi bi-person-lines-fill text-primary me-2"></i> User Management
+                    </h2>
+                    <p class="text-muted small mt-1">Edit user account and permissions</p>
+                </div>
+                <a href="{{ path('admin_user_index') }}" class="btn btn-light btn-lg">
+                    <i class="bi bi-arrow-left me-2"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 m-auto">
+            <!-- User Info Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white border-bottom-0 p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-lg me-3">
+                            <div class="avatar-img rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="bi bi-person-fill text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">{{ user.firstName }} {{ user.lastName }}</h5>
+                            <p class="text-muted mb-0 small">{{ user.email }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Alert -->
+                <div class="px-4 pt-3">
+                    {% if user.isActive %}
+                        <div class="alert alert-success alert-dismissible fade show border-0" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <span>This account is <strong>Active</strong> and users can log in</span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger alert-dismissible fade show border-0" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <span>This account is <strong>Banned</strong> and cannot log in</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Form Section -->
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'class': 'form-content', 'novalidate': 'novalidate'}}) }}
+                    
+                    <!-- Name Section -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
+                            <i class="bi bi-person-fill me-2"></i> Personal Information
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label fw-semibold">First Name</label>
+                                    {{ form_widget(form.firstName, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Enter first name'}}) }}
+                                    {{ form_errors(form.firstName) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label fw-semibold">Last Name</label>
+                                    {{ form_widget(form.lastName, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Enter last name'}}) }}
+                                    {{ form_errors(form.lastName) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Email Section -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
+                            <i class="bi bi-envelope-fill me-2"></i> Contact Information
+                        </h6>
+                        <div class="form-group">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Enter email address'}}) }}
+                            {{ form_errors(form.email) }}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Role Section -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
+                            <i class="bi bi-shield-check me-2"></i> Permissions & Roles
+                        </h6>
+                        <div class="role-selector">
+                            {{ form_widget(form.roles) }}
+                            <small class="text-muted d-block mt-2">
+                                <i class="bi bi-info-circle me-1"></i> Select one or more roles to define user permissions
+                            </small>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 mt-4">
+                        {{ form_widget(form.save, {'attr': {'class': 'btn btn-lg btn-primary fw-semibold'}}) }}
+                        <a href="{{ path('admin_user_index') }}" class="btn btn-lg btn-light fw-semibold">
+                            <i class="bi bi-x me-2"></i> Cancel
+                        </a>
+                    </div>
+                    
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control, .form-select {
+        border-color: #e0e0e0;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+
+    .form-control-lg, .form-select-lg {
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .form-control.is-invalid, .form-select.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .form-control.is-invalid:focus, .form-select.is-invalid:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.15);
+    }
+
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .role-selector {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e0e0e0;
+    }
+
+    .role-selector input[type="checkbox"] {
+        width: 1.2rem;
+        height: 1.2rem;
+        margin-right: 0.5rem;
+        cursor: pointer;
+    }
+
+    .role-selector label {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .role-selector label:last-child {
+        margin-bottom: 0;
+    }
+
+    hr {
+        opacity: 0.5;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        border-radius: 0.5rem;
+    }
+
+    .avatar {
+        flex-shrink: 0;
+    }
+
+    .form-group {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}

@@ -1,122 +1,279 @@
 {% extends 'base_backoffice.html.twig' %}
 
-{% block title %}{{ lecon.titre }} - Leçon{% endblock %}
+{% block title %}{{ lecon.titre }} - Lecon{% endblock %}
 
 {% block body %}
+<style>
+    .lesson-show-page {
+        --ink: #0f172a;
+        --muted: #5b667a;
+        --line: #d7dfeb;
+        --brand: #0ea5a3;
+        --brand-dark: #0b7f7d;
+        --hero-a: #0f766e;
+        --hero-b: #155e75;
+        --hero-c: #1d4ed8;
+        font-family: "Heebo", sans-serif;
+    }
 
-<!-- =======================
-Page Banner START -->
-<section class="py-0 bg-blue h-200px align-items-center d-flex rounded-0"
-         style="background:url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size:cover;">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1 class="text-white">{{ lecon.titre }}</h1>
-                <p class="text-white mb-0">Détails de la leçon</p>
-            </div>
+    .show-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        margin: 1.75rem 1rem 0;
+        padding: 3rem 1.25rem;
+        background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c));
+        color: #fff;
+        box-shadow: 0 24px 60px rgba(2, 44, 34, 0.24);
+    }
+
+    .show-hero h1 {
+        margin: 0;
+        font-size: clamp(1.6rem, 4vw, 2.45rem);
+        font-weight: 700;
+    }
+
+    .show-hero p {
+        margin: 0.8rem 0 0;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .show-shell {
+        padding: 1.75rem 1rem 2.2rem;
+    }
+
+    .show-card {
+        background: linear-gradient(170deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.96));
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 24px;
+        box-shadow: 0 22px 55px rgba(15, 23, 42, 0.1);
+    }
+
+    .show-card .card-body {
+        padding: clamp(1.1rem, 2.8vw, 2.5rem);
+    }
+
+    .section-title {
+        color: var(--ink);
+        font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .detail-box {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 14px;
+        background: #fff;
+        padding: 0.95rem;
+        height: 100%;
+    }
+
+    .detail-label {
+        display: block;
+        margin-bottom: 0.45rem;
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.25px;
+    }
+
+    .detail-value {
+        margin: 0;
+        color: var(--ink);
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .btn-lesson-main {
+        border: 0;
+        border-radius: 12px;
+        padding: 0.82rem 1.2rem;
+        font-weight: 700;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+        color: #fff;
+        box-shadow: 0 12px 24px rgba(11, 127, 125, 0.28);
+    }
+
+    .btn-edit:hover {
+        color: #fff;
+        filter: brightness(1.03);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #f43f5e, #dc2626);
+        color: #fff;
+        box-shadow: 0 12px 24px rgba(220, 38, 38, 0.28);
+    }
+
+    .btn-delete:hover {
+        color: #fff;
+        filter: brightness(1.03);
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 1rem;
+        color: var(--brand-dark);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        color: #095957;
+        text-decoration: underline;
+    }
+
+    .reveal-up {
+        animation: revealUp 0.45s ease both;
+    }
+
+    .reveal-up.delay-1 {
+        animation-delay: 0.08s;
+    }
+
+    @keyframes revealUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+        .show-hero {
+            margin: 1rem 0.75rem 0;
+            border-radius: 18px;
+            padding: 2.2rem 1rem;
+        }
+
+        .show-shell {
+            padding: 1rem 0.75rem 1.5rem;
+        }
+    }
+</style>
+
+<section class="lesson-show-page">
+    <div class="show-hero reveal-up">
+        <div class="container">
+            <h1>{{ lecon.titre }}</h1>
+            <p>Consultez les details de cette lecon en un coup d'oeil.</p>
         </div>
     </div>
-</section>
-<!-- Page Banner END -->
 
-<!-- =======================
-Content START -->
-<section class="pt-5 pb-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10 col-xl-9">
+    <div class="show-shell">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xl-9">
+                    <div class="card show-card reveal-up delay-1">
+                        <div class="card-body">
+                            <h3 class="section-title">Informations de la lecon</h3>
 
-                <div class="card shadow">
-                    <div class="card-body p-4 p-lg-5">
-
-                        <h3 class="mb-4">Informations de la leçon</h3>
-
-                        <div class="row g-4">
-
-                            <!-- Titre -->
-                            <div class="col-12">
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold text-muted">Titre</label>
-                                    <p class="h5 mb-0">{{ lecon.titre }}</p>
+                            <div class="row g-3">
+                                {% set mediaUrl = lecon.mediaUrl %}
+                                {% set videoUrl = lecon.videoUrl %}
+                                {% set pdfLink = mediaUrl %}
+                                {% set videoFileLink = lecon.videoUrl %}
+                                {% set youtubeButtonLink = lecon.youtubeUrl %}
+                                <div class="col-12">
+                                    <div class="detail-box">
+                                        <span class="detail-label">Titre</span>
+                                        <p class="detail-value">{{ lecon.titre }}</p>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Cours associé -->
-                            <div class="col-md-6">
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold text-muted">Cours associé</label>
-                                    {% if lecon.cours %}
-                                        <p class="mb-0">
+                                <div class="col-md-6">
+                                    <div class="detail-box">
+                                        <span class="detail-label">Cours associe</span>
+                                        {% if lecon.cours %}
                                             <a href="{{ path('app_cours_show', {'id': lecon.cours.id}) }}" class="btn btn-sm btn-outline-primary">
                                                 {{ lecon.cours.titre }}
                                             </a>
-                                        </p>
-                                    {% else %}
-                                        <span class="badge bg-warning">Sans cours</span>
-                                    {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-warning">Sans cours</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Ordre -->
-                            <div class="col-md-6">
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold text-muted">Ordre d'affichage</label>
-                                    <p class="h5 mb-0">{{ lecon.ordre }}</p>
+                                <div class="col-md-6">
+                                    <div class="detail-box">
+                                        <span class="detail-label">Ordre d'affichage</span>
+                                        <p class="detail-value">{{ lecon.ordre }}</p>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Type de média -->
-                            <div class="col-md-6">
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold text-muted">Type de média</label>
-                                    <p class="mb-0">
-                                        <span class="badge bg-info text-dark">{{ lecon.mediaType }}</span>
-                                    </p>
+                                <div class="col-md-6">
+                                    <div class="detail-box">
+                                        <span class="detail-label">Type de media</span>
+                                        <p class="detail-value"><span class="badge bg-info text-dark">{{ lecon.mediaType }}</span></p>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- URL du média -->
-                            <div class="col-md-6">
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold text-muted">URL du média</label>
-                                    <p class="mb-0">
-                                        <a href="{{ lecon.mediaUrl }}" target="_blank" class="text-truncate">
-                                            {{ lecon.mediaUrl }}
+                                <div class="col-md-6">
+                                    <div class="detail-box">
+                                        <span class="detail-label">PDF</span>
+                                        {% if lecon.mediaUrl %}
+                                            <a href="{{ lecon.mediaUrl }}" target="_blank" class="detail-value d-inline-block">{{ lecon.mediaUrl }}</a>
+                                        {% else %}
+                                            <p class="detail-value">Aucun PDF</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="detail-box">
+                                        <span class="detail-label">Video</span>
+                                        {% if videoUrl %}
+                                            <a href="{{ videoUrl }}" target="_blank" class="detail-value d-inline-block">{{ videoUrl }}</a>
+                                        {% else %}
+                                            <p class="detail-value">Aucune video</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a href="{{ pdfLink ?: '#' }}" target="_blank" rel="noopener"
+                                           class="btn btn-sm btn-primary">
+                                            Ouvrir PDF
                                         </a>
-                                    </p>
+                                        <a href="{{ videoFileLink ?: '#' }}" target="_blank" rel="noopener"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Ouvrir video
+                                        </a>
+                                        <a href="{{ youtubeButtonLink ?: '#' }}" target="_blank" rel="noopener"
+                                           class="btn btn-sm btn-danger">
+                                            Voir sur YouTube
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
 
+                            <div class="mt-4 d-flex flex-column flex-md-row gap-2 justify-content-center">
+                                <a href="{{ path('app_lecon_edit', {'id': lecon.id}) }}" class="btn btn-lesson-main btn-edit w-100">
+                                    <i class="bi bi-pencil me-2"></i>Modifier
+                                </a>
+                                <form action="{{ path('app_lecon_delete', {'id': lecon.id}) }}" method="POST" class="w-100" onsubmit="return confirm('Etes-vous sur de vouloir supprimer cette lecon ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecon.id) }}">
+                                    <button type="submit" class="btn btn-lesson-main btn-delete w-100">
+                                        <i class="bi bi-trash me-2"></i>Supprimer
+                                    </button>
+                                </form>
+                            </div>
                         </div>
+                    </div>
 
-                        <!-- Boutons d'action -->
-                        <div class="mt-5 d-flex gap-2 justify-content-center">
-                            <a href="{{ path('app_lecon_edit', {'id': lecon.id}) }}" class="btn btn-warning btn-lg px-4">
-                                <i class="bi bi-pencil me-2"></i>Modifier
-                            </a>
-                            <form action="{{ path('app_lecon_delete', {'id': lecon.id}) }}" 
-                                  method="POST" 
-                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette leçon ?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecon.id) }}">
-                                <button type="submit" class="btn btn-danger btn-lg px-4">
-                                    <i class="bi bi-trash me-2"></i>Supprimer
-                                </button>
-                            </form>
-                        </div>
-
+                    <div class="text-center">
+                        <a href="{{ path('app_lecon_index') }}" class="back-link">
+                            <span aria-hidden="true">&larr;</span>
+                            Retour a la liste des lecons
+                        </a>
                     </div>
                 </div>
-
-                <div class="text-center mt-4">
-                    <a href="{{ path('app_lecon_index') }}" class="text-muted small">
-                        ← Retour à la liste des leçons
-                    </a>
-                </div>
-
             </div>
         </div>
     </div>
 </section>
-<!-- Content END -->
-
 {% endblock %}

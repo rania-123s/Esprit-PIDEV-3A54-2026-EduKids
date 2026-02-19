@@ -31,13 +31,27 @@ class UserRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?User
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Search users by first name, last name, or email
+     *
+     * @param string|null $searchTerm The search term (null or empty string returns all users)
+     * @return User[] Returns an array of User objects
+     */
+    public function searchUsers(?string $searchTerm = null): array
+    {
+        $qb = $this->createQueryBuilder('u');
+
+        if ($searchTerm && trim($searchTerm) !== '') {
+            $searchTerm = '%' . strtolower(trim($searchTerm)) . '%';
+            
+            $qb->where('LOWER(u.firstName) LIKE :search')
+               ->orWhere('LOWER(u.lastName) LIKE :search')
+               ->orWhere('LOWER(u.email) LIKE :search')
+               ->setParameter('search', $searchTerm);
+        }
+
+        return $qb->orderBy('u.id', 'DESC')
+                  ->getQuery()
+                  ->getResult();
+    }
 }

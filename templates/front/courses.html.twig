@@ -1,0 +1,280 @@
+{% extends 'base_frontoffice.html.twig' %}
+{% trans_default_domain 'messages' %}
+
+{% block title %}{{ 'front.courses.page_title'|trans }}{% endblock %}
+
+{% block body %}
+
+<!-- =======================
+Page Banner START -->
+<section class="bg-blue align-items-center d-flex"
+         style="background:url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size:cover;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="text-white">{{ 'front.courses.banner_title'|trans }}</h1>
+                <div class="d-flex justify-content-center">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('home') }}">{{ 'nav.home'|trans }}</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">{{ 'nav.courses'|trans }}</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Page Banner END -->
+
+<!-- =======================
+Courses START -->
+<section class="py-5">
+    <div class="container">
+
+        <!-- Search option START -->
+        <div class="row mb-4 align-items-center">
+            <div class="col-xl-6">
+                <form id="courseSearchForm" class="border rounded p-2" onsubmit="return false;">
+                    <div class="input-group input-borderless">
+                        <input id="courseSearchInput" class="form-control me-1" type="search" placeholder="{{ 'front.courses.search_placeholder'|trans }}" autocomplete="off">
+                        <button id="courseSearchBtn" type="button" class="btn btn-primary mb-0 rounded z-index-1">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-12 col-xl-6 d-flex justify-content-xl-end align-items-center mt-3 mt-xl-0">
+                <p
+                    id="courseSearchCount"
+                    class="mb-0 text-end"
+                    data-showing-label="{{ 'front.courses.showing'|trans }}"
+                    data-of-label="{{ 'front.courses.of'|trans }}"
+                    data-result-singular="{{ 'front.courses.result'|trans }}"
+                    data-result-plural="{{ 'front.courses.results'|trans }}"
+                >
+                    {{ 'front.courses.initial_count'|trans({'%current%': cours|length, '%total%': cours.getTotalItemCount}) }}
+                </p>
+            </div>
+        </div>
+        <!-- Search option END -->
+
+        <div id="courseGrid" class="row g-4">
+
+            {% for c in cours %}
+            {% set lecture_count = c.lecons|length %}
+            {% set rating = c.niveau >= 3 ? 4.5 : (c.niveau == 2 ? 4.0 : 3.5) %}
+            {% set full_stars = rating|round(0, 'floor') %}
+            {% set has_half_star = (rating - full_stars) >= 0.5 %}
+            {% set total_minutes = lecture_count > 0 ? (lecture_count * 42) : 35 %}
+            {% set hours = (total_minutes / 60)|round(0, 'floor') %}
+            {% set minutes = total_minutes % 60 %}
+            {% set minutes_text = minutes < 10 ? '0' ~ minutes : minutes %}
+            {% set likes = c.likes ?? 0 %}
+            {% set dislikes = c.dislikes ?? 0 %}
+            {% set isInStudentList = c.id in (studentCourseIds|default([])) %}
+
+            <div class="col-sm-6 col-xl-4 course-item">
+                <div class="card shadow h-100">
+
+                    <!-- Image -->
+                    <img src="{{ asset('uploads/images/cours/' ~ c.image) }}"
+                         class="card-img-top"
+                         style="height:220px; object-fit:cover;"
+                         alt="{{ c.titre }}">
+
+                    <!-- Card body -->
+                    <div class="card-body pb-0">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="badge bg-purple bg-opacity-10 text-purple">
+                                {{ c.niveau <= 1 ? ('front.level.beginner'|trans) : (c.niveau == 2 ? ('front.level.intermediate'|trans) : ('front.level.advanced'|trans)) }}
+                            </span>
+
+                            <div class="d-flex gap-2 js-reaction-group">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-success py-0 px-2 js-reaction-btn"
+                                        data-reaction="like">
+                                    <i class="far fa-thumbs-up me-1"></i><span class="js-reaction-count">{{ likes }}</span>
+                                </button>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger py-0 px-2 js-reaction-btn"
+                                        data-reaction="dislike">
+                                    <i class="far fa-thumbs-down me-1"></i><span class="js-reaction-count">{{ dislikes }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <h5 class="card-title">
+                            <a href="{{ path('front_cours_show', {'id': c.id}) }}">
+                                {{ c.titre }}
+                            </a>
+                        </h5>
+
+                        <p class="mb-2 text-truncate-2">
+                            {{ c.description|slice(0, 95) }}{% if c.description|length > 95 %}...{% endif %}
+                        </p>
+
+                        <div class="small mb-2">
+                            <div class="fw-semibold text-muted mb-1">{{ 'front.courses.lessons'|trans }}:</div>
+                            <ul class="list-unstyled mb-0 course-lessons">
+                                {% for lecon in c.lecons %}
+                                    <li class="text-truncate">
+                                        <i class="bi bi-play-circle me-1"></i>#{{ lecon.ordre }} {{ lecon.titre }}
+                                    </li>
+                                {% else %}
+                                    <li class="text-muted">{{ 'front.courses.no_lesson'|trans }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <ul class="list-inline mb-0">
+                            {% for i in 1..5 %}
+                                {% if i <= full_stars %}
+                                    <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+                                {% elseif has_half_star and i == (full_stars + 1) %}
+                                    <li class="list-inline-item me-0 small"><i class="fas fa-star-half-alt text-warning"></i></li>
+                                {% else %}
+                                    <li class="list-inline-item me-0 small"><i class="far fa-star text-warning"></i></li>
+                                {% endif %}
+                            {% endfor %}
+                            <li class="list-inline-item ms-2 h6 fw-light mb-0">{{ rating|number_format(1) }}/5.0</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card footer -->
+                    <div class="card-footer pt-0 pb-3">
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <span class="h6 fw-light mb-0">
+                                <i class="far fa-clock text-danger me-2"></i>{{ hours }}h {{ minutes_text }}m
+                            </span>
+                            <span class="h6 fw-light mb-0">
+                                <i class="fas fa-table text-orange me-2"></i>{{ lecture_count }} {{ lecture_count == 1 ? ('front.courses.lecture'|trans) : ('front.courses.lectures'|trans) }}
+                            </span>
+                        </div>
+                        <a href="{{ path('front_cours_show', {'id': c.id}) }}"
+                           class="btn btn-primary-soft w-100 mt-3">
+                            {{ 'front.courses.view_details'|trans }}
+                        </a>
+                        <form method="post" action="{{ path('front_student_course_toggle', {'id': c.id}) }}" class="mt-2">
+                            <input type="hidden" name="_token" value="{{ csrf_token('student_course_toggle_' ~ c.id) }}">
+                            <button type="submit" class="btn w-100 {{ isInStudentList ? 'btn-success' : 'btn-outline-primary' }}">
+                                {% if isInStudentList %}
+                                    <i class="bi bi-check-circle me-1"></i>{{ 'front.courses.in_list'|trans }}
+                                {% else %}
+                                    <i class="bi bi-plus-circle me-1"></i>{{ 'front.courses.add_to_list'|trans }}
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+            {% else %}
+                <div class="col-12 text-center">
+                    <p>{{ 'front.courses.none'|trans }}</p>
+                </div>
+            {% endfor %}
+
+        </div>
+
+        <div class="mt-4 d-flex justify-content-center">
+            {{ knp_pagination_render(cours) }}
+        </div>
+
+    </div>
+</section>
+<!-- Courses END -->
+
+<script>
+document.addEventListener('click', function (event) {
+    var button = event.target.closest('.js-reaction-btn');
+    if (!button) return;
+
+    var countNode = button.querySelector('.js-reaction-count');
+    if (!countNode) return;
+
+    var count = parseInt(countNode.textContent, 10) || 0;
+    var isActive = button.classList.contains('active');
+
+    if (isActive) {
+        button.classList.remove('active');
+        countNode.textContent = Math.max(0, count - 1);
+        return;
+    }
+
+    var group = button.closest('.js-reaction-group');
+    if (group) {
+        var currentActive = group.querySelector('.js-reaction-btn.active');
+        if (currentActive && currentActive !== button) {
+            currentActive.classList.remove('active');
+            var activeCountNode = currentActive.querySelector('.js-reaction-count');
+            if (activeCountNode) {
+                var activeCount = parseInt(activeCountNode.textContent, 10) || 0;
+                activeCountNode.textContent = Math.max(0, activeCount - 1);
+            }
+        }
+    }
+
+    button.classList.add('active');
+    countNode.textContent = count + 1;
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    var searchInput = document.getElementById('courseSearchInput');
+    var searchButton = document.getElementById('courseSearchBtn');
+    var searchForm = document.getElementById('courseSearchForm');
+    var countNode = document.getElementById('courseSearchCount');
+    var cards = Array.prototype.slice.call(document.querySelectorAll('#courseGrid .course-item'));
+    var total = cards.length;
+
+    function updateCounter(visible) {
+        if (!countNode) return;
+        var showingLabel = countNode.dataset.showingLabel || 'Showing';
+        var ofLabel = countNode.dataset.ofLabel || 'of';
+        var singularLabel = countNode.dataset.resultSingular || 'result';
+        var pluralLabel = countNode.dataset.resultPlural || 'results';
+        var start = visible > 0 ? 1 : 0;
+        var label = visible > 1 ? pluralLabel : singularLabel;
+        countNode.textContent = showingLabel + ' ' + start + '-' + visible + ' ' + ofLabel + ' ' + total + ' ' + label;
+    }
+
+    function applySearch() {
+        var query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+        var visible = 0;
+
+        cards.forEach(function (card) {
+            var titleNode = card.querySelector('.card-title');
+            var descNode = card.querySelector('.text-truncate-2');
+            var lessonsNode = card.querySelector('.course-lessons');
+            var title = titleNode ? titleNode.textContent.toLowerCase() : '';
+            var description = descNode ? descNode.textContent.toLowerCase() : '';
+            var lessons = lessonsNode ? lessonsNode.textContent.toLowerCase() : '';
+            var matches = query === '' || title.indexOf(query) > -1 || description.indexOf(query) > -1 || lessons.indexOf(query) > -1;
+
+            card.style.display = matches ? '' : 'none';
+            if (matches) visible += 1;
+        });
+
+        updateCounter(visible);
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', applySearch);
+    }
+    if (searchButton) {
+        searchButton.addEventListener('click', applySearch);
+    }
+    if (searchForm) {
+        searchForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            applySearch();
+        });
+    }
+
+    updateCounter(total);
+});
+</script>
+
+{% endblock %}

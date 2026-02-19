@@ -1,0 +1,134 @@
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}Help & Support - Student Dashboard{% endblock %}
+
+{% block body %}
+<section class="py-5">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h1 class="fw-bold mb-2">
+                    <i class="fas fa-question-circle me-2"></i> Help & Support
+                </h1>
+                <p class="text-muted">Find answers to your questions</p>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-white border-end-0 border">
+                        <i class="fas fa-search text-primary"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0 border" placeholder="Search help topics...">
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="row">
+            <div class="col-lg-9 mx-auto">
+                <!-- FAQ Items -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-primary text-white p-4">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-book me-2"></i> Frequently Asked Questions
+                        </h5>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <!-- FAQ Item 1 -->
+                        <div class="mb-4 pb-4 border-bottom">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-chevron-right text-primary me-2"></i> How do I update my profile?
+                            </h6>
+                            <p class="text-muted small ms-4">
+                                Go to <strong>Edit Profile</strong> from your account settings to update your personal information such as name and email.
+                            </p>
+                        </div>
+
+                        <!-- FAQ Item 2 -->
+                        <div class="mb-4 pb-4 border-bottom">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-chevron-right text-primary me-2"></i> How can I reset my password?
+                            </h6>
+                            <p class="text-muted small ms-4">
+                                You can reset your password from the <strong>Account Settings</strong> page. Click on "Change Password" to set a new password.
+                            </p>
+                        </div>
+
+                        <!-- FAQ Item 3 -->
+                        <div class="mb-4 pb-4 border-bottom">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-chevron-right text-primary me-2"></i> How do I enroll in a course?
+                            </h6>
+                            <p class="text-muted small ms-4">
+                                Browse available courses, click "Enroll Now", and follow the checkout process. You'll immediately get access to course materials.
+                            </p>
+                        </div>
+
+                        <!-- FAQ Item 4 -->
+                        <div class="mb-4 pb-4 border-bottom">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-chevron-right text-primary me-2"></i> Can I download course materials?
+                            </h6>
+                            <p class="text-muted small ms-4">
+                                Yes! Once enrolled in a course, you can download lectures, resources, and assignments for offline learning.
+                            </p>
+                        </div>
+
+                        <!-- FAQ Item 5 -->
+                        <div class="mb-4 pb-4 border-bottom">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-chevron-right text-primary me-2"></i> How do I get a course certificate?
+                            </h6>
+                            <p class="text-muted small ms-4">
+                                Complete all course modules, pass the final assessment, and your certificate will be automatically issued to you.
+                            </p>
+                        </div>
+
+                        <!-- FAQ Item 6 -->
+                        <div class="mb-0">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-chevron-right text-primary me-2"></i> Is there a refund policy?
+                            </h6>
+                            <p class="text-muted small ms-4">
+                                Yes, we offer a 30-day money-back guarantee if you're not satisfied with your purchased course.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Support -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-success text-white p-4">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-headset me-2"></i> Still Need Help?
+                        </h5>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <p class="text-muted mb-4">
+                            Our support team is here to help! Reach out to us through any of these channels.
+                        </p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <a href="mailto:support@edukids.com" class="btn btn-success w-100">
+                                    <i class="fas fa-envelope me-2"></i> Email Support
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-outline-success w-100" disabled title="Coming soon">
+                                    <i class="fas fa-comments me-2"></i> Live Chat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

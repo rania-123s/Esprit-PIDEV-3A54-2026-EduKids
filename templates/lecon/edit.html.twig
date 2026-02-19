@@ -1,187 +1,462 @@
 {% extends 'base_backoffice.html.twig' %}
 
-{% block title %}Modifier la leçon{% endblock %}
+{% block title %}Modifier la lecon{% endblock %}
 
 {% block body %}
+<style>
+    .course-create-page {
+        --ink: #18181b;
+        --muted: #52525b;
+        --line: #d4d4d8;
+        --surface: #ffffff;
+        --brand: #f97316;
+        --brand-dark: #c2410c;
+        --accent: #0ea5e9;
+        --hero-a: #fb7185;
+        --hero-b: #fb923c;
+        --hero-c: #facc15;
+        font-family: "Roboto", "Heebo", sans-serif;
+        padding-bottom: 2rem;
+        background:
+            radial-gradient(42rem 16rem at 95% -2%, rgba(249, 115, 22, 0.2), transparent 70%),
+            radial-gradient(38rem 14rem at 5% 0%, rgba(14, 165, 233, 0.16), transparent 72%),
+            linear-gradient(180deg, #fff7ed, #f8fafc 40%, #ffffff);
+    }
 
-<!-- =======================
-Page Banner START -->
-<section class="py-0 bg-blue h-200px align-items-center d-flex rounded-0"
-         style="background:url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size:cover;">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1 class="text-white">Modifier la leçon</h1>
-                <p class="text-white mb-0">Modifiez les informations de votre leçon</p>
-            </div>
+    .create-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 26px;
+        margin: 1.75rem 1rem 0;
+        padding: 3.2rem 1.25rem;
+        background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c));
+        color: #22120c;
+        box-shadow: 0 22px 42px rgba(194, 65, 12, 0.26);
+    }
+
+    .create-hero::before,
+    .create-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .create-hero::before {
+        width: 260px;
+        height: 260px;
+        right: -85px;
+        top: -110px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0));
+    }
+
+    .create-hero::after {
+        width: 220px;
+        height: 220px;
+        left: -68px;
+        bottom: -84px;
+        background: radial-gradient(circle, rgba(14, 165, 233, 0.4), rgba(14, 165, 233, 0));
+    }
+
+    .create-hero h1 {
+        margin: 0;
+        font-size: clamp(1.75rem, 4vw, 2.7rem);
+        font-weight: 800;
+        letter-spacing: 0.35px;
+        text-transform: uppercase;
+    }
+
+    .create-hero p {
+        margin: 0.85rem 0 0;
+        font-size: 1rem;
+        color: rgba(38, 21, 13, 0.92);
+        max-width: 46ch;
+    }
+
+    .create-shell {
+        padding: 1.75rem 1rem 2.2rem;
+    }
+
+    .create-card {
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.82));
+        border: 1px solid rgba(249, 115, 22, 0.2);
+        border-radius: 24px;
+        box-shadow: 0 14px 44px rgba(24, 24, 27, 0.1);
+        backdrop-filter: blur(6px);
+    }
+
+    .create-card .card-body {
+        padding: clamp(1.1rem, 2.8vw, 2.5rem);
+    }
+
+    .create-heading {
+        color: var(--ink);
+        font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+        letter-spacing: 0.2px;
+    }
+
+    .info-header {
+        text-align: center;
+        margin-bottom: 1.35rem;
+    }
+
+    .info-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.78rem;
+        border-radius: 999px;
+        background: rgba(249, 115, 22, 0.14);
+        color: #9a3412;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.55rem;
+    }
+
+    .info-subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+    }
+
+    .field-label {
+        color: var(--ink);
+        font-size: 0.94rem;
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+    }
+
+    .form-section {
+        border: 1px solid rgba(24, 24, 27, 0.08);
+        border-radius: 18px;
+        background: linear-gradient(180deg, #ffffff, #fff7ed);
+        padding: 1rem;
+    }
+
+    .form-section-title {
+        margin: 0 0 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-section-title i {
+        color: #ea580c;
+    }
+
+    .modern-input {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 0.82rem 0.95rem;
+        font-size: 0.96rem;
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.96);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .modern-input:focus {
+        border-color: rgba(249, 115, 22, 0.6);
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.16);
+        transform: translateY(-2px);
+    }
+
+    .modern-input.is-invalid {
+        border-color: #dc3545;
+        box-shadow: none;
+    }
+
+    .form-note {
+        margin-top: 0.4rem;
+        color: var(--muted);
+        font-size: 0.83rem;
+    }
+
+    .error-text {
+        margin-top: 0.45rem;
+        color: #dc3545;
+        font-size: 0.86rem;
+    }
+
+    .create-actions {
+        padding-top: 0.5rem;
+    }
+
+    .btn-create-modern {
+        border: 0;
+        border-radius: 12px;
+        padding: 0.9rem 1.4rem;
+        background: linear-gradient(130deg, var(--brand), var(--brand-dark));
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: 0.22px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        box-shadow: 0 14px 28px rgba(154, 52, 18, 0.34);
+    }
+
+    .btn-create-modern:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.02);
+        box-shadow: 0 16px 30px rgba(154, 52, 18, 0.45);
+        color: #fff;
+    }
+
+    .btn-cancel-modern {
+        border-radius: 12px;
+        padding: 0.9rem 1.4rem;
+        font-weight: 700;
+        border-color: rgba(24, 24, 27, 0.18);
+        color: #27272a;
+        background: #fff;
+    }
+
+    .btn-cancel-modern:hover {
+        background: #fff7ed;
+        color: #9a3412;
+        border-color: rgba(249, 115, 22, 0.4);
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 1rem;
+        color: #9a3412;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        color: #7c2d12;
+        text-decoration: underline;
+    }
+
+    .reveal-up {
+        animation: revealUp 0.45s ease both;
+    }
+
+    .reveal-up.delay-1 {
+        animation-delay: 0.08s;
+    }
+
+    @keyframes revealUp {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .create-hero {
+            margin: 1rem 0.75rem 0;
+            border-radius: 18px;
+            padding: 2.3rem 1rem;
+        }
+
+        .create-shell {
+            padding: 1rem 0.75rem 1.5rem;
+        }
+    }
+</style>
+
+<section class="course-create-page">
+    <div class="create-hero reveal-up">
+        <div class="container">
+            <h1>Modifier la lecon</h1>
+            <p>Mettez a jour les informations de la lecon rapidement et proprement.</p>
         </div>
     </div>
-</section>
-<!-- Page Banner END -->
 
-<!-- =======================
-Form START -->
-<section class="pt-5 pb-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10 col-xl-9">
+    <div class="create-shell">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xl-9">
+                    <div class="card create-card reveal-up delay-1">
+                        <div class="card-body">
+                            <div class="info-header">
+                                <span class="info-kicker">
+                                    <i class="bi bi-pencil-square"></i>
+                                    Edition lecon
+                                </span>
+                                <h3 class="create-heading">Informations de la lecon</h3>
+                                <p class="info-subtitle">Modifiez les champs puis enregistrez vos changements.</p>
+                            </div>
 
-                <div class="card bg-transparent border rounded-3 shadow">
-                    <div class="card-body p-4 p-lg-5">
+                            {{ form_start(form, {
+                                'attr': {
+                                    'novalidate': 'novalidate',
+                                    'class': 'needs-validation'
+                                }
+                            }) }}
 
-                        <h3 class="mb-4 text-center">Informations de la leçon</h3>
+                            <div class="row g-3 g-md-4">
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-info-circle"></i>
+                                            Informations principales
+                                        </h4>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                {{ form_label(form.titre, null, { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.titre, {
+                                                    'attr': {
+                                                        'placeholder': 'Exemple : Introduction aux fractions',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.titre.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                {% if form.titre.vars.errors|length > 0 %}
+                                                    {% for error in form.titre.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
 
-                        {{ form_start(form, {
-                            'attr': {
-                                'class': 'needs-validation'
-                            }
-                        }) }}
+                                            <div class="col-md-6">
+                                                {{ form_label(form.cours, null, { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.cours, {
+                                                    'attr': {
+                                                        'class': 'modern-input form-select form-select-lg' ~ (form.cours.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                {% if form.cours.vars.errors|length > 0 %}
+                                                    {% for error in form.cours.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
 
-                        <div class="row g-4">
-
-                            <!-- Titre -->
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    {{ form_label(form.titre, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.titre, {
-                                        'attr': {
-                                            'placeholder': 'Exemple : Introduction aux fractions',
-                                            'class': 'form-control form-control-lg' ~ (form.titre.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.titre.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.titre.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
+                                            <div class="col-md-6">
+                                                {{ form_label(form.ordre, null, { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.ordre, {
+                                                    'attr': {
+                                                        'min': 1,
+                                                        'placeholder': 'Exemple : 1, 2, 3...',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.ordre.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                {% if form.ordre.vars.errors|length > 0 %}
+                                                    {% for error in form.ordre.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
                                         </div>
-                                    {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-camera-reels"></i>
+                                            Media
+                                        </h4>
+                                        <div class="row g-3">
+                                            <div class="d-none">
+                                                {{ form_widget(form.media_type, {
+                                                    'attr': {
+                                                        'class': 'd-none',
+                                                        'tabindex': '-1',
+                                                        'aria-hidden': 'true'
+                                                    }
+                                                }) }}
+                                                {{ form_widget(form.media_url, {
+                                                    'attr': {
+                                                        'class': 'd-none',
+                                                        'tabindex': '-1',
+                                                        'aria-hidden': 'true'
+                                                    }
+                                                }) }}
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                {{ form_label(form.pdf_file, 'Fichier PDF', { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.pdf_file, {
+                                                    'attr': {
+                                                        'accept': 'application/pdf,.pdf',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.pdf_file.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                {% if lecon.mediaUrl %}
+                                                    <small class="form-note d-block">PDF actuel: <a href="{{ lecon.mediaUrl }}" target="_blank" rel="noopener">ouvrir</a></small>
+                                                {% endif %}
+                                                {% if form.pdf_file.vars.errors|length > 0 %}
+                                                    {% for error in form.pdf_file.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                {{ form_label(form.video_file, 'Fichier video', { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.video_file, {
+                                                    'attr': {
+                                                        'accept': 'video/mp4,video/webm,video/ogg,.mp4,.webm,.ogv',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.video_file.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                {% if lecon.videoUrl %}
+                                                    <small class="form-note d-block">Video actuelle: <a href="{{ lecon.videoUrl }}" target="_blank" rel="noopener">ouvrir</a></small>
+                                                {% endif %}
+                                                {% if form.video_file.vars.errors|length > 0 %}
+                                                    {% for error in form.video_file.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="col-12">
+                                                {{ form_label(form.youtube_url, null, { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.youtube_url, {
+                                                    'attr': {
+                                                        'placeholder': 'https://www.youtube.com/watch?v=...',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.youtube_url.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                <small class="form-note d-block">Mettez le lien YouTube de la lecon.</small>
+                                                {% if form.youtube_url.vars.errors|length > 0 %}
+                                                    {% for error in form.youtube_url.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Cours -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.cours, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.cours, {
-                                        'attr': {
-                                            'class': 'form-select form-select-lg' ~ (form.cours.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.cours.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.cours.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
+                            <div class="create-actions mt-4 d-flex flex-column flex-md-row gap-2">
+                                <button type="submit" class="btn btn-create-modern w-100">
+                                    Enregistrer les modifications
+                                </button>
+                                <a href="{{ path('app_lecon_index') }}" class="btn btn-outline-secondary btn-cancel-modern w-100">
+                                    Annuler
+                                </a>
                             </div>
 
-                            <!-- Ordre -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.ordre, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.ordre, {
-                                        'attr': {
-                                            'min': 1,
-                                            'placeholder': 'Exemple : 1, 2, 3...',
-                                            'class': 'form-control form-control-lg' ~ (form.ordre.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.ordre.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.ordre.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <!-- Type de média -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.media_type, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.media_type, {
-                                        'attr': {
-                                            'placeholder': 'Exemple : video, pdf, image, text',
-                                            'class': 'form-control form-control-lg' ~ (form.media_type.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.media_type.vars.help is defined and form.media_type.vars.help %}
-                                        <small class="form-text text-muted d-block mt-1">{{ form.media_type.vars.help }}</small>
-                                    {% endif %}
-                                    {% if form.media_type.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.media_type.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <!-- URL du média -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.media_url, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.media_url, {
-                                        'attr': {
-                                            'placeholder': 'https://exemple.com/video.mp4',
-                                            'class': 'form-control form-control-lg' ~ (form.media_url.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.media_url.vars.help is defined and form.media_url.vars.help %}
-                                        <small class="form-text text-muted d-block mt-1">{{ form.media_url.vars.help }}</small>
-                                    {% endif %}
-                                    {% if form.media_url.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.media_url.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-
+                            {{ form_end(form) }}
                         </div>
+                    </div>
 
-                        <!-- Boutons -->
-                        <div class="mt-5 text-center">
-                            <button type="submit" class="btn btn-primary btn-lg px-5 py-3">
-                                Enregistrer les modifications
-                            </button>
-                            <a href="{{ path('app_lecon_index') }}" class="btn btn-secondary btn-lg px-5 py-3 ms-2">
-                                Annuler
-                            </a>
-                        </div>
-
-                        {{ form_end(form) }}
-
+                    <div class="text-center">
+                        <a href="{{ path('app_lecon_index') }}" class="back-link">
+                            <span aria-hidden="true">&larr;</span>
+                            Retour a la liste des lecons
+                        </a>
                     </div>
                 </div>
-
-                <div class="text-center mt-4">
-                    <a href="{{ path('app_lecon_index') }}" class="text-muted small">
-                        ← Retour à la liste des leçons
-                    </a>
-                </div>
-
             </div>
         </div>
     </div>
 </section>
-<!-- Form END -->
-
 {% endblock %}

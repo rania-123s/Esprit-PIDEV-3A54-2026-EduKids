@@ -3,198 +3,446 @@
 {% block title %}Modifier le cours{% endblock %}
 
 {% block body %}
+<style>
+    .course-create-page {
+        --ink: #0f172a;
+        --muted: #5b667a;
+        --line: #d7dfeb;
+        --surface: #ffffff;
+        --brand: #0ea5a3;
+        --brand-dark: #0b7f7d;
+        --accent: #f59e0b;
+        --hero-a: #0f766e;
+        --hero-b: #155e75;
+        --hero-c: #1d4ed8;
+        font-family: "Heebo", sans-serif;
+    }
 
-<!-- =======================
-Page Banner START -->
-<section class="py-0 bg-blue h-200px align-items-center d-flex rounded-0"
-         style="background:url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size:cover;">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1 class="text-white">Modifier le cours</h1>
-                <p class="text-white mb-0">Modifiez les informations de votre cours</p>
-            </div>
+    .create-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        margin: 1.75rem 1rem 0;
+        padding: 3.25rem 1.25rem;
+        background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c));
+        color: #fff;
+        box-shadow: 0 24px 60px rgba(2, 44, 34, 0.24);
+    }
+
+    .create-hero::before,
+    .create-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .create-hero::before {
+        width: 240px;
+        height: 240px;
+        right: -70px;
+        top: -70px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.33), rgba(255, 255, 255, 0));
+    }
+
+    .create-hero::after {
+        width: 200px;
+        height: 200px;
+        left: -55px;
+        bottom: -80px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.45), rgba(245, 158, 11, 0));
+    }
+
+    .create-hero h1 {
+        margin: 0;
+        font-size: clamp(1.75rem, 4vw, 2.7rem);
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+
+    .create-hero p {
+        margin: 0.85rem 0 0;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .create-shell {
+        padding: 1.75rem 1rem 2.2rem;
+    }
+
+    .create-card {
+        background: linear-gradient(170deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.96));
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 24px;
+        box-shadow: 0 22px 55px rgba(15, 23, 42, 0.1);
+        backdrop-filter: blur(2px);
+    }
+
+    .create-card .card-body {
+        padding: clamp(1.1rem, 2.8vw, 2.5rem);
+    }
+
+    .create-heading {
+        color: var(--ink);
+        font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+        letter-spacing: 0.2px;
+    }
+
+    .info-header {
+        text-align: center;
+        margin-bottom: 1.35rem;
+    }
+
+    .info-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(14, 165, 163, 0.12);
+        color: #0d7e7b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 0.55rem;
+    }
+
+    .info-subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+    }
+
+    .field-label {
+        color: var(--ink);
+        font-size: 0.94rem;
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+    }
+
+    .form-section {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 16px;
+        background: #fff;
+        padding: 1rem;
+    }
+
+    .form-section-title {
+        margin: 0 0 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-section-title i {
+        color: var(--brand-dark);
+    }
+
+    .modern-input {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 0.82rem 0.95rem;
+        font-size: 0.96rem;
+        color: var(--ink);
+        background: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .modern-input:focus {
+        border-color: rgba(14, 165, 163, 0.65);
+        box-shadow: 0 0 0 4px rgba(14, 165, 163, 0.14);
+        transform: translateY(-1px);
+    }
+
+    .modern-input.is-invalid {
+        border-color: #dc3545;
+        box-shadow: none;
+    }
+
+    .form-note {
+        margin-top: 0.4rem;
+        color: var(--muted);
+        font-size: 0.83rem;
+    }
+
+    .error-text {
+        margin-top: 0.45rem;
+        color: #dc3545;
+        font-size: 0.86rem;
+    }
+
+    .current-image-box {
+        margin-top: 0.3rem;
+        margin-bottom: 0.9rem;
+        padding: 0.8rem;
+        border: 1px dashed rgba(15, 23, 42, 0.18);
+        border-radius: 12px;
+        background: #fafcff;
+    }
+
+    .current-image-box p {
+        margin-bottom: 0.45rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .current-image-preview {
+        width: 180px;
+        max-width: 100%;
+        height: 130px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+    }
+
+    .create-actions {
+        padding-top: 0.5rem;
+    }
+
+    .btn-create-modern {
+        border: 0;
+        border-radius: 13px;
+        padding: 0.9rem 1.4rem;
+        background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+        color: #fff;
+        font-weight: 700;
+        letter-spacing: 0.15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        box-shadow: 0 14px 28px rgba(11, 127, 125, 0.34);
+    }
+
+    .btn-create-modern:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.02);
+        box-shadow: 0 16px 30px rgba(11, 127, 125, 0.4);
+        color: #fff;
+    }
+
+    .btn-cancel-modern {
+        border-radius: 13px;
+        padding: 0.9rem 1.4rem;
+        font-weight: 700;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 1rem;
+        color: var(--brand-dark);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        color: #095957;
+        text-decoration: underline;
+    }
+
+    .reveal-up {
+        animation: revealUp 0.45s ease both;
+    }
+
+    .reveal-up.delay-1 {
+        animation-delay: 0.08s;
+    }
+
+    @keyframes revealUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .create-hero {
+            margin: 1rem 0.75rem 0;
+            border-radius: 18px;
+            padding: 2.3rem 1rem;
+        }
+
+        .create-shell {
+            padding: 1rem 0.75rem 1.5rem;
+        }
+    }
+</style>
+
+<section class="course-create-page">
+    <div class="create-hero reveal-up">
+        <div class="container">
+            <h1>Modifier le cours</h1>
+            <p>Mettez a jour les informations pour garder votre contenu toujours clair.</p>
         </div>
     </div>
-</section>
-<!-- Page Banner END -->
 
-<!-- =======================
-Form START -->
-<section class="pt-5 pb-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10 col-xl-9">
-
-                <div class="card bg-transparent border rounded-3 shadow">
-                    <div class="card-body p-4 p-lg-5">
-
-                        <h3 class="mb-4 text-center">Informations du cours</h3>
-
-                        {{ form_start(form, {
-                            'attr': {
-                                'class': 'needs-validation'
-                            }
-                        }) }}
-
-                        <div class="row g-4">
-
-                            <!-- Titre -->
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    {{ form_label(form.titre, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.titre, {
-                                        'attr': {
-                                            'placeholder': 'Exemple : Mathématiques 6ème année primaire',
-                                            'class': 'form-control form-control-lg' ~ (form.titre.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.titre.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.titre.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
+    <div class="create-shell">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xl-9">
+                    <div class="card create-card reveal-up delay-1">
+                        <div class="card-body">
+                            <div class="info-header">
+                                <span class="info-kicker">
+                                    <i class="bi bi-pencil-square"></i>
+                                    Edition cours
+                                </span>
+                                <h3 class="create-heading">Informations du cours</h3>
+                                <p class="info-subtitle">Modifiez les champs et enregistrez vos changements.</p>
                             </div>
 
-                            <!-- Matière -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.matiere, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.matiere, {
-                                        'attr': {
-                                            'placeholder': 'Exemple : Mathématiques, Français, SVT, Arabe...',
-                                            'class': 'form-control form-control-lg' ~ (form.matiere.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.matiere.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.matiere.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
+                            {{ form_start(form, {
+                                'attr': {
+                                    'novalidate': 'novalidate',
+                                    'class': 'needs-validation'
+                                }
+                            }) }}
 
-                            <!-- Niveau -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.niveau, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.niveau, {
-                                        'attr': {
-                                            'min': 1,
-                                            'max': 13,
-                                            'placeholder': '1 = CP, 7 = 1ère année collège, etc.',
-                                            'class': 'form-control form-control-lg' ~ (form.niveau.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.niveau.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.niveau.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
+                            <div class="row g-3 g-md-4">
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-info-circle"></i>
+                                            Informations principales
+                                        </h4>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                {{ form_label(form.titre, null, { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.titre, {
+                                                    'attr': {
+                                                        'placeholder': 'Exemple : Mathematiques 6eme annee primaire',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.titre.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                {% if form.titre.vars.errors|length > 0 %}
+                                                    {% for error in form.titre.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
 
-                            <!-- Description -->
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    {{ form_label(form.description, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.description, {
-                                        'attr': {
-                                            'rows': 8,
-                                            'placeholder': 'Décrivez les objectifs pédagogiques, le contenu détaillé, le public cible, les compétences visées...',
-                                            'class': 'form-control form-control-lg' ~ (form.description.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.description.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
+                                            <div class="col-md-6">
+                                                {{ form_label(form.matiere, null, { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.matiere, {
+                                                    'attr': {
+                                                        'placeholder': 'Exemple : Mathematiques, Francais, SVT...',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.matiere.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                {% if form.matiere.vars.errors|length > 0 %}
+                                                    {% for error in form.matiere.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                {{ form_label(form.niveau, null, { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.niveau, {
+                                                    'attr': {
+                                                        'min': 1,
+                                                        'max': 13,
+                                                        'placeholder': '1 = CP, 7 = 1ere annee college...',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.niveau.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                {% if form.niveau.vars.errors|length > 0 %}
+                                                    {% for error in form.niveau.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-text-paragraph"></i>
+                                            Description
+                                        </h4>
+                                        {{ form_label(form.description, null, { 'label_attr': {'class': 'field-label'} }) }}
+                                        {{ form_widget(form.description, {
+                                            'attr': {
+                                                'rows': 8,
+                                                'placeholder': 'Decrivez objectifs, contenu detaille, public cible et competences visees...',
+                                                'class': 'modern-input form-control form-control-lg' ~ (form.description.vars.errors|length > 0 ? ' is-invalid' : '')
+                                            }
+                                        }) }}
+                                        {% if form.description.vars.errors|length > 0 %}
                                             {% for error in form.description.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
+                                                <div class="error-text">{{ error.message }}</div>
                                             {% endfor %}
-                                        </div>
-                                    {% endif %}
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Image -->
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    {{ form_label(form.image, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    
-                                    {% if cours.image %}
-                                        <div class="mb-3">
-                                            <p class="text-muted small mb-2">Image actuelle :</p>
-                                            <img src="{{ asset('uploads/images/cours/' ~ cours.image) }}" 
-                                                 alt="{{ cours.titre }}" 
-                                                 class="img-thumbnail" 
-                                                 style="max-width: 200px; max-height: 200px;">
-                                        </div>
-                                    {% endif %}
-                                    
-                                    {{ form_widget(form.image, {
-                                        'attr': {
-                                            'class': 'form-control form-control-lg' ~ (form.image.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.image.vars.help is defined and form.image.vars.help %}
-                                        <small class="form-text text-muted d-block mt-2">{{ form.image.vars.help }}</small>
-                                    {% endif %}
-                                    <small class="form-text text-muted d-block mt-1">
-                                        Laissez vide pour conserver l'image actuelle
-                                    </small>
-                                    {% if form.image.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-image"></i>
+                                            Media
+                                        </h4>
+                                        {{ form_label(form.image, null, { 'label_attr': {'class': 'field-label'} }) }}
+
+                                        {% if cours.image %}
+                                            <div class="current-image-box">
+                                                <p>Image actuelle</p>
+                                                <img src="{{ asset('uploads/images/cours/' ~ cours.image) }}" alt="{{ cours.titre }}" class="current-image-preview">
+                                            </div>
+                                        {% endif %}
+
+                                        {{ form_widget(form.image, {
+                                            'attr': {
+                                                'class': 'modern-input form-control form-control-lg' ~ (form.image.vars.errors|length > 0 ? ' is-invalid' : '')
+                                            }
+                                        }) }}
+                                        {% if form.image.vars.help is defined and form.image.vars.help %}
+                                            <small class="form-note">{{ form.image.vars.help }}</small>
+                                        {% endif %}
+                                        <small class="form-note d-block">Laissez vide pour conserver l'image actuelle.</small>
+                                        {% if form.image.vars.errors|length > 0 %}
                                             {% for error in form.image.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
+                                                <div class="error-text">{{ error.message }}</div>
                                             {% endfor %}
-                                        </div>
-                                    {% endif %}
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
 
+                            <div class="create-actions mt-4 d-flex flex-column flex-md-row gap-2">
+                                <button type="submit" class="btn btn-create-modern w-100">
+                                    Enregistrer les modifications
+                                </button>
+                                <a href="{{ path('app_cours_index') }}" class="btn btn-outline-secondary btn-cancel-modern w-100">
+                                    Annuler
+                                </a>
+                            </div>
+
+                            {{ form_end(form) }}
                         </div>
+                    </div>
 
-                        <!-- Boutons -->
-                        <div class="mt-5 text-center">
-                            <button type="submit" class="btn btn-primary btn-lg px-5 py-3">
-                                Enregistrer les modifications
-                            </button>
-                            <a href="{{ path('app_cours_index') }}" class="btn btn-secondary btn-lg px-5 py-3 ms-2">
-                                Annuler
-                            </a>
-                        </div>
-
-                        {{ form_end(form) }}
-
+                    <div class="text-center">
+                        <a href="{{ path('app_cours_index') }}" class="back-link">
+                            <span aria-hidden="true">&larr;</span>
+                            Retour a la liste des cours
+                        </a>
                     </div>
                 </div>
-
-                <div class="text-center mt-4">
-                    <a href="{{ path('app_cours_index') }}" class="text-muted small">
-                        ← Retour à la liste des cours
-                    </a>
-                </div>
-
             </div>
         </div>
     </div>
 </section>
-<!-- Form END -->
-
 {% endblock %}

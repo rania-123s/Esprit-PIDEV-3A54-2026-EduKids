@@ -28,6 +28,15 @@ class Lecon
     #[ORM\Column(length: 255)]
     private ?string $media_url = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $video_url = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $youtube_url = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -89,6 +98,42 @@ class Lecon
     public function setMediaUrl(string $media_url): static
     {
         $this->media_url = $media_url;
+
+        return $this;
+    }
+
+    public function getVideoUrl(): ?string
+    {
+        return $this->video_url;
+    }
+
+    public function setVideoUrl(?string $video_url): static
+    {
+        $this->video_url = $video_url;
+
+        return $this;
+    }
+
+    public function getYoutubeUrl(): ?string
+    {
+        return $this->youtube_url;
+    }
+
+    public function setYoutubeUrl(?string $youtube_url): static
+    {
+        $this->youtube_url = $youtube_url;
+
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
 
         return $this;
     }

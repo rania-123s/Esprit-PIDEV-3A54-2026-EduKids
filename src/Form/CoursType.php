@@ -116,13 +116,18 @@ class CoursType extends AbstractType
                     'class' => 'form-label',
                 ],
                 'mapped' => false,
-                'required' => false,
+                'required' => $options['image_required'],
                 'attr' => [
                     'class' => 'form-control',
                     'accept' => 'image/jpeg,image/jpg,image/png,image/gif,image/webp',
                 ],
                 'help' => 'Formats acceptés : JPG, PNG, GIF, WEBP. Taille maximale : 2 Mo',
                 'constraints' => [
+                    ...($options['image_required'] ? [
+                        new NotBlank([
+                            'message' => 'L\'image du cours est obligatoire',
+                        ]),
+                    ] : []),
                     new File([
                         'maxSize' => '2M',
                         'mimeTypes' => [
@@ -143,6 +148,8 @@ class CoursType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Cours::class,
+            'image_required' => false,
         ]);
+        $resolver->setAllowedTypes('image_required', 'bool');
     }
 }

@@ -1,0 +1,127 @@
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}Account Settings - Student Dashboard{% endblock %}
+
+{% block body %}
+<section class="py-5">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h1 class="fw-bold mb-2">
+                    <i class="fas fa-cogs me-2"></i> Account Settings
+                </h1>
+                <p class="text-muted">Manage your account preferences and security</p>
+            </div>
+        </div>
+
+        <!-- Settings Grid -->
+        <div class="row">
+            <!-- Profile Section -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user text-primary" style="font-size: 1.3rem;"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Profile Information</h6>
+                                <p class="text-muted small mb-0">Update your personal details</p>
+                            </div>
+                        </div>
+                        <a href="{{ path('user_profile_edit') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit me-1"></i> Edit Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Section -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-info bg-opacity-10 rounded-circle p-3 me-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-lock text-info" style="font-size: 1.3rem;"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Security</h6>
+                                <p class="text-muted small mb-0">Manage password and security options</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-info btn-sm" disabled title="Coming soon">
+                            <i class="fas fa-key me-1"></i> Change Password
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-3 me-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-bell text-warning" style="font-size: 1.3rem;"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Notifications</h6>
+                                <p class="text-muted small mb-0">Control notification preferences</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-warning btn-sm" disabled title="Coming soon">
+                            <i class="fas fa-sliders-h me-1"></i> Preferences
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy Section -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-success bg-opacity-10 rounded-circle p-3 me-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-shield-alt text-success" style="font-size: 1.3rem;"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Privacy</h6>
+                                <p class="text-muted small mb-0">Manage privacy settings</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-success btn-sm" disabled title="Coming soon">
+                            <i class="fas fa-eye-slash me-1"></i> Privacy Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Status -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-history me-2"></i> Account Status
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="text-muted small mb-2">Account Status</p>
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i> Active
+                                </span>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="text-muted small mb-2">Last Login</p>
+                                <p class="small mb-0">Just now</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

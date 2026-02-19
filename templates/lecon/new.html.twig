@@ -1,185 +1,639 @@
 {% extends 'base_backoffice.html.twig' %}
 
-{% block title %}Créer une nouvelle leçon{% endblock %}
+{% block title %}Creer une nouvelle lecon{% endblock %}
 
 {% block body %}
+<style>
+    .course-create-page {
+        --ink: #0f172a;
+        --muted: #5b667a;
+        --line: #d7dfeb;
+        --surface: #ffffff;
+        --brand: #0ea5a3;
+        --brand-dark: #0b7f7d;
+        --hero-a: #0f766e;
+        --hero-b: #155e75;
+        --hero-c: #1d4ed8;
+        font-family: "Heebo", sans-serif;
+    }
 
-<!-- =======================
-Page Banner START -->
-<section class="py-0 bg-blue h-200px align-items-center d-flex rounded-0"
-         style="background:url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size:cover;">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1 class="text-white">Créer une nouvelle leçon</h1>
-                <p class="text-white mb-0">Remplissez les informations essentielles pour créer votre leçon</p>
-            </div>
+    .create-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        margin: 1.75rem 1rem 0;
+        padding: 3.25rem 1.25rem;
+        background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c));
+        color: #fff;
+        box-shadow: 0 24px 60px rgba(2, 44, 34, 0.24);
+    }
+
+    .create-hero::before,
+    .create-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .create-hero::before {
+        width: 240px;
+        height: 240px;
+        right: -70px;
+        top: -70px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.33), rgba(255, 255, 255, 0));
+    }
+
+    .create-hero::after {
+        width: 200px;
+        height: 200px;
+        left: -55px;
+        bottom: -80px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.45), rgba(245, 158, 11, 0));
+    }
+
+    .create-hero h1 {
+        margin: 0;
+        font-size: clamp(1.75rem, 4vw, 2.7rem);
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+
+    .create-hero p {
+        margin: 0.85rem 0 0;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .create-shell {
+        padding: 1.75rem 1rem 2.2rem;
+    }
+
+    .create-card {
+        background: linear-gradient(170deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.96));
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 24px;
+        box-shadow: 0 22px 55px rgba(15, 23, 42, 0.1);
+        backdrop-filter: blur(2px);
+    }
+
+    .create-card .card-body {
+        padding: clamp(1.1rem, 2.8vw, 2.5rem);
+    }
+
+    .create-heading {
+        color: var(--ink);
+        font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+        letter-spacing: 0.2px;
+    }
+
+    .info-header {
+        text-align: center;
+        margin-bottom: 1.35rem;
+    }
+
+    .info-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(14, 165, 163, 0.12);
+        color: #0d7e7b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 0.55rem;
+    }
+
+    .info-subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+    }
+
+    .field-label {
+        color: var(--ink);
+        font-size: 0.94rem;
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+    }
+
+    .form-section {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 16px;
+        background: #fff;
+        padding: 1rem;
+    }
+
+    .form-section-title {
+        margin: 0 0 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-section-title i {
+        color: var(--brand-dark);
+    }
+
+    .modern-input {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 0.82rem 0.95rem;
+        font-size: 0.96rem;
+        color: var(--ink);
+        background: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .modern-input:focus {
+        border-color: rgba(14, 165, 163, 0.65);
+        box-shadow: 0 0 0 4px rgba(14, 165, 163, 0.14);
+        transform: translateY(-1px);
+    }
+
+    .modern-input.is-invalid {
+        border-color: #dc3545;
+        box-shadow: none;
+    }
+
+    .form-note {
+        margin-top: 0.4rem;
+        color: var(--muted);
+        font-size: 0.83rem;
+    }
+
+    .ai-assistant-box {
+        border-style: dashed;
+        border-color: rgba(14, 165, 163, 0.36);
+        background: linear-gradient(135deg, rgba(14, 165, 163, 0.07), rgba(29, 78, 216, 0.05));
+    }
+
+    .ai-meta {
+        font-size: 0.82rem;
+        color: var(--muted);
+    }
+
+    .ai-meta.is-error {
+        color: #dc3545;
+    }
+
+    .ai-meta.is-ok {
+        color: #198754;
+    }
+
+    .ai-preview {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 12px;
+        background: #fff;
+        padding: 0.8rem;
+    }
+
+    .ai-preview-title {
+        margin: 0 0 0.45rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--ink);
+    }
+
+    .ai-image-preview {
+        display: block;
+        width: 100%;
+        max-width: 280px;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+    }
+
+    .ai-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.55rem;
+        font-size: 0.86rem;
+        font-weight: 600;
+        color: var(--brand-dark);
+        text-decoration: none;
+    }
+
+    .ai-link:hover {
+        color: #095957;
+        text-decoration: underline;
+    }
+
+    .error-text {
+        margin-top: 0.45rem;
+        color: #dc3545;
+        font-size: 0.86rem;
+    }
+
+    .create-actions {
+        padding-top: 0.5rem;
+    }
+
+    .btn-create-modern {
+        border: 0;
+        border-radius: 13px;
+        padding: 0.9rem 1.4rem;
+        background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+        color: #fff;
+        font-weight: 700;
+        letter-spacing: 0.15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        box-shadow: 0 14px 28px rgba(11, 127, 125, 0.34);
+    }
+
+    .btn-create-modern:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.02);
+        box-shadow: 0 16px 30px rgba(11, 127, 125, 0.4);
+        color: #fff;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 1rem;
+        color: var(--brand-dark);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        color: #095957;
+        text-decoration: underline;
+    }
+
+    .reveal-up {
+        animation: revealUp 0.45s ease both;
+    }
+
+    .reveal-up.delay-1 {
+        animation-delay: 0.08s;
+    }
+
+    @keyframes revealUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .create-hero {
+            margin: 1rem 0.75rem 0;
+            border-radius: 18px;
+            padding: 2.3rem 1rem;
+        }
+
+        .create-shell {
+            padding: 1rem 0.75rem 1.5rem;
+        }
+    }
+</style>
+
+<section class="course-create-page">
+    <div class="create-hero reveal-up">
+        <div class="container">
+            <h1>Creer une nouvelle lecon</h1>
+            <p>Renseignez rapidement les champs essentiels de votre lecon.</p>
         </div>
     </div>
-</section>
-<!-- Page Banner END -->
 
-<!-- =======================
-Form START -->
-<section class="pt-5 pb-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10 col-xl-9">
+    <div class="create-shell">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xl-9">
+                    <div class="card create-card reveal-up delay-1">
+                        <div class="card-body">
+                            <div class="info-header">
+                                <span class="info-kicker">
+                                    <i class="bi bi-journal-plus"></i>
+                                    Creation lecon
+                                </span>
+                                <h3 class="create-heading">Informations de la lecon</h3>
+                                <p class="info-subtitle">Completez les champs pour enregistrer la lecon.</p>
+                            </div>
 
-                <div class="card bg-transparent border rounded-3 shadow">
-                    <div class="card-body p-4 p-lg-5">
+                            {{ form_start(form, {
+                                'attr': {
+                                    'novalidate': 'novalidate',
+                                    'class': 'needs-validation'
+                                }
+                            }) }}
 
-                        <h3 class="mb-4 text-center">Informations de la leçon</h3>
+                            <div class="row g-3 g-md-4">
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-info-circle"></i>
+                                            Informations principales
+                                        </h4>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                {{ form_label(form.titre, null, { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.titre, {
+                                                    'attr': {
+                                                        'placeholder': 'Exemple : Introduction aux fractions',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.titre.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                {% if form.titre.vars.errors|length > 0 %}
+                                                    {% for error in form.titre.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
 
-                        {{ form_start(form, {
-                            'attr': {
-                                'novalidate': 'novalidate',
-                                'class': 'needs-validation'
-                            }
-                        }) }}
+                                            <div class="col-md-6">
+                                                {{ form_label(form.cours, null, { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.cours, {
+                                                    'attr': {
+                                                        'class': 'modern-input form-select form-select-lg' ~ (form.cours.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                {% if form.cours.vars.errors|length > 0 %}
+                                                    {% for error in form.cours.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
 
-                        <div class="row g-4">
-
-                            <!-- Titre -->
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    {{ form_label(form.titre, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.titre, {
-                                        'attr': {
-                                            'placeholder': 'Exemple : Introduction aux fractions',
-                                            'class': 'form-control form-control-lg' ~ (form.titre.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.titre.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.titre.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
+                                            <div class="col-md-6">
+                                                {{ form_label(form.ordre, null, { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.ordre, {
+                                                    'attr': {
+                                                        'min': 1,
+                                                        'placeholder': 'Exemple : 1, 2, 3...',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.ordre.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                {% if form.ordre.vars.errors|length > 0 %}
+                                                    {% for error in form.ordre.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
                                         </div>
-                                    {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div
+                                        id="js-lecon-ai-image-box"
+                                        class="form-section ai-assistant-box"
+                                        data-generate-image-url="{{ path('app_cours_ai_generate_image') }}"
+                                        data-csrf-image-token="{{ csrf_token('cours_ai_generate_image') }}"
+                                        data-field-title="{{ form.titre.vars.id }}"
+                                        data-field-course="{{ form.cours.vars.id }}"
+                                    >
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-magic"></i>
+                                            Image IA de la lecon
+                                        </h4>
+                                        <p class="form-note mt-0">
+                                            Generez une image illustrative a partir du titre et du cours selectionne.
+                                        </p>
+                                        <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+                                            <button type="button" id="js-lecon-ai-image-generate" class="btn btn-outline-secondary">
+                                                Generer image IA
+                                            </button>
+                                            <span id="js-lecon-ai-image-status" class="ai-meta">
+                                                Aucune image IA generee.
+                                            </span>
+                                        </div>
+
+                                        <input
+                                            type="hidden"
+                                            id="js-lecon-ai-image-hidden"
+                                            name="ai_generated_lesson_image"
+                                            value="{{ app.request.request.get('ai_generated_lesson_image', '') }}"
+                                        >
+
+                                        {% set aiLessonImageFilename = app.request.request.get('ai_generated_lesson_image', '') %}
+                                        <div id="js-lecon-ai-image-preview-wrap" class="ai-preview mt-3 {{ aiLessonImageFilename ? '' : 'd-none' }}">
+                                            <h5 class="ai-preview-title">Apercu image de la lecon</h5>
+                                            <img
+                                                id="js-lecon-ai-image-preview"
+                                                class="ai-image-preview"
+                                                src="{{ aiLessonImageFilename ? asset('uploads/images/cours/' ~ aiLessonImageFilename) : '' }}"
+                                                alt="Apercu image IA"
+                                            >
+                                            <a
+                                                id="js-lecon-ai-image-open"
+                                                class="ai-link {{ aiLessonImageFilename ? '' : 'd-none' }}"
+                                                href="{{ aiLessonImageFilename ? asset('uploads/images/cours/' ~ aiLessonImageFilename) : '#' }}"
+                                                target="_blank"
+                                                rel="noopener"
+                                            >
+                                                Ouvrir l image generee
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-camera-reels"></i>
+                                            Media
+                                        </h4>
+                                        <div class="row g-3">
+
+                                            <div class="d-none">
+                                                {{ form_widget(form.media_type, {
+                                                    'attr': {
+                                                        'class': 'd-none',
+                                                        'tabindex': '-1',
+                                                        'aria-hidden': 'true'
+                                                    }
+                                                }) }}
+                                                {{ form_widget(form.media_url, {
+                                                    'attr': {
+                                                        'class': 'd-none',
+                                                        'tabindex': '-1',
+                                                        'aria-hidden': 'true'
+                                                    }
+                                                }) }}
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                {{ form_label(form.pdf_file, 'Fichier PDF', { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.pdf_file, {
+                                                    'attr': {
+                                                        'accept': 'application/pdf,.pdf',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.pdf_file.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                <small class="form-note d-block">Ajoutez le document PDF de la lecon.</small>
+                                                {% if form.pdf_file.vars.errors|length > 0 %}
+                                                    {% for error in form.pdf_file.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                {{ form_label(form.video_file, 'Fichier video', { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.video_file, {
+                                                    'attr': {
+                                                        'accept': 'video/mp4,video/webm,video/ogg,.mp4,.webm,.ogv',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.video_file.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                <small class="form-note d-block">Ajoutez la video de la lecon (MP4, WEBM, OGG).</small>
+                                                {% if form.video_file.vars.errors|length > 0 %}
+                                                    {% for error in form.video_file.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="col-12">
+                                                {{ form_label(form.youtube_url, null, { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.youtube_url, {
+                                                    'attr': {
+                                                        'placeholder': 'https://www.youtube.com/watch?v=...',
+                                                        'class': 'modern-input form-control form-control-lg' ~ (form.youtube_url.vars.errors|length > 0 ? ' is-invalid' : '')
+                                                    }
+                                                }) }}
+                                                <small class="form-note d-block">Ajoutez le lien YouTube de la lecon.</small>
+                                                {% if form.youtube_url.vars.errors|length > 0 %}
+                                                    {% for error in form.youtube_url.vars.errors %}
+                                                        <div class="error-text">{{ error.message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Cours -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.cours, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.cours, {
-                                        'attr': {
-                                            'class': 'form-select form-select-lg' ~ (form.cours.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.cours.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.cours.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
+                            <div class="create-actions mt-4 text-center">
+                                <button type="submit" class="btn btn-create-modern w-100">
+                                    Creer la lecon
+                                </button>
                             </div>
 
-                            <!-- Ordre -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.ordre, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.ordre, {
-                                        'attr': {
-                                            'min': 1,
-                                            'placeholder': 'Exemple : 1, 2, 3...',
-                                            'class': 'form-control form-control-lg' ~ (form.ordre.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.ordre.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.ordre.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <!-- Type de média -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.media_type, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.media_type, {
-                                        'attr': {
-                                            'placeholder': 'Exemple : video, pdf, image, text',
-                                            'class': 'form-control form-control-lg' ~ (form.media_type.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.media_type.vars.help is defined and form.media_type.vars.help %}
-                                        <small class="form-text text-muted d-block mt-1">{{ form.media_type.vars.help }}</small>
-                                    {% endif %}
-                                    {% if form.media_type.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.media_type.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <!-- URL du média -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.media_url, null, {
-                                        'label_attr': {'class': 'form-label fw-bold'}
-                                    }) }}
-                                    {{ form_widget(form.media_url, {
-                                        'attr': {
-                                            'placeholder': 'https://exemple.com/video.mp4',
-                                            'class': 'form-control form-control-lg' ~ (form.media_url.vars.errors|length > 0 ? ' is-invalid' : '')
-                                        }
-                                    }) }}
-                                    {% if form.media_url.vars.help is defined and form.media_url.vars.help %}
-                                        <small class="form-text text-muted d-block mt-1">{{ form.media_url.vars.help }}</small>
-                                    {% endif %}
-                                    {% if form.media_url.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.media_url.vars.errors %}
-                                                <div class="text-danger">{{ error.message }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-
+                            {{ form_end(form) }}
                         </div>
+                    </div>
 
-                        <!-- Boutons -->
-                        <div class="mt-5 text-center">
-                            <button type="submit" class="btn btn-primary btn-lg px-5 py-3">
-                                Créer la leçon
-                            </button>
-                        </div>
-
-                        {{ form_end(form) }}
-
+                    <div class="text-center">
+                        <a href="{{ path('app_lecon_index') }}" class="back-link">
+                            <span aria-hidden="true">&larr;</span>
+                            Retour a la liste des lecons
+                        </a>
                     </div>
                 </div>
-
-                <div class="text-center mt-4">
-                    <a href="{{ path('app_lecon_index') }}" class="text-muted small">
-                        ← Retour à la liste des leçons
-                    </a>
-                </div>
-
             </div>
         </div>
     </div>
 </section>
-<!-- Form END -->
+<script>
+(() => {
+    const box = document.getElementById('js-lecon-ai-image-box');
+    if (!box) return;
 
+    const titleInput = document.getElementById(box.dataset.fieldTitle || '');
+    const courseInput = document.getElementById(box.dataset.fieldCourse || '');
+    const generateBtn = document.getElementById('js-lecon-ai-image-generate');
+    const statusEl = document.getElementById('js-lecon-ai-image-status');
+    const hiddenInput = document.getElementById('js-lecon-ai-image-hidden');
+    const previewWrap = document.getElementById('js-lecon-ai-image-preview-wrap');
+    const previewImage = document.getElementById('js-lecon-ai-image-preview');
+    const openLink = document.getElementById('js-lecon-ai-image-open');
+
+    const setStatus = (message, kind = '') => {
+        if (!statusEl) return;
+        statusEl.textContent = message;
+        statusEl.classList.remove('is-error', 'is-ok');
+        if (kind === 'error') statusEl.classList.add('is-error');
+        if (kind === 'ok') statusEl.classList.add('is-ok');
+    };
+
+    const readJsonResponse = async (response) => {
+        const raw = await response.text();
+        if (!raw) return {};
+        try {
+            return JSON.parse(raw);
+        } catch (_) {
+            return {};
+        }
+    };
+
+    generateBtn?.addEventListener('click', async () => {
+        const title = String(titleInput?.value || '').trim();
+        const selectedOption = courseInput?.options?.[courseInput.selectedIndex];
+        const subject = String(selectedOption?.textContent || '').trim();
+
+        if (!title && !subject) {
+            setStatus('Saisissez un titre ou choisissez un cours avant la generation.', 'error');
+            return;
+        }
+
+        generateBtn.disabled = true;
+        setStatus('Generation image en cours...');
+
+        try {
+            const response = await fetch(box.dataset.generateImageUrl || '', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    _token: box.dataset.csrfImageToken || '',
+                    title,
+                    subject,
+                }),
+            });
+
+            const data = await readJsonResponse(response);
+            if (!response.ok) {
+                setStatus(data.error || 'Generation image impossible pour le moment.', 'error');
+                return;
+            }
+
+            const filename = String(data.filename || '').trim();
+            const url = String(data.url || '').trim();
+            if (!filename || !url) {
+                setStatus('Reponse image invalide.', 'error');
+                return;
+            }
+
+            if (hiddenInput) {
+                hiddenInput.value = filename;
+            }
+
+            if (previewImage) {
+                previewImage.src = `${url}?v=${Date.now()}`;
+            }
+
+            if (openLink) {
+                openLink.href = url;
+                openLink.classList.remove('d-none');
+            }
+
+            previewWrap?.classList.remove('d-none');
+            const sourceLabel = data.source === 'ai' ? 'IA' : 'mode local';
+            setStatus(`Image generee (${sourceLabel}).`, 'ok');
+        } catch (_) {
+            setStatus('Erreur reseau pendant la generation image.', 'error');
+        } finally {
+            generateBtn.disabled = false;
+        }
+    });
+})();
+</script>
 {% endblock %}

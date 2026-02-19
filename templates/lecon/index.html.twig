@@ -1,119 +1,256 @@
 {% extends 'base_backoffice.html.twig' %}
 
-{% block title %}Liste des Leçons{% endblock %}
+{% block title %}Liste des Lecons{% endblock %}
 
 {% block body %}
+    <style>
+        .lecon-index-tuned .card {
+            border-radius: 14px;
+            overflow: hidden;
+            animation: panelIn 0.45s ease both;
+        }
 
-<!-- =======================
-Page Banner START -->
-<section class="py-0 bg-blue h-200px align-items-center d-flex rounded-0"
-         style="background:url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size:cover;">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1 class="text-white">Leçons</h1>
-                <p class="text-white mb-0">Gérez les leçons de vos cours</p>
+        .lecon-index-tuned .card-header {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .lecon-index-tuned .form-control,
+        .lecon-index-tuned .form-select {
+            border-radius: 10px;
+        }
+
+        .lecon-index-tuned .table thead th {
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        .lecon-index-tuned .table tbody tr {
+            transition: background-color 0.2s ease;
+            animation: rowIn 0.35s ease both;
+        }
+
+        .lecon-index-tuned .table tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.04);
+        }
+
+        .lecon-index-tuned .row.mb-3 {
+            animation: slideDownIn 0.45s ease both;
+        }
+
+        .lecon-index-tuned .row.g-4.mb-4 > div {
+            animation: riseIn 0.45s ease both;
+        }
+
+        .lecon-index-tuned .row.g-4.mb-4 > div:nth-child(2) {
+            animation-delay: 0.08s;
+        }
+
+        .lecon-index-tuned .row.g-4.mb-4 > div:nth-child(3) {
+            animation-delay: 0.16s;
+        }
+
+        .lecon-index-tuned .card-header .fa-search {
+            transition: transform 0.2s ease;
+        }
+
+        .lecon-index-tuned .card-header .btn:hover .fa-search {
+            transform: scale(1.15);
+        }
+
+        .lecon-index-tuned .btn-outline-secondary {
+            animation: pulseSoft 1.7s ease-in-out infinite;
+        }
+
+        .lecon-index-tuned .results-meta {
+            font-size: 0.85rem;
+            color: #6c757d;
+            animation: fadeInSoft 0.45s ease both;
+        }
+
+        .lecon-index-tuned .table tbody tr:nth-child(1) { animation-delay: 0.02s; }
+        .lecon-index-tuned .table tbody tr:nth-child(2) { animation-delay: 0.05s; }
+        .lecon-index-tuned .table tbody tr:nth-child(3) { animation-delay: 0.08s; }
+        .lecon-index-tuned .table tbody tr:nth-child(4) { animation-delay: 0.11s; }
+        .lecon-index-tuned .table tbody tr:nth-child(5) { animation-delay: 0.14s; }
+        .lecon-index-tuned .table tbody tr:nth-child(6) { animation-delay: 0.17s; }
+
+        @keyframes slideDownIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes riseIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes panelIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInSoft {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes rowIn {
+            from { opacity: 0; transform: translateX(8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes pulseSoft {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(108, 117, 125, 0.12); }
+            50% { box-shadow: 0 0 0 6px rgba(108, 117, 125, 0.04); }
+        }
+
+        @media (max-width: 768px) {
+            .lecon-index-tuned .card-header .row > div {
+                width: 100%;
+            }
+        }
+    </style>
+
+    <div class="lecon-index-tuned">
+        <div class="row mb-3">
+            <div class="col-12 d-sm-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-2 mb-sm-0">Lecons</h1>
+                <a href="{{ path('app_lecon_new') }}" class="btn btn-sm btn-primary mb-0">Ajouter une lecon</a>
             </div>
         </div>
-    </div>
-</section>
-<!-- Page Banner END -->
 
-<!-- =======================
-Table START -->
-<section class="pt-5 pb-5">
-    <div class="container">
-        <div class="row mb-4">
-            <div class="col-12 text-end">
-                <a href="{{ path('app_lecon_new') }}" class="btn btn-primary btn-lg">
-                    <i class="bi bi-plus-circle me-2"></i>Ajouter une leçon
-                </a>
+        <div class="row g-4 mb-4">
+            <div class="col-sm-6 col-lg-4">
+                <div class="text-center p-4 bg-primary bg-opacity-10 border border-primary rounded-3">
+                    <h6>Total Lecons</h6>
+                    <h2 class="mb-0 fs-1 text-primary">{{ lecons.getTotalItemCount }}</h2>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <div class="text-center p-4 bg-success bg-opacity-10 border border-success rounded-3">
+                    <h6>Avec Cours</h6>
+                    <h2 class="mb-0 fs-1 text-success">{{ withCoursCount }}</h2>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <div class="text-center p-4 bg-warning bg-opacity-15 border border-warning rounded-3">
+                    <h6>Sans Cours</h6>
+                    <h2 class="mb-0 fs-1 text-warning">{{ withoutCoursCount }}</h2>
+                </div>
             </div>
         </div>
 
-        <!-- Messages d'alerte -->
-        {% for message in app.flashes('success') %}
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-
-        <div class="row">
-            <div class="col-12">
-                <div class="card shadow">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Titre</th>
-                                    <th>Cours</th>
-                                    <th>Ordre</th>
-                                    <th>Type de média</th>
-                                    <th class="text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for lecon in lecons %}
-                                    <tr>
-                                        <td>
-                                            <a href="{{ path('app_lecon_show', {'id': lecon.id}) }}" class="fw-bold text-decoration-none">
-                                                {{ lecon.titre }}
-                                            </a>
-                                        </td>
-                                        <td>
-                                            {% if lecon.cours %}
-                                                <a href="{{ path('app_cours_show', {'id': lecon.cours.id}) }}" class="text-decoration-none">
-                                                    {{ lecon.cours.titre }}
-                                                </a>
-                                            {% else %}
-                                                <span class="badge bg-warning">Sans cours</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ lecon.ordre }}</td>
-                                        <td>
-                                            <span class="badge bg-info">{{ lecon.mediaType }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <a href="{{ path('app_lecon_show', {'id': lecon.id}) }}" 
-                                               class="btn btn-sm btn-info me-1" 
-                                               title="Afficher">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a href="{{ path('app_lecon_edit', {'id': lecon.id}) }}" 
-                                               class="btn btn-sm btn-warning me-1" 
-                                               title="Modifier">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <form action="{{ path('app_lecon_delete', {'id': lecon.id}) }}" 
-                                                  method="POST" 
-                                                  class="d-inline" 
-                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette leçon ?');">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecon.id) }}">
-                                                <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                {% else %}
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">
-                                            <p class="text-muted mb-0">Aucune leçon trouvée.</p>
-                                            <a href="{{ path('app_lecon_new') }}" class="btn btn-sm btn-primary mt-2">
-                                                Créer la première leçon
-                                            </a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+        <div class="card bg-transparent border">
+            <div class="card-header bg-light border-bottom">
+                <div class="row g-3 align-items-center justify-content-between">
+                    <div class="col-md-8">
+                        <form method="get" action="{{ path('app_lecon_index') }}" class="rounded position-relative">
+                            <input class="form-control bg-body" type="search" name="search" placeholder="Search by title, course, media type or order" aria-label="Search" value="{{ searchQuery }}">
+                            <input type="hidden" name="order" value="{{ sort }}">
+                            <button type="submit" class="btn bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y me-2" aria-label="Rechercher">
+                                <i class="fas fa-search fs-6 text-primary"></i>
+                            </button>
+                        </form>
                     </div>
+
+                    <div class="col-md-3">
+                        <form method="get" action="{{ path('app_lecon_index') }}">
+                            <input type="hidden" name="search" value="{{ searchQuery }}">
+                            <select name="order" onchange="this.form.submit()" class="form-select js-choice border-0 z-index-9" aria-label="Sort lessons">
+                                <option value="">Default</option>
+                                <option value="a-z" {{ sort == 'a-z' ? 'selected' : '' }}>Titre A-Z</option>
+                                <option value="ordre-asc" {{ sort == 'ordre-asc' ? 'selected' : '' }}>Ordre ASC</option>
+                                <option value="ordre-desc" {{ sort == 'ordre-desc' ? 'selected' : '' }}>Ordre DESC</option>
+                            </select>
+                        </form>
+                    </div>
+
+                    {% if searchQuery or sort %}
+                        <div class="col-md-1 text-md-end">
+                            <a href="{{ path('app_lecon_index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="results-meta mt-2">
+                    {{ lecons.getTotalItemCount }} resultat(s)
+                    {% if searchQuery %}
+                        | recherche: "{{ searchQuery }}"
+                    {% endif %}
+                    {% if sort %}
+                        | tri: {{ sort }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive border-0 rounded-3">
+                    <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="border-0 rounded-start">Titre</th>
+                                <th scope="col" class="border-0">Cours</th>
+                                <th scope="col" class="border-0">Ordre</th>
+                                <th scope="col" class="border-0">Type de media</th>
+                                <th scope="col" class="border-0 rounded-end text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lecon in lecons %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path('app_lecon_show', {'id': lecon.id}) }}" class="fw-bold text-decoration-none">
+                                            {{ lecon.titre }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {% if lecon.cours %}
+                                            <a href="{{ path('app_cours_show', {'id': lecon.cours.id}) }}" class="text-decoration-none">
+                                                {{ lecon.cours.titre }}
+                                            </a>
+                                        {% else %}
+                                            <span class="badge bg-warning">Sans cours</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="badge text-bg-primary">{{ lecon.ordre }}</span></td>
+                                    <td><span class="badge bg-info">{{ lecon.mediaType }}</span></td>
+                                    <td class="text-end">
+                                        <a href="{{ path('app_lecon_show', {'id': lecon.id}) }}" class="btn btn-sm btn-success-soft me-1 mb-1 mb-md-0" title="Afficher">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_lecon_edit', {'id': lecon.id}) }}" class="btn btn-sm btn-warning-soft me-1 mb-1 mb-md-0" title="Modifier">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form action="{{ path('app_lecon_delete', {'id': lecon.id}) }}" method="POST" class="d-inline" onsubmit="return confirm('Etes-vous sur de vouloir supprimer cette lecon ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecon.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-danger-soft mb-0" title="Supprimer">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <p class="text-muted mb-0">Aucune lecon trouvee.</p>
+                                        <a href="{{ path('app_lecon_new') }}" class="btn btn-sm btn-primary mt-2">Creer la premiere lecon</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card-footer bg-transparent pt-0">
+                <div class="d-sm-flex justify-content-sm-between align-items-sm-center">
+                    <p class="mb-0 text-center text-sm-start">
+                        Affichage page {{ lecons.getCurrentPageNumber }} ({{ lecons.getItemNumberPerPage }} / page)
+                    </p>
+                    {{ knp_pagination_render(lecons) }}
                 </div>
             </div>
         </div>
     </div>
-</section>
-<!-- Table END -->
-
 {% endblock %}

@@ -3,6 +3,122 @@
 {% block title %}Liste des cours{% endblock %}
 
 {% block body %}
+    <style>
+        .cours-index-tuned .card {
+            border-radius: 14px;
+            overflow: hidden;
+            animation: panelIn 0.45s ease both;
+        }
+
+        .cours-index-tuned .card-header {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .cours-index-tuned .form-control,
+        .cours-index-tuned .form-select {
+            border-radius: 10px;
+        }
+
+        .cours-index-tuned .table thead th {
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        .cours-index-tuned .table tbody tr {
+            transition: background-color 0.2s ease;
+            animation: rowIn 0.35s ease both;
+        }
+
+        .cours-index-tuned .table tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.04);
+        }
+
+        .cours-index-tuned .w-60px img {
+            width: 56px;
+            height: 56px;
+            object-fit: cover;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .cours-index-tuned .results-meta {
+            font-size: 0.85rem;
+            color: #6c757d;
+            animation: fadeInSoft 0.45s ease both;
+        }
+
+        .cours-index-tuned .row.mb-3 {
+            animation: slideDownIn 0.45s ease both;
+        }
+
+        .cours-index-tuned .row.g-4.mb-4 > div {
+            animation: riseIn 0.45s ease both;
+        }
+
+        .cours-index-tuned .row.g-4.mb-4 > div:nth-child(2) {
+            animation-delay: 0.08s;
+        }
+
+        .cours-index-tuned .row.g-4.mb-4 > div:nth-child(3) {
+            animation-delay: 0.16s;
+        }
+
+        .cours-index-tuned .card-header .fa-search {
+            transition: transform 0.2s ease;
+        }
+
+        .cours-index-tuned .card-header .btn:hover .fa-search {
+            transform: scale(1.15);
+        }
+
+        .cours-index-tuned .btn-outline-secondary {
+            animation: pulseSoft 1.7s ease-in-out infinite;
+        }
+
+        .cours-index-tuned .table tbody tr:nth-child(1) { animation-delay: 0.02s; }
+        .cours-index-tuned .table tbody tr:nth-child(2) { animation-delay: 0.05s; }
+        .cours-index-tuned .table tbody tr:nth-child(3) { animation-delay: 0.08s; }
+        .cours-index-tuned .table tbody tr:nth-child(4) { animation-delay: 0.11s; }
+        .cours-index-tuned .table tbody tr:nth-child(5) { animation-delay: 0.14s; }
+        .cours-index-tuned .table tbody tr:nth-child(6) { animation-delay: 0.17s; }
+
+        @keyframes slideDownIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes riseIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes panelIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInSoft {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes rowIn {
+            from { opacity: 0; transform: translateX(8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes pulseSoft {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(108, 117, 125, 0.12); }
+            50% { box-shadow: 0 0 0 6px rgba(108, 117, 125, 0.04); }
+        }
+
+        @media (max-width: 768px) {
+            .cours-index-tuned .card-header .row > div {
+                width: 100%;
+            }
+        }
+    </style>
+    <div class="cours-index-tuned">
 	<!-- Title -->
 		<div class="row mb-3">
 			<div class="col-12 d-sm-flex justify-content-between align-items-center">
@@ -50,15 +166,19 @@
 					<div class="col-md-8">
 					<form method="get" action="{{ path('app_cours_index') }}" class="rounded position-relative">
 						<input class="form-control bg-body" type="search" name="search" placeholder="Search by title, subject or level" aria-label="Search" value="{{ searchQuery }}">
-							</button>
+                            <input type="hidden" name="order" value="{{ sort }}">
+                            <button type="submit" class="btn bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y me-2" aria-label="Rechercher">
+                                <i class="fas fa-search fs-6 text-primary"></i>
+                            </button>
 						</form>
 					</div>
 
 					<!-- Select option -->
 					<div class="col-md-3">
 						<!-- Short by filter -->
-						<form>
-							<select name="sort" onchange="this.form.submit()" class="form-select js-choice border-0 z-index-9" aria-label=".form-select-sm">
+						<form method="get" action="{{ path('app_cours_index') }}">
+                            <input type="hidden" name="search" value="{{ searchQuery }}">
+							<select name="order" onchange="this.form.submit()" class="form-select js-choice border-0 z-index-9" aria-label=".form-select-sm">
 								<option value="">Default</option>
 								<option value="a-z" {{ sort == 'a-z' ? 'selected' : '' }}>Titre A-Z</option>
 								<option value="niveau-asc" {{ sort == 'niveau-asc' ? 'selected' : '' }}>Niveau ASC</option>
@@ -66,7 +186,23 @@
 							</select>
 						</form>
 					</div>
+
+                    {% if searchQuery or sort %}
+                        <div class="col-md-1 text-md-end">
+                            <a href="{{ path('app_cours_index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                        </div>
+                    {% endif %}
 				</div>
+
+                <div class="results-meta mt-2">
+                    {{ cours.getTotalItemCount }} resultat(s)
+                    {% if searchQuery %}
+                        | recherche: "{{ searchQuery }}"
+                    {% endif %}
+                    {% if sort %}
+                        | tri: {{ sort }}
+                    {% endif %}
+                </div>
 				<!-- Search and select END -->
 			</div>
 			<!-- Card header END -->
@@ -147,7 +283,9 @@
 				<!-- Pagination START -->
 				<div class="d-sm-flex justify-content-sm-between align-items-sm-center">
 					<!-- Content -->
-					<p class="mb-0 text-center text-sm-start">Showing 1 to 8 of 20 entries</p>
+					<p class="mb-0 text-center text-sm-start">
+                        Affichage page {{ cours.getCurrentPageNumber }} ({{ cours.getItemNumberPerPage }} / page)
+                    </p>
 					<!-- Pagination -->
 					{{ knp_pagination_render(cours) }}
 				</div>
@@ -156,4 +294,5 @@
 			<!-- Card footer END -->
 		</div>
 		<!-- Card END -->
+    </div>
 {% endblock %}

@@ -8,8 +8,9 @@
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
-/var/
+/public/uploads/
 /vendor/
+/var
 /.env
 ###< symfony/framework-bundle ###
 
@@ -27,3 +28,7 @@
 /assets/vendor/
 
 ###< symfony/asset-mapper ###
+
+###> lexik/jwt-authentication-bundle ###
+/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Course image">
+    <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0ea5a3"/>
+            <stop offset="55%" stop-color="#2563eb"/>
+            <stop offset="100%" stop-color="#1e293b"/>
+        </linearGradient>
+    </defs>
+    <rect width="1024" height="1024" rx="64" fill="url(#bg)"/>
+    <circle cx="860" cy="170" r="180" fill="#ffffff" fill-opacity="0.16"/>
+    <circle cx="140" cy="900" r="220" fill="#f59e0b" fill-opacity="0.26"/>
+    <rect x="84" y="320" width="856" height="430" rx="34" fill="#0f172a" fill-opacity="0.28"/>
+    <text x="96" y="378" font-family="Arial, sans-serif" font-size="30" font-weight="600" fill="#bfdbfe">COURSE COVER</text>
+    <text x="96" y="462" font-family="Arial, sans-serif" font-size="54" font-weight="700" fill="#ffffff">الريضيات</text>
+    <text x="96" y="660" font-family="Arial, sans-serif" font-size="34" font-weight="500" fill="#e2e8f0">mathematique</text>
+    <rect x="96" y="700" width="260" height="58" rx="16" fill="#ffffff" fill-opacity="0.2"/>
+    <text x="126" y="738" font-family="Arial, sans-serif" font-size="28" font-weight="600" fill="#ffffff">EduKids</text>
+</svg>

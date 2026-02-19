@@ -1,0 +1,339 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Users Management - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="fw-bold mb-0">
+                <i class="bi bi-people-fill me-2"></i> Users Management
+            </h1>
+            <p class="text-muted">Manage all user accounts and permissions</p>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-end">
+                <form id="searchForm" method="GET" action="{{ path('admin_user_index') }}" style="width: 350px;">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0" style="border: 1.5px solid #0056b3;">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" 
+                               id="searchInput"
+                               class="form-control border-start-0" 
+                               name="q"
+                               placeholder="Search users..."
+                               value="{{ searchQuery }}"
+                               style="border: 1.5px solid #0056b3; border-left: none; font-size: 0.9rem;">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table Card -->
+    <div class="card border-0 shadow-sm">
+        <!-- Card Header -->
+        <div class="card-header bg-primary text-white p-4">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-table me-2"></i> All Users
+            </h5>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body p-0">
+            {% if users|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="usersTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="fw-bold ps-4 py-3">Name</th>
+                                <th class="fw-bold py-3">Email</th>
+                                <th class="fw-bold py-3">Role</th>
+                                <th class="fw-bold py-3">Status</th>
+                                <th class="fw-bold text-center py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-users">
+                            {% for user in users %}
+                                <tr class="user-row align-middle border-bottom">
+                                    <td class="ps-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; font-size: 0.9rem;">
+                                                {{ user.firstName|first|upper }}{{ user.lastName|first|upper }}
+                                            </div>
+                                            <div>
+                                                <p class="mb-0 fw-bold">{{ user.firstName }} {{ user.lastName }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <code style="background-color: #f5f5f5; padding: 0.25rem 0.5rem; border-radius: 0.25rem; color: #333;">{{ user.email }}</code>
+                                    </td>
+                                    <td class="py-3">
+                                        {% if user.roles %}
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                {% for role in user.roles %}
+                                                    <span class="badge bg-dark">
+                                                        {% if role == 'ROLE_ADMIN' %}
+                                                            <i class="bi bi-shield-fill me-1"></i> Admin
+                                                        {% elseif role == 'ROLE_ELEVE' %}
+                                                            <i class="bi bi-mortarboard-fill me-1"></i> Student
+                                                        {% elseif role == 'ROLE_PARENT' %}
+                                                            <i class="bi bi-people-fill me-1"></i> Parent
+                                                        {% else %}
+                                                            {{ role|replace({'ROLE_': ''}) }}
+                                                        {% endif %}
+                                                    </span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted small">No Role</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3">
+                                        {% if user.isActive %}
+                                            <span class="badge bg-success" style="background-color: #198754 !important;">
+                                                <i class="bi bi-check-circle me-1"></i> Active
+                                            </span>
+                                        {% else %}
+                                            <span class="badge" style="background-color: #6c757d;">
+                                                <i class="bi bi-ban me-1"></i> Banned
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center py-3">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="{{ path('admin_user_edit', {id: user.id}) }}" 
+                                               class="btn btn-sm btn-outline-primary fw-bold">
+                                                <i class="bi bi-pencil-square"></i> Edit
+                                            </a>
+                                            <a href="{{ path('admin_user_block', {id: user.id}) }}" 
+                                               class="btn btn-sm {% if user.isActive %}btn-outline-dark{% else %}btn-outline-success{% endif %} fw-bold">
+                                                {% if user.isActive %}
+                                                    <i class="bi bi-ban"></i> Ban
+                                                {% else %}
+                                                    <i class="bi bi-unlock"></i> Unban
+                                                {% endif %}
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="card-footer bg-light border-top p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <p class="mb-0 text-muted">
+                                Showing <strong id="showing-start">1</strong> to <strong id="showing-end">5</strong> of <strong id="total-items">{{ users|length }}</strong> users
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination mb-0 justify-content-end" id="pagination">
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="p-5 text-center">
+                    <i class="bi bi-inbox text-muted" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                    <h5 class="text-muted fw-bold">No users found</h5>
+                    <p class="text-muted">There are currently no users in the system</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit search form as user types
+    const searchInput = document.getElementById('searchInput');
+    const searchForm = document.getElementById('searchForm');
+    
+    if (searchInput && searchForm) {
+        searchInput.addEventListener('input', function() {
+            // Submit form immediately as user types
+            searchForm.submit();
+        });
+    }
+
+    // Pagination logic
+    const itemsPerPage = 5;
+    const tableRows = Array.from(document.querySelectorAll('#tbody-users .user-row'));
+    const totalItems = tableRows.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const pagination = document.getElementById('pagination');
+    
+    let currentPage = 1;
+
+    function showPage(page) {
+        const start = (page - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        // Hide all rows first
+        document.querySelectorAll('#tbody-users .user-row').forEach(row => {
+            row.style.display = 'none';
+        });
+
+        // Show rows for current page
+        tableRows.slice(start, end).forEach(row => {
+            row.style.display = 'table-row';
+        });
+
+        // Update showing info
+        const totalFiltered = tableRows.length;
+        const showingStart = totalFiltered > 0 ? start + 1 : 0;
+        const showingEnd = Math.min(end, totalFiltered);
+        document.getElementById('showing-start').textContent = showingStart;
+        document.getElementById('showing-end').textContent = showingEnd;
+        document.getElementById('total-items').textContent = totalFiltered;
+
+        // Highlight current page
+        document.querySelectorAll('.pagination .page-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        if (page > 0 && page <= Math.ceil(totalFiltered / itemsPerPage)) {
+            document.querySelector(`.pagination .page-link[data-page="${page}"]`)?.classList.add('active');
+        }
+    }
+
+    function updatePagination() {
+        const totalFiltered = tableRows.length;
+        const totalPages = Math.ceil(totalFiltered / itemsPerPage) || 1;
+        currentPage = Math.max(1, currentPage);
+        pagination.innerHTML = '';
+
+        showPage(currentPage);
+
+        if (totalPages <= 1) return;
+
+        // Previous button
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = '<a class="page-link" href="#" data-page="prev"><i class="bi bi-chevron-left"></i> Previous</a>';
+        prevLi.querySelector('a').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                showPage(currentPage);
+                updatePagination();
+            }
+        });
+        pagination.appendChild(prevLi);
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#" data-page="${i}">${i}</a>`;
+            li.querySelector('a').addEventListener('click', (e) => {
+                e.preventDefault();
+                currentPage = i;
+                showPage(currentPage);
+                updatePagination();
+            });
+            pagination.appendChild(li);
+        }
+
+        // Next button
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = '<a class="page-link" href="#" data-page="next">Next <i class="bi bi-chevron-right"></i></a>';
+        nextLi.querySelector('a').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+                currentPage++;
+                showPage(currentPage);
+                updatePagination();
+            }
+        });
+        pagination.appendChild(nextLi);
+    }
+
+    // Initialize
+    updatePagination();
+});
+</script>
+
+<style>
+    .page-link {
+        color: #0056b3;
+        border-color: #dee2e6;
+    }
+
+    .page-link:hover {
+        color: #0056b3;
+        background-color: #f0f0f0;
+        border-color: #dee2e6;
+    }
+
+    .page-item.active .page-link {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .user-row:hover {
+        background-color: #f8f9fa;
+    }
+
+    .btn-outline-primary {
+        color: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .btn-outline-primary:hover {
+        color: #fff;
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .input-group-text {
+        background-color: white;
+    }
+
+    .form-control:focus {
+        border-color: #0056b3;
+        box-shadow: 0 0 0 0.2rem rgba(0, 86, 179, 0.25);
+    }
+
+    .badge {
+        font-weight: 500;
+        padding: 0.35rem 0.6rem;
+    }
+
+    table {
+        font-size: 0.95rem;
+    }
+
+    #searchInput {
+        transition: all 0.3s ease;
+    }
+
+    #searchInput::placeholder {
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+
+    #searchInput:focus {
+        border-color: #0056b3 !important;
+        box-shadow: 0 0 0 0.2rem rgba(0, 86, 179, 0.25) !important;
+        background-color: #f0f5ff;
+    }
+{% endblock %}

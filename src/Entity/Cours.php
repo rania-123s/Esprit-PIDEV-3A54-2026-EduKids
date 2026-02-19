@@ -30,10 +30,17 @@ class Cours
     #[ORM\Column(length: 255)]
     private ?string $image = null;
 
+    #[ORM\Column(options: ['default' => 0])]
+    private int $likes = 0;
+
+    #[ORM\Column(options: ['default' => 0])]
+    private int $dislikes = 0;
+
     /**
      * @var Collection<int, Lecon>
      */
     #[ORM\OneToMany(targetEntity: Lecon::class, mappedBy: 'cours')]
+    #[ORM\OrderBy(['ordre' => 'ASC'])]
     private Collection $lecons;
 
     /**
@@ -42,10 +49,17 @@ class Cours
     #[ORM\OneToMany(targetEntity: Quiz::class, mappedBy: 'cours')]
     private Collection $quizzes;
 
+    /**
+     * @var Collection<int, UserCoursProgress>
+     */
+    #[ORM\OneToMany(targetEntity: UserCoursProgress::class, mappedBy: 'cours', orphanRemoval: true)]
+    private Collection $progress;
+
     public function __construct()
     {
         $this->lecons = new ArrayCollection();
         $this->quizzes = new ArrayCollection();
+        $this->progress = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -113,6 +127,30 @@ class Cours
         return $this;
     }
 
+    public function getLikes(): int
+    {
+        return $this->likes;
+    }
+
+    public function setLikes(int $likes): static
+    {
+        $this->likes = max(0, $likes);
+
+        return $this;
+    }
+
+    public function getDislikes(): int
+    {
+        return $this->dislikes;
+    }
+
+    public function setDislikes(int $dislikes): static
+    {
+        $this->dislikes = max(0, $dislikes);
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, Lecon>
      */
@@ -167,6 +205,35 @@ class Cours
             // set the owning side to null (unless already changed)
             if ($quiz->getCours() === $this) {
                 $quiz->setCours(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserCoursProgress>
+     */
+    public function getProgress(): Collection
+    {
+        return $this->progress;
+    }
+
+    public function addProgress(UserCoursProgress $progress): static
+    {
+        if (!$this->progress->contains($progress)) {
+            $this->progress->add($progress);
+            $progress->setCours($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProgress(UserCoursProgress $progress): static
+    {
+        if ($this->progress->removeElement($progress)) {
+            if ($progress->getCours() === $this) {
+                $progress->setCours(null);
             }
         }
 

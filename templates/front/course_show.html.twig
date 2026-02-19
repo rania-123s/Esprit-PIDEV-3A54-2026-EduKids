@@ -1,0 +1,820 @@
+{% extends 'base_frontoffice.html.twig' %}
+{% trans_default_domain 'messages' %}
+
+{% block title %}{{ cours.titre }}{% endblock %}
+
+{% block body %}
+<style>
+    .course-hero {
+        min-height: 240px;
+        display: flex;
+        align-items: center;
+        background:
+            linear-gradient(135deg, rgba(13, 110, 253, 0.92), rgba(13, 110, 253, 0.72)),
+            url('{{ asset('assets/images/pattern/04.png') }}') center/cover no-repeat;
+    }
+    .course-hero .hero-title {
+        font-size: clamp(1.8rem, 3vw, 2.6rem);
+        font-weight: 700;
+        letter-spacing: 0.2px;
+    }
+    .course-shell {
+        margin-top: -52px;
+        position: relative;
+        z-index: 2;
+    }
+    .course-main-card,
+    .course-side-card {
+        border: 1px solid #e9edf4;
+        border-radius: 18px;
+        box-shadow: 0 14px 34px rgba(18, 38, 63, 0.08);
+        overflow: hidden;
+        background: #fff;
+    }
+    .course-cover {
+        width: 100%;
+        height: 340px;
+        object-fit: cover;
+    }
+    .course-meta-badge {
+        background: #eef4ff;
+        color: #0d6efd;
+        border: 1px solid #d8e6ff;
+        font-weight: 600;
+        font-size: .82rem;
+    }
+    .course-desc {
+        color: #5c6574;
+        line-height: 1.75;
+        margin-bottom: 0;
+    }
+    .course-ai-box {
+        margin-top: 1rem;
+        border: 1px solid #dbe8ff;
+        border-radius: 14px;
+        padding: 1rem;
+        background: #f6f9ff;
+    }
+    .course-ai-status {
+        font-size: .86rem;
+        font-weight: 600;
+        color: #4f637f;
+    }
+    .course-ai-status.is-error {
+        color: #b02a37;
+    }
+    .course-ai-status.is-ok {
+        color: #146c43;
+    }
+    .course-ai-preview {
+        margin-top: .8rem;
+        background: #ffffff;
+        border: 1px solid #e6edf9;
+        border-radius: 12px;
+        padding: .9rem;
+    }
+    .course-ai-preview h6 {
+        margin-bottom: .45rem;
+    }
+    .course-ai-preview ul,
+    .course-ai-preview ol {
+        margin-bottom: .55rem;
+    }
+    .lesson-list {
+        display: grid;
+        gap: 14px;
+    }
+    .lesson-item {
+        border: 1px solid #e5ecf8;
+        border-radius: 14px;
+        padding: 14px;
+        background:
+            linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+        transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+    }
+    .lesson-item:hover {
+        border-color: #cfe0ff;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(13, 110, 253, 0.12);
+    }
+    .lesson-index {
+        min-width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #e8f0ff;
+        color: #0d6efd;
+        font-weight: 700;
+        font-size: .82rem;
+    }
+    .lesson-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .lesson-head {
+        display: flex;
+        gap: 10px;
+        min-width: 0;
+    }
+    .lesson-thumb {
+        width: 76px;
+        height: 76px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1px solid #d9e6ff;
+        background: #f2f6ff;
+        flex-shrink: 0;
+    }
+    .lesson-title {
+        display: block;
+        font-size: 1rem;
+        line-height: 1.3;
+        color: #1f2b3d;
+        margin-top: 2px;
+        word-break: break-word;
+    }
+    .lesson-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+    }
+    .lesson-pill {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid #dbe8ff;
+        background: #eef4ff;
+        color: #3865b5;
+        border-radius: 999px;
+        padding: 2px 9px;
+        font-size: .73rem;
+        font-weight: 600;
+    }
+    .lesson-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+    .lesson-actions .btn {
+        border-radius: 999px;
+        font-weight: 600;
+    }
+    .course-side-card {
+        position: sticky;
+        top: 110px;
+    }
+    .voice-log {
+        max-height: 320px;
+        overflow-y: auto;
+        border: 1px solid #e9edf4;
+        border-radius: 12px;
+        background: #f8fbff;
+        padding: 0.75rem;
+    }
+    .voice-msg {
+        border-radius: 10px;
+        padding: 0.55rem 0.7rem;
+        margin-bottom: 0.55rem;
+        font-size: 0.92rem;
+    }
+    .voice-msg.user {
+        background: #e8f1ff;
+        border: 1px solid #d8e6ff;
+    }
+    .voice-msg.ai {
+        background: #eefaf3;
+        border: 1px solid #ccefdc;
+    }
+
+    .anim-ready .anim-reveal {
+        opacity: 0;
+        transform: translateY(24px) scale(0.99);
+        transition:
+            opacity .62s cubic-bezier(.2, .65, .25, 1),
+            transform .62s cubic-bezier(.2, .65, .25, 1);
+        transition-delay: var(--anim-delay, 0ms);
+    }
+    .anim-ready .anim-reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    .anim-ready .lesson-item.anim-reveal {
+        transform: translateY(20px);
+    }
+    .anim-ready .lesson-item.anim-reveal.is-visible {
+        transform: translateY(0);
+    }
+
+    @media (max-width: 991.98px) {
+        .course-cover {
+            height: 260px;
+        }
+        .lesson-row {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .lesson-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+    @media (max-width: 575.98px) {
+        .lesson-thumb {
+            width: 64px;
+            height: 64px;
+        }
+        .lesson-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<section class="course-hero anim-reveal">
+    <div class="container text-center">
+        <h1 class="text-white hero-title mb-2">{{ cours.titre }}</h1>
+        <p class="text-white mb-0 opacity-75">{{ cours.matiere }}</p>
+    </div>
+</section>
+
+<section class="pt-0 pb-5">
+    <div class="container">
+        <div class="row g-4 course-shell">
+            <div class="col-lg-8">
+                <div class="course-main-card anim-reveal" style="--anim-delay: 80ms;">
+                    <img src="{{ asset('uploads/images/cours/' ~ cours.image) }}"
+                         class="course-cover"
+                         alt="{{ cours.titre }}">
+
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="badge course-meta-badge">{{ cours.matiere }}</span>
+                            <span class="badge course-meta-badge">{{ 'front.course_show.level_badge'|trans({'%level%': cours.niveau}) }}</span>
+                            <span class="badge course-meta-badge">{{ 'front.course_show.lessons_count'|trans({'%count%': lecons|length}) }}</span>
+                        </div>
+
+                        <h3 class="mb-3">{{ cours.titre }}</h3>
+                        <p class="course-desc">{{ cours.description }}</p>
+                        <div
+                            id="js-front-course-ai-box"
+                            class="course-ai-box"
+                            data-generate-url="{{ path('app_cours_ai_generate') }}"
+                            data-csrf-token="{{ csrf_token('cours_ai_generate') }}"
+                            data-title="{{ cours.titre|e('html_attr') }}"
+                            data-subject="{{ cours.matiere|e('html_attr') }}"
+                            data-level="{{ cours.niveau }}"
+                        >
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <button type="button" id="js-front-course-ai-generate" class="btn btn-sm btn-outline-primary">
+                                    Generer resume IA
+                                </button>
+                                <span id="js-front-course-ai-status" class="course-ai-status">Pret.</span>
+                            </div>
+                            <div id="js-front-course-ai-preview" class="course-ai-preview d-none">
+                                <h6>Description proposee</h6>
+                                <p id="js-front-course-ai-description" class="mb-2"></p>
+                                <h6>Objectifs</h6>
+                                <ul id="js-front-course-ai-objectives"></ul>
+                                <h6>Plan</h6>
+                                <ol id="js-front-course-ai-plan"></ol>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <h5 class="mb-3">{{ 'front.course_show.lessons_title'|trans }}</h5>
+                        <p class="small text-muted mb-3">{{ 'front.course_show.lessons_help'|trans }}</p>
+
+                        {% if lecons is not empty %}
+                            <div class="lesson-list">
+                                {% for lecon in lecons %}
+                                    {% set mediaUrl = lecon.mediaUrl %}
+                                    {% set pdfLink = mediaUrl %}
+                                    {% set videoFileLink = lecon.videoUrl %}
+                                    {% set youtubeButtonLink = lecon.youtubeUrl %}
+                                    {% set lessonImageSrc = lecon.image ? asset('uploads/images/cours/' ~ lecon.image) : asset('uploads/images/cours/' ~ cours.image) %}
+                                    <div class="lesson-item anim-reveal" style="--anim-delay: {{ (loop.index0 * 70) + 150 }}ms;">
+                                        <div class="lesson-row">
+                                            <div class="lesson-head">
+                                                <img src="{{ lessonImageSrc }}" class="lesson-thumb" alt="{{ lecon.titre }}">
+                                                <span class="lesson-index">#{{ lecon.ordre }}</span>
+                                                <div>
+                                                    <strong class="lesson-title">{{ lecon.titre }}</strong>
+                                                    <div class="lesson-meta">
+                                                        <span class="lesson-pill">PDF</span>
+                                                        <span class="lesson-pill">{{ 'front.course_show.video'|trans }}</span>
+                                                        <span class="lesson-pill">{{ 'front.course_show.lesson_badge'|trans({'%order%': lecon.ordre}) }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="lesson-actions">
+                                                <a href="{{ pdfLink ?: '#' }}" target="_blank" rel="noopener"
+                                                   class="btn btn-sm btn-primary">
+                                                    {{ 'front.course_show.open_pdf'|trans }}
+                                                </a>
+                                                <a href="{{ videoFileLink ?: '#' }}" target="_blank" rel="noopener"
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    {{ 'front.course_show.open_video'|trans }}
+                                                </a>
+                                                <a href="{{ youtubeButtonLink ?: '#' }}" target="_blank" rel="noopener"
+                                                   class="btn btn-sm btn-danger">
+                                                    {{ 'front.course_show.open_youtube'|trans }}
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-dark js-open-voice-tutor"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#voiceTutorModal"
+                                                        data-lesson-id="{{ lecon.id }}"
+                                                        data-lesson-title="{{ lecon.titre|e('html_attr') }}"
+                                                        data-ask-url="{{ path('app_lecon_tutor_ask', {'id': lecon.id}) }}"
+                                                        data-ocr-url="{{ path('app_lecon_tutor_ocr', {'id': lecon.id}) }}"
+                                                        data-summary-url="{{ path('app_lecon_tutor_summary', {'id': lecon.id}) }}">
+                                                    {{ 'front.course_show.ai_tutor'|trans }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">{{ 'front.course_show.no_lessons'|trans }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="course-side-card anim-reveal" style="--anim-delay: 140ms;">
+                    <div class="card-body text-center">
+                        <h4 class="mb-3">{{ 'front.course_show.info_title'|trans }}</h4>
+                        <p><strong>{{ 'front.course_show.subject'|trans }} :</strong> {{ cours.matiere }}</p>
+                        <p><strong>{{ 'front.course_show.level'|trans }} :</strong> {{ cours.niveau }}</p>
+                        <p><strong>{{ 'front.course_show.lessons'|trans }} :</strong> {{ lecons|length }}</p>
+
+                        <a href="{{ path('front_courses') }}" class="btn btn-primary w-100">
+                            {{ 'front.course_show.back_to_courses'|trans }}
+                        </a>
+
+                        <hr>
+                        <h6 class="mb-2">{{ 'front.course_show.create_own_title'|trans }}</h6>
+                        <p class="small text-muted mb-3">
+                            {{ 'front.course_show.create_own_help'|trans }}
+                        </p>
+                        <form method="post" action="{{ path('front_student_course_create_own', {'id': cours.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('student_course_create_' ~ cours.id) }}">
+                            <input type="text"
+                                   name="custom_title"
+                                   class="form-control mb-2"
+                                   maxlength="255"
+                                   placeholder="{{ 'front.course_show.custom_title_placeholder'|trans }}">
+                            <button type="submit" class="btn btn-success w-100">
+                                {{ 'front.course_show.create_own_btn'|trans }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="voiceTutorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ 'front.course_show.ai_tutor'|trans }} - <span id="voiceTutorLessonTitle"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="voiceTutorLog" class="voice-log mb-3"></div>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    <span class="small text-muted me-1">{{ 'front.course_show.summary_label'|trans }}:</span>
+                    <button class="btn btn-sm btn-outline-success js-summary-btn" type="button" data-level="facile">{{ 'front.course_show.summary_easy'|trans }}</button>
+                    <button class="btn btn-sm btn-outline-primary js-summary-btn" type="button" data-level="standard">{{ 'front.course_show.summary_standard'|trans }}</button>
+                    <button class="btn btn-sm btn-outline-dark js-summary-btn" type="button" data-level="avance">{{ 'front.course_show.summary_advanced'|trans }}</button>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="voiceTutorInput" class="form-control" placeholder="{{ 'front.course_show.ask_placeholder'|trans }}">
+                    <button class="btn btn-outline-warning" type="button" id="voiceTutorOcrBtn">{{ 'front.course_show.ocr_btn'|trans }}</button>
+                    <button class="btn btn-outline-secondary" type="button" id="voiceTutorMicBtn">{{ 'front.course_show.mic_btn'|trans }}</button>
+                    <button class="btn btn-outline-danger" type="button" id="voiceTutorStopBtn">{{ 'front.course_show.stop_btn'|trans }}</button>
+                    <button class="btn btn-primary" type="button" id="voiceTutorSendBtn">{{ 'front.course_show.send_btn'|trans }}</button>
+                </div>
+                <small class="text-muted d-block mt-2">{{ 'front.course_show.ai_help'|trans }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    document.body.classList.add('anim-ready');
+    const animNodes = Array.from(document.querySelectorAll('.anim-reveal'));
+    if (animNodes.length) {
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('is-visible');
+                    obs.unobserve(entry.target);
+                });
+            }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+
+            animNodes.forEach((node) => observer.observe(node));
+        } else {
+            animNodes.forEach((node) => node.classList.add('is-visible'));
+        }
+    }
+})();
+
+(() => {
+    const box = document.getElementById('js-front-course-ai-box');
+    const btn = document.getElementById('js-front-course-ai-generate');
+    const statusEl = document.getElementById('js-front-course-ai-status');
+    const previewEl = document.getElementById('js-front-course-ai-preview');
+    const descEl = document.getElementById('js-front-course-ai-description');
+    const objectivesEl = document.getElementById('js-front-course-ai-objectives');
+    const planEl = document.getElementById('js-front-course-ai-plan');
+
+    if (!box || !btn || !statusEl || !previewEl || !descEl || !objectivesEl || !planEl) return;
+
+    const setStatus = (message, type = '') => {
+        statusEl.textContent = message;
+        statusEl.classList.remove('is-error', 'is-ok');
+        if (type) statusEl.classList.add(`is-${type}`);
+    };
+
+    const renderList = (container, items, ordered = false) => {
+        container.innerHTML = '';
+        if (!Array.isArray(items) || items.length === 0) {
+            const empty = document.createElement('li');
+            empty.textContent = 'Aucun element.';
+            container.appendChild(empty);
+            return;
+        }
+        items.forEach((item) => {
+            const li = document.createElement('li');
+            li.textContent = String(item || '').trim();
+            if (li.textContent !== '') container.appendChild(li);
+        });
+        if (!ordered && container.children.length === 0) {
+            const empty = document.createElement('li');
+            empty.textContent = 'Aucun element.';
+            container.appendChild(empty);
+        }
+    };
+
+    const readJsonResponse = async (response) => {
+        const raw = await response.text();
+        if (!raw) return {};
+        try {
+            return JSON.parse(raw);
+        } catch (_) {
+            return {};
+        }
+    };
+
+    btn.addEventListener('click', async () => {
+        const title = (box.dataset.title || '').trim();
+        const subject = (box.dataset.subject || '').trim();
+        const levelRaw = (box.dataset.level || '').trim();
+        const level = Number.parseInt(levelRaw, 10);
+
+        if (!title && !subject) {
+            setStatus('Titre ou matiere manquant.', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        setStatus('Generation IA en cours...');
+
+        try {
+            const response = await fetch(box.dataset.generateUrl || '', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    _token: box.dataset.csrfToken || '',
+                    title,
+                    subject,
+                    level: Number.isFinite(level) ? level : null
+                })
+            });
+
+            const data = await readJsonResponse(response);
+            if (!response.ok) {
+                throw new Error(data.error || 'Erreur IA');
+            }
+
+            descEl.textContent = String(data.structured_description || data.description || '').trim();
+            renderList(objectivesEl, data.objectives || []);
+            renderList(planEl, data.plan || [], true);
+            previewEl.classList.remove('d-none');
+
+            const sourceLabel = data.source === 'ai' ? 'IA' : 'mode local';
+            setStatus(`Resume genere (${sourceLabel}).`, 'ok');
+        } catch (error) {
+            setStatus(String(error.message || 'Generation impossible.'), 'error');
+        } finally {
+            btn.disabled = false;
+        }
+    });
+})();
+
+(() => {
+    const logEl = document.getElementById('voiceTutorLog');
+    const inputEl = document.getElementById('voiceTutorInput');
+    const ocrBtn = document.getElementById('voiceTutorOcrBtn');
+    const micBtn = document.getElementById('voiceTutorMicBtn');
+    const stopBtn = document.getElementById('voiceTutorStopBtn');
+    const sendBtn = document.getElementById('voiceTutorSendBtn');
+    const lessonTitleEl = document.getElementById('voiceTutorLessonTitle');
+    const modalEl = document.getElementById('voiceTutorModal');
+    const summaryBtns = Array.from(document.querySelectorAll('.js-summary-btn'));
+
+    if (!logEl || !inputEl || !ocrBtn || !micBtn || !stopBtn || !sendBtn || !lessonTitleEl) return;
+
+    let currentAskUrl = null;
+    let currentOcrUrl = null;
+    let currentSummaryUrl = null;
+    let recognition = null;
+    let isListening = false;
+
+    const appendMessage = (role, text) => {
+        const msg = document.createElement('div');
+        msg.className = `voice-msg ${role}`;
+        const safeText = String(text ?? '');
+        if (role === 'ai') {
+            const escaped = safeText
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+            const withBreaks = escaped.replace(/\n/g, '<br>');
+
+            const withLinks = withBreaks.replace(/(https?:\/\/[^\s]+|\/uploads\/media\/[^\s]+\.pdf)/gi, (match) => {
+                const href = match.startsWith('/uploads/')
+                    ? `${window.location.origin}${match}`
+                    : match;
+                return `<a href="${href}" target="_blank" rel="noopener">${match}</a>`;
+            });
+
+            msg.innerHTML = withLinks;
+        } else {
+            msg.textContent = safeText;
+        }
+        logEl.appendChild(msg);
+        logEl.scrollTop = logEl.scrollHeight;
+    };
+
+    const speak = (text) => {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fr-FR';
+        utterance.rate = 1;
+        window.speechSynthesis.speak(utterance);
+    };
+
+    const stopAudioAndMic = () => {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+
+        if (recognition && isListening) {
+            recognition.stop();
+        } else {
+            isListening = false;
+            micBtn.textContent = 'Parler';
+        }
+    };
+
+    const setSummaryButtonsDisabled = (disabled) => {
+        summaryBtns.forEach((btn) => {
+            btn.disabled = disabled || !currentSummaryUrl;
+        });
+    };
+
+    const sendQuestion = async (question) => {
+        const text = (question || '').trim();
+        if (!text || !currentAskUrl) return;
+
+        appendMessage('user', text);
+        inputEl.value = '';
+        ocrBtn.disabled = true;
+        sendBtn.disabled = true;
+        micBtn.disabled = true;
+        setSummaryButtonsDisabled(true);
+
+        try {
+            const response = await fetch(currentAskUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: text })
+            });
+
+            const raw = await response.text();
+            let data = {};
+            try {
+                data = raw ? JSON.parse(raw) : {};
+            } catch (_) {
+                data = {};
+            }
+
+            const answer = data.answer
+                || data.error
+                || (!response.ok ? "Le tuteur IA a renvoye une erreur serveur." : '')
+                || "Je ne trouve pas cette information dans la lecon.";
+            appendMessage('ai', answer);
+            speak(answer);
+        } catch (e) {
+            appendMessage('ai', "Le tuteur IA est indisponible pour le moment.");
+        } finally {
+            ocrBtn.disabled = false;
+            sendBtn.disabled = false;
+            micBtn.disabled = false;
+            setSummaryButtonsDisabled(false);
+            inputEl.focus();
+        }
+    };
+
+    const runOcr = async () => {
+        if (!currentOcrUrl) return;
+        if (ocrBtn.dataset.unavailable === '1') {
+            appendMessage('ai', "OCR indisponible sur ce serveur tant qu'aucun moteur OCR n'est installe.");
+            return;
+        }
+
+        appendMessage('ai', "Traitement OCR en cours. Cela peut prendre quelques secondes...");
+        ocrBtn.disabled = true;
+        sendBtn.disabled = true;
+        micBtn.disabled = true;
+        setSummaryButtonsDisabled(true);
+
+        try {
+            const response = await fetch(currentOcrUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const raw = await response.text();
+            let data = {};
+            try {
+                data = raw ? JSON.parse(raw) : {};
+            } catch (_) {
+                data = {};
+            }
+
+            const answer = data.answer
+                || data.error
+                || (!response.ok ? "Echec OCR cote serveur." : '')
+                || "OCR termine.";
+
+            appendMessage('ai', answer);
+            if (data.code === 'OCR_ENGINE_MISSING') {
+                ocrBtn.dataset.unavailable = '1';
+                appendMessage('ai', "Le bouton OCR est desactive pour eviter des tentatives repetitives.");
+            }
+            if (response.ok && data.answer) {
+                inputEl.focus();
+            }
+        } catch (_) {
+            appendMessage('ai', "Impossible de lancer l'OCR pour le moment.");
+        } finally {
+            ocrBtn.disabled = !currentOcrUrl || ocrBtn.dataset.unavailable === '1';
+            sendBtn.disabled = false;
+            micBtn.disabled = false;
+            setSummaryButtonsDisabled(false);
+        }
+    };
+
+    const fetchSummary = async (level) => {
+        if (!currentSummaryUrl) return;
+
+        const normalizedLevel = (level || 'standard').toLowerCase();
+        const levelLabel = normalizedLevel.charAt(0).toUpperCase() + normalizedLevel.slice(1);
+        appendMessage('user', `Resume niveau ${levelLabel}`);
+
+        ocrBtn.disabled = true;
+        sendBtn.disabled = true;
+        micBtn.disabled = true;
+        setSummaryButtonsDisabled(true);
+
+        try {
+            const response = await fetch(currentSummaryUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ level: normalizedLevel })
+            });
+
+            const raw = await response.text();
+            let data = {};
+            try {
+                data = raw ? JSON.parse(raw) : {};
+            } catch (_) {
+                data = {};
+            }
+
+            const summary = data.summary
+                || data.error
+                || (!response.ok ? "Resume indisponible pour le moment." : '')
+                || "Je ne trouve pas assez d'informations dans la lecon.";
+
+            appendMessage('ai', summary);
+            speak(summary);
+        } catch (_) {
+            appendMessage('ai', "Resume indisponible pour le moment.");
+        } finally {
+            ocrBtn.disabled = !currentOcrUrl || ocrBtn.dataset.unavailable === '1';
+            sendBtn.disabled = false;
+            micBtn.disabled = false;
+            setSummaryButtonsDisabled(false);
+            inputEl.focus();
+        }
+    };
+
+    document.querySelectorAll('.js-open-voice-tutor').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            currentAskUrl = btn.dataset.askUrl || null;
+            currentOcrUrl = btn.dataset.ocrUrl || null;
+            currentSummaryUrl = btn.dataset.summaryUrl || null;
+            lessonTitleEl.textContent = btn.dataset.lessonTitle || 'Lecon';
+            logEl.innerHTML = '';
+            appendMessage('ai', "Bonjour. Posez votre question sur cette lecon. Je peux aussi reformuler votre question si elle n'est pas claire.");
+            inputEl.value = '';
+            ocrBtn.disabled = !currentOcrUrl || ocrBtn.dataset.unavailable === '1';
+            setSummaryButtonsDisabled(false);
+        });
+    });
+
+    stopBtn.addEventListener('click', () => {
+        stopAudioAndMic();
+        appendMessage('ai', "Lecture vocale et ecoute micro arretees.");
+    });
+
+    if (modalEl) {
+        modalEl.addEventListener('hidden.bs.modal', () => {
+            stopAudioAndMic();
+        });
+    }
+
+    ocrBtn.addEventListener('click', () => runOcr());
+    sendBtn.addEventListener('click', () => sendQuestion(inputEl.value));
+    summaryBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            fetchSummary(btn.dataset.level || 'standard');
+        });
+    });
+    inputEl.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendQuestion(inputEl.value);
+        }
+    });
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        micBtn.disabled = true;
+        micBtn.title = 'Reconnaissance vocale non disponible sur ce navigateur';
+        return;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.lang = 'fr-FR';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+        isListening = true;
+        micBtn.textContent = 'Ecoute...';
+    };
+
+    recognition.onend = () => {
+        isListening = false;
+        micBtn.textContent = 'Parler';
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results?.[0]?.[0]?.transcript || '';
+        inputEl.value = transcript;
+        sendQuestion(transcript);
+    };
+
+    recognition.onerror = () => {
+        appendMessage('ai', "Impossible d'utiliser le micro maintenant.");
+    };
+
+    micBtn.addEventListener('click', () => {
+        if (!recognition) return;
+        if (isListening) {
+            recognition.stop();
+            return;
+        }
+        recognition.start();
+    });
+})();
+</script>
+{% endblock %}
