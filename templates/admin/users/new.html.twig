@@ -1,0 +1,201 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Create User - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0 fw-bold">
+                        <i class="bi bi-person-plus-fill text-primary me-2"></i> Create New User
+                    </h2>
+                    <p class="text-muted small mt-1">Add a new user account to the system</p>
+                </div>
+                <a href="{{ path('admin_user_index') }}" class="btn btn-light btn-lg">
+                    <i class="bi bi-arrow-left me-2"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 m-auto">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white border-bottom-0 p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-lg me-3">
+                            <div class="avatar-img rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="bi bi-person-plus-fill text-success" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">New User Account</h5>
+                            <p class="text-muted mb-0 small">Fill in the details below to create a new user</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                <div class="px-4 pt-3">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success alert-dismissible fade show border-0" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger alert-dismissible fade show border-0" role="alert">
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Form Section -->
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'class': 'form-content', 'novalidate': 'novalidate'}}) }}
+                    
+                    <!-- Name Section -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
+                            <i class="bi bi-person-fill me-2"></i> Personal Information
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label fw-semibold">First Name</label>
+                                    {{ form_widget(form.firstName) }}
+                                    {{ form_errors(form.firstName) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label fw-semibold">Last Name</label>
+                                    {{ form_widget(form.lastName) }}
+                                    {{ form_errors(form.lastName) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Email Section -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
+                            <i class="bi bi-envelope-fill me-2"></i> Contact Information
+                        </h6>
+                        <div class="form-group">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            {{ form_widget(form.email) }}
+                            {{ form_errors(form.email) }}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Password Section -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
+                            <i class="bi bi-lock-fill me-2"></i> Password
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label fw-semibold">Password</label>
+                                    {{ form_widget(form.plainPassword.first) }}
+                                    {{ form_errors(form.plainPassword.first) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label fw-semibold">Confirm Password</label>
+                                    {{ form_widget(form.plainPassword.second) }}
+                                    {{ form_errors(form.plainPassword.second) }}
+                                </div>
+                            </div>
+                        </div>
+                        {{ form_errors(form.plainPassword) }}
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Role Section -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
+                            <i class="bi bi-shield-check me-2"></i> Permissions & Roles
+                        </h6>
+                        <div class="role-selector">
+                            {{ form_widget(form.roles) }}
+                            <small class="text-muted d-block mt-2">
+                                <i class="bi bi-info-circle me-1"></i> Select one or more roles to define user permissions
+                            </small>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-lg btn-success fw-semibold">
+                            <i class="bi bi-person-plus me-2"></i> Create User
+                        </button>
+                        <a href="{{ path('admin_user_index') }}" class="btn btn-lg btn-light fw-semibold">
+                            <i class="bi bi-x me-2"></i> Cancel
+                        </a>
+                    </div>
+                    
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control, .form-select {
+        border-color: #e0e0e0;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+    .form-control-lg, .form-select-lg {
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+    }
+    .role-selector {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e0e0e0;
+    }
+    .role-selector input[type="checkbox"] {
+        width: 1.2rem;
+        height: 1.2rem;
+        margin-right: 0.5rem;
+        cursor: pointer;
+    }
+    .role-selector label {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    .role-selector label:last-child {
+        margin-bottom: 0;
+    }
+    hr { opacity: 0.5; }
+    .btn-lg {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        border-radius: 0.5rem;
+    }
+</style>
+{% endblock %}

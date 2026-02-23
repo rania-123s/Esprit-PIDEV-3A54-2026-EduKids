@@ -16,8 +16,9 @@ class Message
     #[ORM\ManyToOne(inversedBy: 'messages')]
     private ?Chat $chat = null;
 
-    #[ORM\Column]
-    private ?int $expediteur_id = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $expediteur = null;
 
     #[ORM\Column(length: 255)]
     private ?string $contenu = null;
@@ -45,14 +46,14 @@ class Message
         return $this;
     }
 
-    public function getExpediteurId(): ?int
+    public function getExpediteur(): ?User
     {
-        return $this->expediteur_id;
+        return $this->expediteur;
     }
 
-    public function setExpediteurId(int $expediteur_id): static
+    public function setExpediteur(?User $expediteur): static
     {
-        $this->expediteur_id = $expediteur_id;
+        $this->expediteur = $expediteur;
 
         return $this;
     }

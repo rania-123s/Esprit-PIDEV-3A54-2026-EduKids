@@ -1,0 +1,190 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}User Details - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0 fw-bold">
+                        <i class="bi bi-person-lines-fill text-primary me-2"></i> User Details
+                    </h2>
+                    <p class="text-muted small mt-1">View user account information</p>
+                </div>
+                <a href="{{ path('admin_user_index') }}" class="btn btn-light btn-lg">
+                    <i class="bi bi-arrow-left me-2"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 m-auto">
+            <!-- User Profile Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            {% if user.avatar %}
+                                <img src="{{ asset('uploads/avatars/' ~ user.avatar) }}" 
+                                     alt="Avatar" 
+                                     class="rounded-circle" 
+                                     style="width: 80px; height: 80px; object-fit: cover;">
+                            {% else %}
+                                <div class="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center" 
+                                     style="width: 80px; height: 80px; font-size: 1.5rem;">
+                                    {{ user.firstName|first|upper }}{{ user.lastName|first|upper }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h4 class="mb-0 fw-bold">{{ user.firstName }} {{ user.lastName }}</h4>
+                            <p class="text-muted mb-0">{{ user.email }}</p>
+                        </div>
+                        <div class="ms-auto">
+                            {% if user.isActive %}
+                                <span class="badge bg-success fs-6">
+                                    <i class="bi bi-check-circle me-1"></i> Active
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary fs-6">
+                                    <i class="bi bi-ban me-1"></i> Banned
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Personal Information -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
+                            <i class="bi bi-person-fill me-2"></i> Personal Information
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="bg-light rounded p-3">
+                                    <small class="text-muted d-block mb-1">First Name</small>
+                                    <p class="mb-0 fw-semibold">{{ user.firstName ?? 'N/A' }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light rounded p-3">
+                                    <small class="text-muted d-block mb-1">Last Name</small>
+                                    <p class="mb-0 fw-semibold">{{ user.lastName ?? 'N/A' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Contact Information -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
+                            <i class="bi bi-envelope-fill me-2"></i> Contact Information
+                        </h6>
+                        <div class="bg-light rounded p-3">
+                            <small class="text-muted d-block mb-1">Email Address</small>
+                            <p class="mb-0 fw-semibold">
+                                <code style="background-color: transparent; color: #333;">{{ user.email }}</code>
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Roles & Permissions -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
+                            <i class="bi bi-shield-check me-2"></i> Roles & Permissions
+                        </h6>
+                        <div class="d-flex gap-2 flex-wrap">
+                            {% for role in user.roles %}
+                                <span class="badge bg-dark fs-6 py-2 px-3">
+                                    {% if role == 'ROLE_ADMIN' %}
+                                        <i class="bi bi-shield-fill me-1"></i> Admin
+                                    {% elseif role == 'ROLE_ELEVE' %}
+                                        <i class="bi bi-mortarboard-fill me-1"></i> Student
+                                    {% elseif role == 'ROLE_PARENT' %}
+                                        <i class="bi bi-people-fill me-1"></i> Parent
+                                    {% elseif role == 'ROLE_USER' %}
+                                        <i class="bi bi-person-fill me-1"></i> User
+                                    {% else %}
+                                        {{ role|replace({'ROLE_': ''}) }}
+                                    {% endif %}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Account Status -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">
+                            <i class="bi bi-info-circle me-2"></i> Account Status
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="bg-light rounded p-3">
+                                    <small class="text-muted d-block mb-1">Status</small>
+                                    {% if user.isActive %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Banned</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-light rounded p-3">
+                                    <small class="text-muted d-block mb-1">Email Verified</small>
+                                    {% if user.isVerified %}
+                                        <span class="badge bg-success">Verified</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Not Verified</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-light rounded p-3">
+                                    <small class="text-muted d-block mb-1">User ID</small>
+                                    <p class="mb-0 fw-semibold">#{{ user.id }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2">
+                        <a href="{{ path('admin_user_edit', {id: user.id}) }}" class="btn btn-primary fw-semibold">
+                            <i class="bi bi-pencil-square me-2"></i> Edit User
+                        </a>
+                        <a href="{{ path('admin_user_block', {id: user.id}) }}" 
+                           class="btn {% if user.isActive %}btn-outline-dark{% else %}btn-outline-success{% endif %} fw-semibold">
+                            {% if user.isActive %}
+                                <i class="bi bi-ban me-1"></i> Ban User
+                            {% else %}
+                                <i class="bi bi-unlock me-1"></i> Unban User
+                            {% endif %}
+                        </a>
+                        <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" 
+                              onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');"
+                              class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                            <button type="submit" class="btn btn-outline-danger fw-semibold">
+                                <i class="bi bi-trash me-1"></i> Delete User
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -5,7 +5,7 @@
 {% block body %}
 <h1>Modifier le cours</h1>
 
-{{ form_start(form) }}
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
     {{ form_widget(form) }}
     <button type="submit">Mettre à jour</button>
 {{ form_end(form) }}

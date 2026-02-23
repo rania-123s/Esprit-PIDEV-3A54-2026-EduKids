@@ -1,0 +1,273 @@
+{% extends 'base_auth.html.twig' %}
+
+{% block title %}Sign Up - Eduport{% endblock %}
+
+{% block body %}
+<section class="p-0 d-flex align-items-center position-relative overflow-hidden">
+	
+	<div class="container-fluid">
+		<div class="row">
+			<!-- left -->
+			<div class="col-12 col-lg-6 d-md-flex align-items-center justify-content-center bg-primary bg-opacity-10 vh-lg-100">
+				<div class="p-3 p-lg-5">
+					<!-- Title -->
+					<div class="text-center">
+						<h2 class="fw-bold">Welcome to our largest community</h2>
+						<p class="mb-0 h6 fw-light">Let's learn something new today!</p>
+					</div>
+					<!-- SVG Image -->
+					<img src="assets/images/element/02.svg" class="mt-5" alt="">
+					<!-- Info -->
+					<div class="d-sm-flex mt-5 align-items-center justify-content-center">
+						<ul class="avatar-group mb-2 mb-sm-0">
+							<li class="avatar avatar-sm"><img class="avatar-img rounded-circle" src="assets/images/avatar/01.jpg" alt="avatar"></li>
+							<li class="avatar avatar-sm"><img class="avatar-img rounded-circle" src="assets/images/avatar/02.jpg" alt="avatar"></li>
+							<li class="avatar avatar-sm"><img class="avatar-img rounded-circle" src="assets/images/avatar/03.jpg" alt="avatar"></li>
+							<li class="avatar avatar-sm"><img class="avatar-img rounded-circle" src="assets/images/avatar/04.jpg" alt="avatar"></li>
+						</ul>
+						<!-- Content -->
+						<p class="mb-0 h6 fw-light ms-0 ms-sm-3">4k+ Students joined us, now it's your turn.</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Right -->
+			<div class="col-12 col-lg-6 m-auto">
+				<div class="row my-5">
+					<div class="col-sm-10 col-xl-8 m-auto">
+						<!-- Title -->
+						<img src="assets/images/element/03.svg" class="h-40px mb-2" alt="">
+						<h2>Sign up for your account!</h2>
+						<p class="lead mb-4">Nice to see you! Please Sign up with your account.</p>
+					
+						<!-- Form START -->
+							{{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+							<!-- First Name -->
+							<div class="mb-4">
+								{{ form_label(registrationForm.firstName, null, { 'label_attr': {'class': 'form-label'} }) }}
+								<div class="input-group input-group-lg">
+									<span class="input-group-text bg-light rounded-start border-0 text-secondary px-3"><i class="bi bi-person-fill"></i></span>
+									{{ form_widget(registrationForm.firstName, { 'attr': { 'class': 'form-control border-0 bg-light rounded-end ps-1' } }) }}
+								</div>
+								{% if registrationForm.firstName.vars.errors|length > 0 %}
+									<div class="alert alert-danger alert-sm mt-2 mb-0">
+										{% for error in registrationForm.firstName.vars.errors %}
+											<i class="bi bi-exclamation-triangle"></i> {{ error.message }}
+										{% endfor %}
+									</div>
+								{% endif %}
+							</div>
+							<!-- Last Name -->
+							<div class="mb-4">
+								{{ form_label(registrationForm.lastName, null, { 'label_attr': {'class': 'form-label'} }) }}
+								<div class="input-group input-group-lg">
+									<span class="input-group-text bg-light rounded-start border-0 text-secondary px-3"><i class="bi bi-person-fill"></i></span>
+									{{ form_widget(registrationForm.lastName, { 'attr': { 'class': 'form-control border-0 bg-light rounded-end ps-1' } }) }}
+								</div>
+								{% if registrationForm.lastName.vars.errors|length > 0 %}
+									<div class="alert alert-danger alert-sm mt-2 mb-0">
+										{% for error in registrationForm.lastName.vars.errors %}
+											<i class="bi bi-exclamation-triangle"></i> {{ error.message }}
+										{% endfor %}
+									</div>
+								{% endif %}
+							</div>
+							<!-- Email -->
+							<div class="mb-4">
+								<label for="{{ registrationForm.email.vars.id }}" class="form-label">Email address *</label>
+								<div class="input-group input-group-lg">
+									<span class="input-group-text bg-light rounded-start border-0 text-secondary px-3"><i class="bi bi-envelope-fill"></i></span>
+									{{ form_widget(registrationForm.email, {'attr': {'class': 'form-control border-0 bg-light rounded-end ps-1', 'placeholder': 'E-mail'}}) }}
+								</div>
+								{% if registrationForm.email.vars.errors|length > 0 %}
+									<div class="alert alert-danger alert-sm mt-2 mb-0">
+										{% for error in registrationForm.email.vars.errors %}
+											<i class="bi bi-exclamation-triangle"></i> {{ error.message }}
+										{% endfor %}
+									</div>
+								{% endif %}
+							</div>
+							<!-- Role Selection -->
+							<div class="mb-4">
+								<label class="form-label d-block mb-3">{{ form_label(registrationForm.roles) }}</label>
+								<div class="d-flex gap-3">
+									{% for child in registrationForm.roles %}
+										<div class="form-check">
+											{{ form_widget(child, { 'attr': { 'class': 'form-check-input' } }) }}
+											<label class="form-check-label" for="{{ child.vars.id }}">
+												{{ child.vars.label }}
+											</label>
+										</div>
+									{% endfor %}
+								</div>
+								{% if registrationForm.roles.vars.errors|length > 0 %}
+									<div class="alert alert-danger alert-sm mt-2 mb-0">
+										{% for error in registrationForm.roles.vars.errors %}
+											<i class="bi bi-exclamation-triangle"></i> {{ error.message }}
+										{% endfor %}
+									</div>
+								{% endif %}
+							</div>
+							<!-- Password -->
+							<div class="mb-4">
+								<div class="d-flex justify-content-between align-items-center">
+									<label for="{{ registrationForm.password.first.vars.id }}" class="form-label">Password *</label>
+									<button type="button" class="btn btn-sm btn-outline-primary mb-1" id="suggestPassword">
+										<i class="bi bi-magic me-1"></i> Suggest Password
+									</button>
+								</div>
+								<div class="input-group input-group-lg">
+									<span class="input-group-text bg-light rounded-start border-0 text-secondary px-3"><i class="fas fa-lock"></i></span>
+									{{ form_widget(registrationForm.password.first, {'attr': {'class': 'form-control border-0 bg-light ps-1', 'placeholder': '*********', 'id': 'password-field'}}) }}
+									<button class="btn btn-outline-secondary border-0 bg-light" type="button" id="togglePassword">
+										<i class="bi bi-eye"></i>
+									</button>
+								</div>
+								<div id="suggestedPasswordDisplay" class="d-none mt-2">
+									<div class="alert alert-info py-2 d-flex justify-content-between align-items-center">
+										<code id="generatedPassword" class="fs-6"></code>
+										<button type="button" class="btn btn-sm btn-primary" id="usePassword">Use This</button>
+									</div>
+								</div>
+								{% if registrationForm.password.first.vars.errors|length > 0 %}
+									<div class="alert alert-danger alert-sm mt-2 mb-0">
+										{% for error in registrationForm.password.first.vars.errors %}
+											<i class="bi bi-exclamation-triangle"></i> {{ error.message }}
+										{% endfor %}
+									</div>
+								{% endif %}
+							</div>
+							<!-- Confirm Password -->
+							<div class="mb-4">
+								<label for="{{ registrationForm.password.second.vars.id }}" class="form-label">Confirm Password *</label>
+								<div class="input-group input-group-lg">
+									<span class="input-group-text bg-light rounded-start border-0 text-secondary px-3"><i class="fas fa-lock"></i></span>
+									{{ form_widget(registrationForm.password.second, {'attr': {'class': 'form-control border-0 bg-light ps-1', 'placeholder': '*********', 'id': 'confirm-password-field'}}) }}
+									<button class="btn btn-outline-secondary border-0 bg-light" type="button" id="toggleConfirmPassword">
+										<i class="bi bi-eye"></i>
+									</button>
+								</div>
+								{% if registrationForm.password.vars.errors|length > 0 %}
+									<div class="alert alert-danger alert-sm mt-2 mb-0">
+										{% for error in registrationForm.password.vars.errors %}
+											<i class="bi bi-exclamation-triangle"></i> {{ error.message }}
+										{% endfor %}
+									</div>
+								{% endif %}
+							</div>
+							<!-- Check box -->
+							<div class="mb-4">
+								<div class="form-check">
+									<input type="checkbox" class="form-check-input" id="checkbox-1">
+									<label class="form-check-label" for="checkbox-1">By signing up, you agree to the<a href="#"> terms of service</a></label>
+								</div>
+							</div>
+							<!-- Button -->
+							<div class="align-items-center mt-0">
+								<div class="d-grid">
+									<button class="btn btn-primary mb-0" type="submit">Sign Up</button>
+								</div>
+							</div>
+						{{ form_end(registrationForm) }}
+						<!-- Form END -->
+
+						
+
+						<!-- Sign up link -->
+						<div class="mt-4 text-center">
+							<span>Already have an account?<a href="{{ path('app_login') }}"> Sign in here</a></span>
+						</div>
+
+						<!-- Social Login -->
+						<div class="mt-4">
+							<div class="position-relative">
+								<hr>
+								<p class="small position-absolute top-50 start-50 translate-middle bg-white px-2 text-muted">Or sign up with</p>
+							</div>
+							<div class="d-grid gap-2 mt-3">
+								<a href="{{ path('connect_facebook_start') }}" class="btn btn-outline-primary">
+									<i class="bi bi-facebook me-2"></i> Continue with Facebook
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password suggestion functionality
+    const suggestBtn = document.getElementById('suggestPassword');
+    const displayDiv = document.getElementById('suggestedPasswordDisplay');
+    const generatedPassword = document.getElementById('generatedPassword');
+    const usePasswordBtn = document.getElementById('usePassword');
+    const passwordField = document.getElementById('password-field');
+    const confirmPasswordField = document.getElementById('confirm-password-field');
+    
+    function generatePassword(length = 12) {
+        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        const numbers = '0123456789';
+        const symbols = '!@#$%^&*()_+-=';
+        const allChars = uppercase + lowercase + numbers + symbols;
+        
+        let password = '';
+        // Ensure at least one of each type
+        password += uppercase[Math.floor(Math.random() * uppercase.length)];
+        password += lowercase[Math.floor(Math.random() * lowercase.length)];
+        password += numbers[Math.floor(Math.random() * numbers.length)];
+        password += symbols[Math.floor(Math.random() * symbols.length)];
+        
+        // Fill the rest
+        for (let i = password.length; i < length; i++) {
+            password += allChars[Math.floor(Math.random() * allChars.length)];
+        }
+        
+        // Shuffle the password
+        return password.split('').sort(() => Math.random() - 0.5).join('');
+    }
+    
+    suggestBtn.addEventListener('click', function() {
+        const password = generatePassword(14);
+        generatedPassword.textContent = password;
+        displayDiv.classList.remove('d-none');
+    });
+    
+    usePasswordBtn.addEventListener('click', function() {
+        const password = generatedPassword.textContent;
+        passwordField.value = password;
+        confirmPasswordField.value = password;
+        displayDiv.classList.add('d-none');
+        
+        // Show the passwords briefly
+        passwordField.type = 'text';
+        confirmPasswordField.type = 'text';
+        setTimeout(() => {
+            passwordField.type = 'password';
+            confirmPasswordField.type = 'password';
+        }, 2000);
+    });
+    
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    
+    togglePassword.addEventListener('click', function() {
+        const type = passwordField.type === 'password' ? 'text' : 'password';
+        passwordField.type = type;
+        this.querySelector('i').classList.toggle('bi-eye');
+        this.querySelector('i').classList.toggle('bi-eye-slash');
+    });
+    
+    toggleConfirmPassword.addEventListener('click', function() {
+        const type = confirmPasswordField.type === 'password' ? 'text' : 'password';
+        confirmPasswordField.type = type;
+        this.querySelector('i').classList.toggle('bi-eye');
+        this.querySelector('i').classList.toggle('bi-eye-slash');
+    });
+});
+</script>
+{% endblock %}

@@ -9,6 +9,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Range;
 
 class CoursType extends AbstractType
 {
@@ -21,7 +24,15 @@ class CoursType extends AbstractType
                     'placeholder' => 'Exemple : Mathématiques 6ème année',
                     'class'       => 'form-control',
                 ],
-                'required' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'Please enter a course title.']),
+                    new Length([
+                        'min' => 3,
+                        'max' => 255,
+                        'minMessage' => 'Title must be at least {{ limit }} characters.',
+                        'maxMessage' => 'Title cannot exceed {{ limit }} characters.',
+                    ]),
+                ],
             ])
 
             ->add('description', TextareaType::class, [
@@ -31,7 +42,13 @@ class CoursType extends AbstractType
                     'placeholder' => 'Décrivez le contenu, les objectifs, le public cible, les prérequis...',
                     'class'       => 'form-control',
                 ],
-                'required' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'Please enter a description.']),
+                    new Length([
+                        'min' => 10,
+                        'minMessage' => 'Description must be at least {{ limit }} characters.',
+                    ]),
+                ],
             ])
 
             ->add('niveau', IntegerType::class, [
@@ -41,7 +58,14 @@ class CoursType extends AbstractType
                     'max'   => 13,
                     'class' => 'form-control',
                 ],
-                'required' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'Please select a level.']),
+                    new Range([
+                        'min' => 1,
+                        'max' => 13,
+                        'notInRangeMessage' => 'Level must be between {{ min }} and {{ max }}.',
+                    ]),
+                ],
             ])
             ->add('matiere', TextType::class, [
                 'label' => 'Matière',
@@ -49,7 +73,9 @@ class CoursType extends AbstractType
                     'placeholder' => 'Exemple : Mathématiques, Français, SVT, Arabe...',
                     'class'       => 'form-control',
                 ],
-                'required' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'Please enter a subject.']),
+                ],
             ])
             ->add('image', TextType::class, [
                 'label' => 'Image (URL ou chemin relatif)',

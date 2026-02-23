@@ -1,0 +1,188 @@
+{% extends 'base_auth.html.twig' %}
+
+{% block title %}Verify OTP - Eduport{% endblock %}
+
+{% block body %}
+<section class="p-0 d-flex align-items-center position-relative overflow-hidden">
+	
+	<div class="container-fluid">
+		<div class="row">
+			<!-- left -->
+			<div class="col-12 col-lg-6 d-md-flex align-items-center justify-content-center bg-primary bg-opacity-10 vh-lg-100">
+				<div class="p-3 p-lg-5">
+					<!-- Title -->
+					<div class="text-center">
+						<h2 class="fw-bold">Verification Code</h2>
+						<p class="mb-0 h6 fw-light">Check your email for the verification code</p>
+					</div>
+					<!-- SVG Image -->
+					<img src="assets/images/element/02.svg" class="mt-5" alt="">
+					<!-- Info -->
+					<div class="d-sm-flex mt-5 align-items-center justify-content-center">
+						<!-- Avatar group -->
+						<ul class="avatar-group mb-2 mb-sm-0">
+							<li class="avatar avatar-sm">
+								<img class="avatar-img rounded-circle" src="assets/images/avatar/01.jpg" alt="avatar">
+							</li>
+							<li class="avatar avatar-sm">
+								<img class="avatar-img rounded-circle" src="assets/images/avatar/02.jpg" alt="avatar">
+							</li>
+							<li class="avatar avatar-sm">
+								<img class="avatar-img rounded-circle" src="assets/images/avatar/03.jpg" alt="avatar">
+							</li>
+							<li class="avatar avatar-sm">
+								<img class="avatar-img rounded-circle" src="assets/images/avatar/04.jpg" alt="avatar">
+							</li>
+						</ul>
+						<!-- Content -->
+						<p class="mb-0 h6 fw-light ms-0 ms-sm-3">Secure verification in progress</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Right -->
+			<div class="col-12 col-lg-6 m-auto">
+				<div class="row my-5">
+					<div class="col-sm-10 col-xl-8 m-auto">
+						<!-- Title -->
+						<span class="mb-0 fs-1">✉️</span>
+						<h1 class="fs-2">Enter the code</h1>
+						<p class="lead mb-4">We've sent a verification code to <strong>{{ email }}</strong></p>
+
+						{% if error %}
+							<div class="alert alert-danger alert-dismissible fade show" role="alert">
+								{{ error }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endif %}
+
+						
+
+						<form method="POST" action="{{ path('app_verify_otp') }}">
+							<!-- OTP Input -->
+							<div class="mb-4">
+								<label for="otp" class="form-label">Verification Code *</label>
+								<input type="hidden" id="otp" name="otp" value="">
+								
+								<!-- OTP Circles -->
+								<div class="d-flex justify-content-center gap-2 mb-3">
+									<input type="text" class="otp-input" maxlength="1" placeholder="0" data-index="0">
+									<input type="text" class="otp-input" maxlength="1" placeholder="0" data-index="1">
+									<input type="text" class="otp-input" maxlength="1" placeholder="0" data-index="2">
+									<input type="text" class="otp-input" maxlength="1" placeholder="0" data-index="3">
+									<input type="text" class="otp-input" maxlength="1" placeholder="0" data-index="4">
+									<input type="text" class="otp-input" maxlength="1" placeholder="0" data-index="5">
+								</div>
+							</div>
+
+							<!-- Submit button -->
+							<div class="d-grid">
+								<button class="btn btn-primary mb-0" type="submit" id="submitBtn">Verify Code</button>
+							</div>
+						</form>
+
+						<!-- Resend code link -->
+						<p class="mb-0 mt-4 text-center">
+							Didn't receive the code? <a href="{{ path('app_forgot_password') }}">Try another email</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.otp-input {
+		width: 50px;
+		height: 50px;
+		border: 2px solid #dee2e6;
+		border-radius: 50%;
+		text-align: center;
+		font-size: 24px;
+		font-weight: bold;
+		transition: all 0.3s ease;
+	}
+
+	.otp-input:focus {
+		border-color: #0d6efd;
+		box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+		outline: none;
+	}
+
+	.otp-input.filled {
+		background-color: #e7f1ff;
+		border-color: #0d6efd;
+	}
+</style>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		const inputs = document.querySelectorAll('.otp-input');
+		const otpInput = document.getElementById('otp');
+		const submitBtn = document.getElementById('submitBtn');
+
+		inputs.forEach((input, index) => {
+			input.addEventListener('input', function(e) {
+				// Only allow digits
+				this.value = this.value.replace(/[^0-9]/g, '');
+
+				// Add filled class
+				if (this.value) {
+					this.classList.add('filled');
+				} else {
+					this.classList.remove('filled');
+				}
+
+				// Move to next input
+				if (this.value && index < inputs.length - 1) {
+					inputs[index + 1].focus();
+				}
+
+				// Update hidden OTP field
+				updateOTP();
+
+				// Enable submit if all fields are filled
+				const allFilled = Array.from(inputs).every(inp => inp.value !== '');
+				submitBtn.disabled = !allFilled;
+			});
+
+			input.addEventListener('keydown', function(e) {
+				// Handle backspace
+				if (e.key === 'Backspace' && !this.value && index > 0) {
+					inputs[index - 1].focus();
+				}
+			});
+
+			input.addEventListener('paste', function(e) {
+				e.preventDefault();
+				const paste = (e.clipboardData || window.clipboardData).getData('text');
+				const digits = paste.replace(/[^0-9]/g, '').split('');
+				
+				digits.forEach((digit, i) => {
+					if (index + i < inputs.length) {
+						inputs[index + i].value = digit;
+						inputs[index + i].classList.add('filled');
+					}
+				});
+				
+				updateOTP();
+				const allFilled = Array.from(inputs).every(inp => inp.value !== '');
+				submitBtn.disabled = !allFilled;
+				
+				if (index + digits.length < inputs.length) {
+					inputs[index + digits.length].focus();
+				}
+			});
+		});
+
+		function updateOTP() {
+			const otp = Array.from(inputs).map(inp => inp.value).join('');
+			otpInput.value = otp;
+		}
+
+		// Initial disable
+		submitBtn.disabled = true;
+	});
+</script>
+{% endblock %}
