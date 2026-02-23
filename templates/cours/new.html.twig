@@ -1,0 +1,121 @@
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}Créer un nouveau cours{% endblock %}
+
+{% block body %}
+
+<!-- =======================
+Page Banner START -->
+<section class="py-0 bg-blue h-200px align-items-center d-flex rounded-0"
+         style="background:url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size:cover;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="text-white">Créer un nouveau cours</h1>
+                <p class="text-white mb-0">Remplissez les informations essentielles pour soumettre votre cours</p>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Page Banner END -->
+
+<!-- =======================
+Form START -->
+<section class="pt-5 pb-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+
+                <div class="card bg-transparent border rounded-3 shadow">
+                    <div class="card-body p-4 p-lg-5">
+
+                        <h3 class="mb-4 text-center">Informations du cours</h3>
+
+                        {{ form_start(form, {
+                            'attr': {
+                                'novalidate': 'novalidate',
+                                'class': 'needs-validation'
+                            }
+                        }) }}
+
+                        <div class="row g-4">
+
+                            <!-- Titre -->
+                            <div class="col-12">
+                                {{ form_row(form.titre, {
+                                    'attr': {
+                                        'placeholder': 'Exemple : Mathématiques 6ème année primaire',
+                                        'class': 'form-control form-control-lg'
+                                    }
+                                }) }}
+                            </div>
+
+                            <!-- Matière -->
+                            <div class="col-md-6">
+                                {{ form_row(form.matiere, {
+                                    'attr': {
+                                        'placeholder': 'Exemple : Mathématiques, Français, SVT, Arabe...',
+                                        'class': 'form-control form-control-lg'
+                                    }
+                                }) }}
+                            </div>
+
+                            <!-- Niveau -->
+                            <div class="col-md-6">
+                                {{ form_row(form.niveau, {
+                                    'attr': {
+                                        'min': 1,
+                                        'max': 13,
+                                        'placeholder': '1 = CP, 7 = 1ère année collège, etc.',
+                                        'class': 'form-control form-control-lg'
+                                    }
+                                }) }}
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12">
+                                {{ form_row(form.description, {
+                                    'attr': {
+                                        'rows': 8,
+                                        'placeholder': 'Décrivez les objectifs pédagogiques, le contenu détaillé, le public cible, les compétences visées...',
+                                        'class': 'form-control form-control-lg'
+                                    }
+                                }) }}
+                            </div>
+
+                        </div>
+
+                        <div class="col-12">
+                                {{ form_row(form.image, {
+                                    'attr': {
+                                        'placeholder': 'Exemple : image',
+                                        'class': 'form-control form-control-lg'
+                                    }
+                                }) }}
+                            </div>
+
+                        <!-- Boutons -->
+                        <div class="mt-5 text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 py-3">
+                                Créer et soumettre le cours
+                            </button>
+                        </div>
+
+                        {{ form_end(form) }}
+
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ path('app_cours_index') }}" class="text-muted small">
+                        ← Retour à la liste des cours
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Form END -->
+
+{% endblock %}
