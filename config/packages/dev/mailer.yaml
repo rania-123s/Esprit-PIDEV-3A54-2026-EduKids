@@ -1,0 +1,6 @@
+# Configuration SMTP pour le développement
+framework:
+    mailer:
+        dsn: '%env(MAILER_DSN)%'
+        # Pour Gmail, utilisez le port 465 avec SSL ou 587 avec STARTTLS
+        # Si erreur SSL, essayez d'ajouter ?verify_peer=0 à la fin du DSN (développement uniquement)

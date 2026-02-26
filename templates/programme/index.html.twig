@@ -1,0 +1,320 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Liste des Programmes{% endblock %}
+
+{% block body %}
+<div class="dashboard-content-one">
+
+    <!-- Flash Messages -->
+    {% for message in app.flashes('success') %}
+        <div id="successModal" class="notification-overlay">
+            <div class="notification-modal">
+                <div class="notification-icon">
+                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                </div>
+                <h4 class="notification-title">{{ message }}</h4>
+                <button type="button" class="btn btn-success mt-3 px-4" onclick="closeNotification()">OK</button>
+            </div>
+        </div>
+    {% endfor %}
+    
+    <style>
+    .notification-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .notification-modal {
+        background: white;
+        padding: 40px 60px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.4s ease;
+    }
+    
+    .notification-icon {
+        margin-bottom: 20px;
+    }
+    
+    .notification-title {
+        color: #333;
+        font-weight: 500;
+        margin: 0;
+    }
+    
+    .checkmark {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .checkmark-circle {
+        stroke: #4CAF50;
+        stroke-width: 2;
+        stroke-dasharray: 166;
+        stroke-dashoffset: 166;
+        animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+    
+    .checkmark-check {
+        stroke: #4CAF50;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 48;
+        stroke-dashoffset: 48;
+        animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+    }
+    
+    @keyframes stroke {
+        100% { stroke-dashoffset: 0; }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    /* Styles unifiés pour le tableau */
+    .table {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 14px;
+    }
+    
+    .table thead th {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #dee2e6;
+        padding: 12px 10px;
+    }
+    
+    .table td {
+        vertical-align: top;
+        padding: 14px 10px;
+        color: #212529;
+        font-size: 0.95em;
+        line-height: 1.6;
+    }
+    
+    .table tbody tr {
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .text-content-cell {
+        max-width: 300px;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        line-height: 1.6;
+        font-size: 0.9em;
+    }
+    
+    .text-content-display {
+        color: #212529;
+        line-height: 1.7;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+    }
+    
+    /* Styles pour les titres d'événements */
+    .table td strong {
+        color: #212529;
+        font-weight: 600;
+        font-size: 0.95em;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    
+    /* Date d'événement - plus visible */
+    .table td .event-date {
+        color: #495057;
+        font-size: 0.95em;
+        font-weight: 500;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        margin-top: 6px;
+        display: block;
+        line-height: 1.5;
+    }
+    
+    .table td .event-date i {
+        color: #6c757d;
+        margin-right: 6px;
+        font-size: 0.9em;
+    }
+    
+    /* Badge pause - plus visible */
+    .pause-badge {
+        font-weight: 600;
+        font-size: 0.9em;
+        letter-spacing: 0.3px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        padding: 8px 12px;
+        display: inline-block;
+        margin-bottom: 4px;
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+        border: none;
+    }
+    
+    /* Durée de pause - plus visible */
+    .pause-duration {
+        color: #495057;
+        font-size: 0.9em;
+        font-weight: 500;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        display: block;
+        margin-top: 6px;
+    }
+    
+    /* Boutons d'action unifiés */
+    .btn-group .btn {
+        font-size: 0.9em;
+        padding: 6px 10px;
+    }
+    </style>
+
+    <!-- Table Area Start Here -->
+    <div class="card height-auto">
+        <div class="card-body">
+            <div class="heading-layout1 mb-4 d-flex justify-content-between align-items-center">
+                <div class="item-title">
+                    <h3><i class="fas fa-clipboard-list text-info me-2"></i> Tous les Programmes</h3>
+                </div>
+                <div>
+                    <a href="{{ path('app_programme_new') }}" class="btn-fill-lg bg-blue-dark btn-hover-yellow">
+                        <i class="fas fa-plus-circle me-1"></i> Nouveau Programme
+                    </a>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="bg-light">
+                        <tr>
+                            <th><i class="fas fa-calendar-alt me-1"></i> Événement</th>
+                            <th class="text-center"><i class="fas fa-coffee me-1"></i> Pause</th>
+                            <th><i class="fas fa-running me-1"></i> Activités</th>
+                            <th><i class="fas fa-file-alt me-1"></i> Documents</th>
+                            <th><i class="fas fa-tools me-1"></i> Matériels</th>
+                            <th class="text-center" style="width: 150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for programme in programmes %}
+                        <tr>
+                            <td>
+                                <strong class="text-dark">{{ programme.evenement.titre }}</strong>
+                                <span class="event-date">
+                                    <i class="fas fa-calendar-day"></i>
+                                    {{ programme.evenement.dateEvenement ? programme.evenement.dateEvenement|date('d/m/Y') : '-' }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-warning text-dark pause-badge">
+                                    {{ programme.pauseDebut|date('H:i') }} - {{ programme.pauseFin|date('H:i') }}
+                                </span>
+                                <span class="pause-duration">{{ programme.dureePause }} min</span>
+                            </td>
+                            <td class="text-content-cell">
+                                <div class="text-content-display">
+                                    {{ programme.activites|nl2br }}
+                                </div>
+                            </td>
+                            <td class="text-content-cell">
+                                <div class="text-content-display">
+                                    {{ programme.documentsRequis|nl2br }}
+                                </div>
+                            </td>
+                            <td class="text-content-cell">
+                                <div class="text-content-display">
+                                    {{ programme.materielsRequis|nl2br }}
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a href="{{ path('app_programme_show', {'id': programme.id}) }}" 
+                                       class="btn btn-sm btn-outline-info" title="Voir les détails">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_programme_edit', {'id': programme.id}) }}" 
+                                       class="btn btn-sm btn-outline-warning" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" action="{{ path('app_programme_delete', {'id': programme.id}) }}" 
+                                          style="display: inline-block;" 
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce programme ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ programme.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="empty-state">
+                                    <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">Aucun programme trouvé</h5>
+                                    <p class="text-muted mb-3">Commencez par créer un programme pour un événement</p>
+                                    <a href="{{ path('app_programme_new') }}" class="btn btn-primary">
+                                        <i class="fas fa-plus-circle me-1"></i> Créer un programme
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if programmes|length > 0 %}
+            <div class="mt-3">
+                <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Total : {{ programmes|length }} programme(s)</small>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <!-- Table Area End Here -->
+</div>
+
+<script>
+function closeNotification() {
+    const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
+}
+
+setTimeout(() => {
+    closeNotification();
+}, 3000);
+</script>
+{% endblock %}

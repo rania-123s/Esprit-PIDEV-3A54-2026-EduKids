@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pass - {{ evenement.titre }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .pass-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .pass-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        .pass-header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .pass-header .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .pass-body {
+            padding: 30px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .info-box h3 {
+            color: #28a745;
+            font-size: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-item {
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        
+        .info-item strong {
+            color: #6c757d;
+            display: block;
+            margin-bottom: 3px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-item span {
+            color: #212529;
+            font-weight: 500;
+        }
+        
+        .qr-section {
+            text-align: center;
+            padding: 30px 20px;
+            background: #f8f9fa;
+            border-top: 2px dashed #dee2e6;
+            border-bottom: 2px dashed #dee2e6;
+            margin: 25px 0;
+        }
+        
+        .qr-code-wrapper {
+            display: inline-block;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            background: white;
+            border: 3px solid #28a745;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            position: relative;
+        }
+        
+        .qr-code img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .qr-code canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+        
+        #qrCodePlaceholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .reservation-id {
+            font-size: 22px;
+            font-weight: bold;
+            color: #28a745;
+            letter-spacing: 2px;
+            margin-top: 15px;
+        }
+        
+        .qr-instructions {
+            margin-top: 15px;
+            color: #6c757d;
+            font-size: 12px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #6c757d;
+            font-size: 11px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .print-buttons {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 0 10px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: #218838;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .pass-container {
+                box-shadow: none;
+                border: none;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-buttons no-print">
+        <button onclick="downloadPDF()" class="btn" id="pdfButton">
+            <i class="fas fa-download"></i> Télécharger PDF
+        </button>
+        <a href="{{ path('app_front_evenement_index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+    
+    <div class="pass-container" id="passContent">
+        <div class="pass-header">
+            <h1><i class="fas fa-ticket-alt"></i> PASS ÉVÉNEMENT</h1>
+            <div class="subtitle">Votre billet d'entrée numérique</div>
+        </div>
+        
+        <div class="pass-body">
+            <div class="info-grid">
+                <div class="info-box">
+                    <h3><i class="fas fa-calendar-check"></i> Événement</h3>
+                    
+                    <div class="info-item">
+                        <strong>Titre</strong>
+                        <span>{{ evenement.titre }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <strong>Date</strong>
+                        <span>{{ evenement.dateEvenement ? evenement.dateEvenement|date('d/m/Y') : 'Non définie' }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <strong>Heure</strong>
+                        <span>{{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '-' }} - {{ evenement.heureFin ? evenement.heureFin|date('H:i') : '-' }}</span>
+                    </div>
+                    
+                    {% if evenement.localisation %}
+                    <div class="info-item">
+                        <strong>Lieu</strong>
+                        <span>{{ evenement.localisation }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if evenement.typeEvenement %}
+                    <div class="info-item">
+                        <strong>Type</strong>
+                        <span>{{ evenement.typeEvenementLabel }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="info-box">
+                    <h3><i class="fas fa-user"></i> Réservation</h3>
+                    
+                    <div class="info-item">
+                        <strong>Nom complet</strong>
+                        <span>{{ reservation.prenom }} {{ reservation.nom }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <strong>Email</strong>
+                        <span>{{ reservation.email }}</span>
+                    </div>
+                    
+                    {% if reservation.telephone %}
+                    <div class="info-item">
+                        <strong>Téléphone</strong>
+                        <span>{{ reservation.telephone }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="info-item">
+                        <strong>Places</strong>
+                        <span>
+                            <strong style="color: #28a745;">{{ reservation.nbPlacesTotal }} place(s)</strong>
+                            <span class="badge badge-info">{{ reservation.nbAdultes }} adulte(s)</span>
+                            {% if reservation.nbEnfants > 0 %}
+                            <span class="badge badge-success">{{ reservation.nbEnfants }} enfant(s)</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <strong>Date de réservation</strong>
+                        <span>{{ reservation.dateReservation ? reservation.dateReservation|date('d/m/Y à H:i') : '-' }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="qr-section">
+                <div class="qr-code-wrapper">
+                    <div class="qr-code" id="qrCodeContainer">
+                        <canvas id="qrcode" style="display: block; width: 100%; height: 100%;"></canvas>
+                        <img id="qrCodeImage" style="display: none; width: 100%; height: 100%; object-fit: contain;" alt="QR Code">
+                        <div id="qrCodePlaceholder" style="display: none;">
+                            <div style="font-size: 50px; margin-bottom: 10px; opacity: 0.3;">🎫</div>
+                            <div style="font-size: 10px; margin-top: 8px; color: #6c757d;">Chargement...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="qr-instructions">
+                    <p><i class="fas fa-qrcode"></i> <strong>Code QR de validation</strong></p>
+                    <p style="margin-top: 5px;">Présentez ce code à l'entrée de l'événement</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong><i class="fas fa-info-circle"></i> Important :</strong> Veuillez présenter ce document à l'entrée de l'événement.</p>
+            <p style="margin-top: 5px;">Document généré le {{ 'now'|date('d/m/Y à H:i') }}</p>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Utiliser une API en ligne pour générer le QR code si la bibliothèque ne charge pas -->
+    <script>
+        // Fonction pour générer un QR code via API si la bibliothèque ne charge pas
+        function generateQRCodeViaAPI(data, canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const qrImage = document.getElementById('qrCodeImage');
+            const placeholder = document.getElementById('qrCodePlaceholder');
+            
+            if (!canvas) return;
+            
+            const qrText = JSON.stringify(data);
+            // Utiliser une API QR code en ligne
+            const apiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrText);
+            
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+                const ctx = canvas.getContext('2d');
+                canvas.width = 200;
+                canvas.height = 200;
+                ctx.drawImage(img, 0, 0, 200, 200);
+                console.log('QR code généré via API');
+                
+                // Masquer le placeholder
+                if (placeholder) {
+                    placeholder.style.display = 'none';
+                }
+                
+                // Convertir en image pour le PDF
+                try {
+                    qrCodeImageSrc = canvas.toDataURL('image/png', 1.0);
+                    if (qrImage) {
+                        qrImage.src = qrCodeImageSrc;
+                        qrImage.onload = function() {
+                            qrCodeReady = true;
+                        };
+                    }
+                    qrCodeReady = true;
+                } catch (e) {
+                    console.error('Erreur conversion:', e);
+                    qrCodeReady = true;
+                }
+            };
+            img.onerror = function() {
+                console.error('Erreur lors du chargement de l\'image QR depuis l\'API');
+                if (placeholder) {
+                    placeholder.style.display = 'flex';
+                    placeholder.innerHTML = '<div style="font-size: 50px; margin-bottom: 10px; opacity: 0.3;">🎫</div><div class="reservation-id" style="font-size: 16px;">#{{ '%06d'|format(reservation.id) }}</div><div style="font-size: 10px; margin-top: 8px; color: #dc3545;">Erreur de génération</div>';
+                }
+            };
+            img.src = apiUrl;
+        }
+        let qrCodeReady = false;
+        let qrCodeImageSrc = null;
+        
+        // Générer le QR code - essayer d'abord avec la bibliothèque, sinon utiliser l'API
+        function generateQRCode() {
+            const qrCanvas = document.getElementById('qrcode');
+            const qrImage = document.getElementById('qrCodeImage');
+            const placeholder = document.getElementById('qrCodePlaceholder');
+            
+            if (!qrCanvas) {
+                console.error('Élément QR code non trouvé');
+                return;
+            }
+            
+            // Données à encoder dans le QR code
+            const qrData = {
+                id: {{ reservation.id }},
+                event: '{{ evenement.titre|e('js') }}',
+                user: '{{ reservation.prenom|e('js') }} {{ reservation.nom|e('js') }}',
+                date: '{{ evenement.dateEvenement ? evenement.dateEvenement|date('Y-m-d') : '' }}',
+                places: {{ reservation.nbPlacesTotal }},
+                reservation: '{{ reservation.id }}'
+            };
+            
+            const qrText = JSON.stringify(qrData);
+            console.log('Génération du QR code avec les données:', qrData);
+            
+            // Essayer d'abord avec la bibliothèque QRCode si disponible
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    QRCode.toCanvas(qrCanvas, qrText, {
+                        width: 200,
+                        margin: 2,
+                        color: {
+                            dark: '#28a745',
+                            light: '#ffffff'
+                        },
+                        errorCorrectionLevel: 'M'
+                    }, function (error) {
+                        if (error) {
+                            console.error('Erreur bibliothèque QRCode, utilisation API:', error);
+                            generateQRCodeViaAPI(qrData, 'qrcode');
+                        } else {
+                            handleQRCodeSuccess(qrCanvas, qrImage, placeholder);
+                        }
+                    });
+                } catch (e) {
+                    console.error('Exception bibliothèque QRCode, utilisation API:', e);
+                    generateQRCodeViaAPI(qrData, 'qrcode');
+                }
+            } else {
+                // Utiliser directement l'API
+                console.log('Bibliothèque QRCode non disponible, utilisation API');
+                generateQRCodeViaAPI(qrData, 'qrcode');
+            }
+        }
+        
+        function handleQRCodeSuccess(qrCanvas, qrImage, placeholder) {
+            console.log('QR code généré avec succès');
+            
+            // Masquer le placeholder
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+            
+            // Convertir le canvas en image pour le PDF
+            try {
+                qrCodeImageSrc = qrCanvas.toDataURL('image/png', 1.0);
+                console.log('QR code converti en image base64');
+                
+                // Préparer l'image pour le PDF
+                qrImage.src = qrCodeImageSrc;
+                qrImage.onload = function() {
+                    qrCodeReady = true;
+                    console.log('QR code image prête pour le PDF');
+                };
+            } catch (e) {
+                console.error('Erreur lors de la conversion en image:', e);
+                qrCodeReady = true; // Continuer quand même avec le canvas
+            }
+        }
+        
+        // Essayer de charger la bibliothèque QRCode, mais générer via API si elle ne charge pas
+        function loadQRCodeLibrary() {
+            // Essayer plusieurs sources
+            const sources = [
+                'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
+                'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js'
+            ];
+            
+            let currentSource = 0;
+            
+            function tryLoadSource() {
+                if (currentSource >= sources.length) {
+                    console.log('Toutes les sources ont échoué, utilisation de l\'API');
+                    generateQRCode(); // Générer directement avec l'API
+                    return;
+                }
+                
+                if (typeof QRCode !== 'undefined') {
+                    console.log('QRCode déjà disponible');
+                    generateQRCode();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = sources[currentSource];
+                script.async = true;
+                script.onload = function() {
+                    if (typeof QRCode !== 'undefined') {
+                        console.log('Bibliothèque QRCode chargée depuis', sources[currentSource]);
+                        generateQRCode();
+                    } else {
+                        currentSource++;
+                        tryLoadSource();
+                    }
+                };
+                script.onerror = function() {
+                    console.warn('Échec chargement depuis', sources[currentSource]);
+                    currentSource++;
+                    tryLoadSource();
+                };
+                document.head.appendChild(script);
+            }
+            
+            tryLoadSource();
+        }
+        
+        // Initialiser le QR code
+        function initQRCode() {
+            console.log('Initialisation du QR code...');
+            
+            // Attendre un peu puis essayer de charger
+            setTimeout(function() {
+                if (typeof QRCode !== 'undefined') {
+                    generateQRCode();
+                } else {
+                    loadQRCodeLibrary();
+                }
+            }, 200);
+        }
+        
+        // Attendre que la page soit chargée
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initQRCode);
+        } else {
+            initQRCode();
+        }
+        
+        // Aussi essayer après le chargement complet
+        window.addEventListener('load', function() {
+            if (!qrCodeReady) {
+                setTimeout(initQRCode, 500);
+            }
+        });
+        
+        // Fonction de téléchargement PDF simplifiée
+        function downloadPDF() {
+            const button = document.getElementById('pdfButton');
+            const originalText = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
+            
+            // Attendre que le QR code soit prêt (maximum 5 secondes)
+            let waitCount = 0;
+            const maxWait = 25; // 5 secondes max
+            
+            function waitAndGenerate() {
+                const qrCanvas = document.getElementById('qrcode');
+                const qrImage = document.getElementById('qrCodeImage');
+                
+                // Vérifier si le canvas a du contenu (QR code généré)
+                const canvasHasContent = qrCanvas && qrCanvas.width > 0 && qrCanvas.height > 0;
+                
+                if (canvasHasContent) {
+                    // Convertir le canvas en image si pas déjà fait
+                    if (!qrCodeImageSrc) {
+                        try {
+                            qrCodeImageSrc = qrCanvas.toDataURL('image/png', 1.0);
+                            console.log('QR code converti en image pour le PDF');
+                        } catch (e) {
+                            console.error('Erreur conversion canvas:', e);
+                        }
+                    }
+                    
+                    // Utiliser l'image pour le PDF
+                    if (qrImage && qrCodeImageSrc) {
+                        qrImage.src = qrCodeImageSrc;
+                        qrImage.style.display = 'block';
+                        qrImage.style.width = '100%';
+                        qrImage.style.height = '100%';
+                        qrImage.style.objectFit = 'contain';
+                        
+                        // Masquer temporairement le canvas pour le PDF
+                        qrCanvas.style.display = 'none';
+                    }
+                    
+                    // Attendre un peu pour que l'image soit rendue
+                    setTimeout(function() {
+                        generatePDFNow(button, originalText);
+                    }, 300);
+                } else if (waitCount < maxWait) {
+                    waitCount++;
+                    console.log('Attente du QR code...', waitCount);
+                    setTimeout(waitAndGenerate, 200);
+                } else {
+                    // Timeout - générer le PDF même sans QR code
+                    console.warn('Timeout: génération du PDF (QR code peut être absent)');
+                    generatePDFNow(button, originalText);
+                }
+            }
+            
+            function generatePDFNow(btn, originalTxt) {
+                const element = document.getElementById('passContent');
+                const qrCanvas = document.getElementById('qrcode');
+                
+                // Réafficher le canvas après la génération du PDF
+                const restoreCanvas = function() {
+                    if (qrCanvas) {
+                        qrCanvas.style.display = 'block';
+                    }
+                    const qrImage = document.getElementById('qrCodeImage');
+                    if (qrImage) {
+                        qrImage.style.display = 'none';
+                    }
+                };
+                
+                const opt = {
+                    margin: [5, 5, 5, 5],
+                    filename: 'Pass-{{ evenement.titre|replace({' ': '_'})|slice(0, 25) }}-{{ reservation.id }}.pdf',
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { 
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        letterRendering: true,
+                        allowTaint: true, // Permettre les images base64
+                        backgroundColor: '#ffffff',
+                        timeout: 20000,
+                        onclone: function(clonedDoc) {
+                            // S'assurer que l'image QR est visible dans le clone
+                            const clonedQrImage = clonedDoc.getElementById('qrCodeImage');
+                            const clonedQrCanvas = clonedDoc.getElementById('qrcode');
+                            if (clonedQrImage && qrCodeImageSrc) {
+                                clonedQrImage.src = qrCodeImageSrc;
+                                clonedQrImage.style.display = 'block';
+                                if (clonedQrCanvas) {
+                                    clonedQrCanvas.style.display = 'none';
+                                }
+                            }
+                        }
+                    },
+                    jsPDF: { 
+                        unit: 'mm', 
+                        format: 'a4', 
+                        orientation: 'portrait'
+                    }
+                };
+                
+                html2pdf().set(opt).from(element).save().then(function() {
+                    restoreCanvas();
+                    btn.disabled = false;
+                    btn.innerHTML = originalTxt;
+                    console.log('PDF généré avec succès');
+                }).catch(function(error) {
+                    restoreCanvas();
+                    console.error('Erreur PDF:', error);
+                    alert('Erreur lors de la génération du PDF: ' + (error.message || 'Erreur inconnue'));
+                    btn.disabled = false;
+                    btn.innerHTML = originalTxt;
+                });
+            }
+            
+            waitAndGenerate();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<div class="modal fade" id="reservationModal{{ evenement.id }}" tabindex="-1" aria-labelledby="reservationModalLabel{{ evenement.id }}" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header bg-success text-white">
+				<h5 class="modal-title" id="reservationModalLabel{{ evenement.id }}">
+					<i class="fas fa-calendar-check me-2"></i>Participer à l'événement
+				</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="mb-3">
+					<h6 class="text-primary">{{ evenement.titre }}</h6>
+					<p class="text-muted small mb-0">
+						<i class="fas fa-calendar me-1"></i>{{ evenement.dateEvenement ? evenement.dateEvenement|date('d/m/Y') : '-' }}
+						<span class="ms-3"><i class="fas fa-clock me-1"></i>{{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '-' }} - {{ evenement.heureFin ? evenement.heureFin|date('H:i') : '-' }}</span>
+					</p>
+					{% if evenement.nbPlacesDisponibles is not null %}
+					<p class="text-muted small mt-2">
+						<i class="fas fa-users me-1"></i>
+						Places disponibles : <strong id="placesRestantes{{ evenement.id }}">{{ evenement.nbPlacesRestantes }}</strong> / {{ evenement.nbPlacesDisponibles }}
+					</p>
+					{% endif %}
+				</div>
+				<hr>
+				{{ form_start(form, {
+					'action': path('app_reservation_participer', {'id': evenement.id}),
+					'method': 'POST',
+					'attr': {'id': 'reservationForm' ~ evenement.id, 'class': 'needs-validation', 'novalidate': ''}
+				}) }}
+					<div class="row mb-3">
+						<div class="col-md-6">
+							{{ form_row(form.nom) }}
+						</div>
+						<div class="col-md-6">
+							{{ form_row(form.prenom) }}
+						</div>
+					</div>
+					
+					<div class="mb-3">
+						{{ form_row(form.email) }}
+					</div>
+					
+					<div class="mb-3">
+						{{ form_row(form.telephone) }}
+					</div>
+					
+					<div class="row mb-3">
+						<div class="col-md-6">
+							{{ form_row(form.nbAdultes) }}
+						</div>
+						<div class="col-md-6">
+							{{ form_row(form.nbEnfants) }}
+						</div>
+					</div>
+					
+					<div class="alert alert-info small mb-0">
+						<i class="fas fa-info-circle me-1"></i>
+						Total de places : <strong id="totalPlaces{{ evenement.id }}">0</strong>
+					</div>
+				{{ form_end(form) }}
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+				<button type="submit" form="reservationForm{{ evenement.id }}" class="btn btn-success">
+					<i class="fas fa-check me-1"></i>Confirmer la réservation
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+(function() {
+	const modal = document.getElementById('reservationModal{{ evenement.id }}');
+	if (modal) {
+		modal.addEventListener('shown.bs.modal', function() {
+			const nbAdultes = modal.querySelector('#reservation_nbAdultes');
+			const nbEnfants = modal.querySelector('#reservation_nbEnfants');
+			const totalPlaces = modal.querySelector('#totalPlaces{{ evenement.id }}');
+			const form = modal.querySelector('#reservationForm{{ evenement.id }}');
+			
+			function updateTotal() {
+				const adultes = parseInt(nbAdultes?.value) || 0;
+				const enfants = parseInt(nbEnfants?.value) || 0;
+				const total = adultes + enfants;
+				
+				if (totalPlaces) {
+					totalPlaces.textContent = total;
+				}
+				
+				// Vérifier les places disponibles
+				{% if evenement.nbPlacesDisponibles is not null %}
+				const placesRestantes = {{ evenement.nbPlacesRestantes }};
+				const placesRestantesEl = modal.querySelector('#placesRestantes{{ evenement.id }}');
+				const submitBtn = modal.querySelector('button[type="submit"]');
+				
+				if (total > placesRestantes) {
+					if (totalPlaces) {
+						totalPlaces.style.color = '#dc3545';
+						totalPlaces.textContent = total + ' (Dépassement !)';
+					}
+					if (placesRestantesEl) {
+						placesRestantesEl.style.color = '#dc3545';
+					}
+					if (submitBtn) {
+						submitBtn.disabled = true;
+						submitBtn.title = 'Le nombre de places demandées dépasse les places disponibles';
+					}
+				} else if (total === 0) {
+					if (totalPlaces) {
+						totalPlaces.style.color = '#dc3545';
+					}
+					if (submitBtn) {
+						submitBtn.disabled = true;
+						submitBtn.title = 'Vous devez réserver au moins une place';
+					}
+				} else {
+					if (totalPlaces) {
+						totalPlaces.style.color = '';
+					}
+					if (placesRestantesEl) {
+						placesRestantesEl.style.color = '';
+					}
+					if (submitBtn) {
+						submitBtn.disabled = false;
+						submitBtn.title = '';
+					}
+				}
+				{% else %}
+				// Si pas de limite, vérifier seulement qu'au moins une place est réservée
+				const submitBtn = modal.querySelector('button[type="submit"]');
+				if (total === 0 && submitBtn) {
+					submitBtn.disabled = true;
+					submitBtn.title = 'Vous devez réserver au moins une place';
+				} else if (submitBtn) {
+					submitBtn.disabled = false;
+					submitBtn.title = '';
+				}
+				{% endif %}
+			}
+			
+			if (nbAdultes) {
+				nbAdultes.addEventListener('input', updateTotal);
+				nbAdultes.addEventListener('change', updateTotal);
+				// Initialiser à 0 si vide
+				if (!nbAdultes.value || nbAdultes.value === '' || nbAdultes.value === '1') {
+					nbAdultes.value = 0;
+				}
+			}
+			if (nbEnfants) {
+				nbEnfants.addEventListener('input', updateTotal);
+				nbEnfants.addEventListener('change', updateTotal);
+				// Initialiser à 0 si vide
+				if (!nbEnfants.value || nbEnfants.value === '') {
+					nbEnfants.value = 0;
+				}
+			}
+			updateTotal();
+			
+			// Gérer la soumission du formulaire via AJAX
+			if (form) {
+				form.addEventListener('submit', function(e) {
+					e.preventDefault();
+					
+					const formData = new FormData(form);
+					const submitButton = modal.querySelector('button[type="submit"]');
+					const originalText = submitButton.innerHTML;
+					
+					// Désactiver le bouton et afficher un loader
+					submitButton.disabled = true;
+					submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Enregistrement...';
+					
+					fetch(form.action, {
+						method: 'POST',
+						body: formData,
+						headers: {
+							'X-Requested-With': 'XMLHttpRequest'
+						}
+					})
+					.then(response => {
+						// Gérer les erreurs HTTP
+						if (!response.ok) {
+							return response.json().then(data => {
+								data.success = false;
+								return data;
+							}).catch(() => {
+								return {
+									success: false,
+									message: 'Une erreur est survenue lors de l\'enregistrement.'
+								};
+							});
+						}
+						if (response.headers.get('content-type')?.includes('application/json')) {
+							return response.json();
+						}
+						return response.text().then(text => ({ html: text }));
+					})
+					.then(data => {
+						if (data.success) {
+							// Afficher le message de succès
+							const message = data.message || 'Votre réservation a été enregistrée avec succès !';
+							
+							// Fermer le modal
+							const bsModal = bootstrap.Modal.getInstance(modal);
+							if (bsModal) {
+								bsModal.hide();
+							}
+							
+							// Rediriger vers le pass si disponible
+							if (data.passUrl) {
+								// Ouvrir le pass dans un nouvel onglet pour impression
+								window.open(data.passUrl + '?print=1', '_blank');
+								// Recharger la page après un court délai
+								setTimeout(() => {
+									window.location.reload();
+								}, 1000);
+							} else {
+								// Recharger la page pour mettre à jour les informations
+								window.location.reload();
+							}
+						} else {
+							// Afficher le message d'erreur
+							const errorMessage = data.message || 'Une erreur est survenue.';
+							alert(errorMessage);
+							
+							// Si c'est une erreur de places, mettre à jour l'affichage
+							if (data.placesRestantes !== undefined) {
+								const placesRestantesEl = modal.querySelector('#placesRestantes{{ evenement.id }}');
+								if (placesRestantesEl) {
+									placesRestantesEl.textContent = data.placesRestantes;
+									placesRestantesEl.style.color = '#dc3545';
+								}
+							}
+							
+							submitButton.disabled = false;
+							submitButton.innerHTML = originalText;
+						}
+					})
+					.catch(error => {
+						console.error('Erreur:', error);
+						alert('Une erreur est survenue lors de l\'enregistrement de la réservation.');
+						submitButton.disabled = false;
+						submitButton.innerHTML = originalText;
+					});
+				});
+			}
+		});
+	}
+})();
+</script>

@@ -1,0 +1,175 @@
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}Participer à l'événement{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+	<div class="row justify-content-center">
+		<div class="col-lg-8">
+			<div class="card shadow">
+				<div class="card-header bg-success text-white">
+					<h4 class="mb-0">
+						<i class="fas fa-calendar-check me-2"></i>Participer à l'événement
+					</h4>
+				</div>
+				<div class="card-body p-4">
+					<!-- Informations de l'événement -->
+					<div class="mb-4 p-3 bg-light rounded">
+						<h5 class="text-primary mb-2">{{ evenement.titre }}</h5>
+						<p class="text-muted small mb-2">
+							<i class="fas fa-calendar me-1"></i>{{ evenement.dateEvenement ? evenement.dateEvenement|date('d/m/Y') : '-' }}
+							<span class="ms-3"><i class="fas fa-clock me-1"></i>{{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '-' }} - {{ evenement.heureFin ? evenement.heureFin|date('H:i') : '-' }}</span>
+						</p>
+						{% if evenement.localisation %}
+						<p class="text-muted small mb-0">
+							<i class="fas fa-map-marker-alt me-1"></i>{{ evenement.localisation }}
+						</p>
+						{% endif %}
+						{% if evenement.nbPlacesDisponibles is not null %}
+						<p class="text-muted small mt-2 mb-0">
+							<i class="fas fa-users me-1"></i>
+							Places disponibles : <strong id="placesRestantes">{{ evenement.nbPlacesRestantes }}</strong> / {{ evenement.nbPlacesDisponibles }}
+						</p>
+						{% endif %}
+					</div>
+					
+					<hr>
+					
+					<!-- Formulaire de réservation -->
+					{{ form_start(form, {
+						'action': path('app_reservation_participer', {'id': evenement.id}),
+						'method': 'POST',
+						'attr': {'class': 'needs-validation', 'novalidate': ''}
+					}) }}
+						<div class="row mb-3">
+							<div class="col-md-6">
+								{{ form_row(form.nom) }}
+							</div>
+							<div class="col-md-6">
+								{{ form_row(form.prenom) }}
+							</div>
+						</div>
+						
+						<div class="mb-3">
+							{{ form_row(form.email) }}
+						</div>
+						
+						<div class="mb-3">
+							{{ form_row(form.telephone) }}
+						</div>
+						
+						<div class="row mb-3">
+							<div class="col-md-6">
+								{{ form_row(form.nbAdultes) }}
+							</div>
+							<div class="col-md-6">
+								{{ form_row(form.nbEnfants) }}
+							</div>
+						</div>
+						
+						<div class="alert alert-info">
+							<i class="fas fa-info-circle me-1"></i>
+							Total de places : <strong id="totalPlaces">0</strong>
+						</div>
+						
+						<div class="d-flex justify-content-between">
+							<a href="{{ path('app_front_evenement_index') }}" class="btn btn-secondary">
+								<i class="fas fa-arrow-left me-1"></i>Retour
+							</a>
+							<button type="submit" class="btn btn-success">
+								<i class="fas fa-check me-1"></i>Confirmer la réservation
+							</button>
+						</div>
+					{{ form_end(form) }}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	const nbAdultes = document.getElementById('reservation_nbAdultes');
+	const nbEnfants = document.getElementById('reservation_nbEnfants');
+	const totalPlaces = document.getElementById('totalPlaces');
+	
+	function updateTotal() {
+		const adultes = parseInt(nbAdultes?.value) || 0;
+		const enfants = parseInt(nbEnfants?.value) || 0;
+		const total = adultes + enfants;
+		
+		if (totalPlaces) {
+			totalPlaces.textContent = total;
+		}
+		
+		// Vérifier les places disponibles
+		{% if evenement.nbPlacesDisponibles is not null %}
+		const placesRestantes = {{ evenement.nbPlacesRestantes }};
+		const placesRestantesEl = document.getElementById('placesRestantes');
+		const submitBtn = document.querySelector('button[type="submit"]');
+		
+		if (total > placesRestantes) {
+			if (totalPlaces) {
+				totalPlaces.style.color = '#dc3545';
+				totalPlaces.textContent = total + ' (Dépassement !)';
+			}
+			if (placesRestantesEl) {
+				placesRestantesEl.style.color = '#dc3545';
+			}
+			if (submitBtn) {
+				submitBtn.disabled = true;
+				submitBtn.title = 'Le nombre de places demandées dépasse les places disponibles';
+			}
+		} else if (total === 0) {
+			if (totalPlaces) {
+				totalPlaces.style.color = '#dc3545';
+			}
+			if (submitBtn) {
+				submitBtn.disabled = true;
+				submitBtn.title = 'Vous devez réserver au moins une place';
+			}
+		} else {
+			if (totalPlaces) {
+				totalPlaces.style.color = '';
+			}
+			if (placesRestantesEl) {
+				placesRestantesEl.style.color = '';
+			}
+			if (submitBtn) {
+				submitBtn.disabled = false;
+				submitBtn.title = '';
+			}
+		}
+		{% else %}
+		// Si pas de limite, vérifier seulement qu'au moins une place est réservée
+		const submitBtn = document.querySelector('button[type="submit"]');
+		if (total === 0 && submitBtn) {
+			submitBtn.disabled = true;
+			submitBtn.title = 'Vous devez réserver au moins une place';
+		} else if (submitBtn) {
+			submitBtn.disabled = false;
+			submitBtn.title = '';
+		}
+		{% endif %}
+	}
+	
+	if (nbAdultes) {
+		nbAdultes.addEventListener('input', updateTotal);
+		nbAdultes.addEventListener('change', updateTotal);
+		// Initialiser à 0 si vide ou égal à 1
+		if (!nbAdultes.value || nbAdultes.value === '' || nbAdultes.value === '1') {
+			nbAdultes.value = 0;
+		}
+	}
+	if (nbEnfants) {
+		nbEnfants.addEventListener('input', updateTotal);
+		nbEnfants.addEventListener('change', updateTotal);
+		// Initialiser à 0 si vide
+		if (!nbEnfants.value || nbEnfants.value === '') {
+			nbEnfants.value = 0;
+		}
+	}
+	updateTotal();
+});
+</script>
+{% endblock %}

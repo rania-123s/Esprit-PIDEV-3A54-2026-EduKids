@@ -1,0 +1,446 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Nouveau Programme{% endblock %}
+
+{% block body %}
+<div class="dashboard-content-one">
+
+    <!-- Add New Programme Area Start Here -->
+    <div class="card height-auto">
+        <div class="card-body">
+            <div class="heading-layout1 mb-4">
+                <div class="item-title">
+                    <h3><i class="fas fa-plus-circle text-success me-2"></i> Créer un Nouveau Programme</h3>
+                </div>
+            </div>
+            
+            {{ form_start(form, {'attr': {'class': 'new-added-form', 'novalidate': 'novalidate'}}) }}
+                <div class="row">
+                    <!-- Section 1: Association à l'événement -->
+                    <div class="col-12 mb-4">
+                        <div class="alert alert-primary py-2">
+                            <i class="fas fa-link me-2"></i> <strong>Association à un événement</strong>
+                        </div>
+                    </div>
+                    
+                    <!-- Événement -->
+                    <div class="col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-calendar-alt text-primary me-1"></i> Événement associé <span class="text-danger">*</span>
+                        </label>
+                        {{ form_widget(form.evenement) }}
+                        {% if form.evenement.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.evenement.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Sélectionnez l'événement pour lequel créer ce programme</small>
+                    </div>
+                    
+                    <!-- Section 2: Horaires de pause -->
+                    <div class="col-12 mb-4">
+                        <div class="alert alert-warning py-2">
+                            <i class="fas fa-coffee me-2"></i> <strong>Horaires de pause</strong>
+                        </div>
+                    </div>
+                    
+                    <!-- Pause Début -->
+                    <div class="col-xl-6 col-lg-6 col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-clock text-warning me-1"></i> Heure début de pause <span class="text-danger">*</span>
+                        </label>
+                        {{ form_widget(form.pauseDebut) }}
+                        {% if form.pauseDebut.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.pauseDebut.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Pause Fin -->
+                    <div class="col-xl-6 col-lg-6 col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-clock text-warning me-1"></i> Heure fin de pause <span class="text-danger">*</span>
+                        </label>
+                        {{ form_widget(form.pauseFin) }}
+                        {% if form.pauseFin.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.pauseFin.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Section 3: Contenu du programme -->
+                    <div class="col-12 mb-4">
+                        <div class="alert alert-success py-2">
+                            <i class="fas fa-clipboard-list me-2"></i> <strong>Contenu du programme</strong>
+                        </div>
+                    </div>
+                    
+                    <!-- Activités -->
+                    <div class="col-12 form-group mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold mb-0">
+                                <i class="fas fa-running text-success me-1"></i> Activités prévues <span class="text-danger">*</span>
+                            </label>
+                            <button type="button" id="btn-generate-activities" class="btn btn-sm btn-primary">
+                                <i class="fas fa-robot me-1"></i> Générer avec l'IA
+                            </button>
+                        </div>
+                        <div id="activity-loading" class="alert alert-info d-none mb-2">
+                            <i class="fas fa-spinner fa-spin me-2"></i> Génération des activités en cours...
+                        </div>
+                        {{ form_widget(form.activites) }}
+                        {% if form.activites.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.activites.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Décrivez toutes les activités prévues avec les horaires si possible. Cliquez sur "Générer avec l'IA" pour obtenir des suggestions automatiques.</small>
+                    </div>
+                    
+                    <!-- Documents Requis -->
+                    <div class="col-xl-6 col-lg-6 col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-file-alt text-info me-1"></i> Documents requis <span class="text-danger">*</span>
+                        </label>
+                        {{ form_widget(form.documentsRequis) }}
+                        {% if form.documentsRequis.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.documentsRequis.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Documents obligatoires pour participer</small>
+                    </div>
+                    
+                    <!-- Matériels Requis -->
+                    <div class="col-xl-6 col-lg-6 col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-tools text-secondary me-1"></i> Matériels requis <span class="text-danger">*</span>
+                        </label>
+                        {{ form_widget(form.materielsRequis) }}
+                        {% if form.materielsRequis.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.materielsRequis.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Matériel nécessaire pour l'événement</small>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div class="col-12 form-group mt-4">
+                        <hr class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="submit" class="btn btn-outline-success px-4 py-2">
+                                <i class="fas fa-save me-1"></i> Enregistrer le programme
+                            </button>
+                            <a href="{{ path('app_programme_index') }}" class="btn btn-outline-primary px-4 py-2">
+                                <i class="fas fa-times me-1"></i> Annuler
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+    <!-- Add New Programme Area End Here -->
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const evenementSelect = document.querySelector('#{{ form.evenement.vars.id }}');
+    const pauseDebutInput = document.querySelector('#{{ form.pauseDebut.vars.id }}');
+    const pauseFinInput = document.querySelector('#{{ form.pauseFin.vars.id }}');
+    
+    let eventHeureDebut = null;
+    let eventHeureFin = null;
+    
+    // Fonction pour convertir HH:mm en minutes depuis minuit
+    function timeToMinutes(timeString) {
+        if (!timeString) return null;
+        const [hours, minutes] = timeString.split(':').map(Number);
+        return hours * 60 + minutes;
+    }
+    
+    // Fonction pour valider la pause
+    function validatePause() {
+        if (!pauseDebutInput || !pauseFinInput || !eventHeureDebut || !eventHeureFin) {
+            return;
+        }
+        
+        const pauseDebut = pauseDebutInput.value;
+        const pauseFin = pauseFinInput.value;
+        
+        if (!pauseDebut || !pauseFin) {
+            clearErrors();
+            return;
+        }
+        
+        const pauseDebutMinutes = timeToMinutes(pauseDebut);
+        const pauseFinMinutes = timeToMinutes(pauseFin);
+        const eventDebutMinutes = timeToMinutes(eventHeureDebut);
+        const eventFinMinutes = timeToMinutes(eventHeureFin);
+        
+        let hasError = false;
+        
+        // Vérifier que le début de la pause est dans l'intervalle de l'événement
+        if (pauseDebutMinutes < eventDebutMinutes) {
+            showError(pauseDebutInput, `L'heure de début de pause doit être après ou égale à ${eventHeureDebut} (début de l'événement).`);
+            hasError = true;
+        } else if (pauseDebutMinutes > eventFinMinutes) {
+            showError(pauseDebutInput, `L'heure de début de pause doit être avant ou égale à ${eventHeureFin} (fin de l'événement).`);
+            hasError = true;
+        } else {
+            clearError(pauseDebutInput);
+        }
+        
+        // Vérifier que la fin de la pause est dans l'intervalle de l'événement
+        if (pauseFinMinutes < eventDebutMinutes) {
+            showError(pauseFinInput, `L'heure de fin de pause doit être après ou égale à ${eventHeureDebut} (début de l'événement).`);
+            hasError = true;
+        } else if (pauseFinMinutes > eventFinMinutes) {
+            showError(pauseFinInput, `L'heure de fin de pause doit être avant ou égale à ${eventHeureFin} (fin de l'événement).`);
+            hasError = true;
+        } else {
+            clearError(pauseFinInput);
+        }
+        
+        // Vérifier que le début de la pause est avant la fin de la pause
+        if (pauseDebutMinutes >= pauseFinMinutes) {
+            showError(pauseDebutInput, 'L\'heure de début de pause doit être avant l\'heure de fin de pause.');
+            hasError = true;
+        }
+        
+        return !hasError;
+    }
+    
+    // Fonction pour afficher une erreur
+    function showError(input, message) {
+        input.classList.add('is-invalid');
+        let errorDiv = input.parentElement.querySelector('.pause-validation-error');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'invalid-feedback d-block pause-validation-error';
+            input.parentElement.appendChild(errorDiv);
+        }
+        errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> ' + message;
+    }
+    
+    // Fonction pour effacer une erreur
+    function clearError(input) {
+        input.classList.remove('is-invalid');
+        const errorDiv = input.parentElement.querySelector('.pause-validation-error');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+    }
+    
+    // Fonction pour effacer toutes les erreurs
+    function clearErrors() {
+        if (pauseDebutInput) clearError(pauseDebutInput);
+        if (pauseFinInput) clearError(pauseFinInput);
+    }
+    
+    // Charger les heures de l'événement sélectionné
+    function loadEvenementHeures(evenementId) {
+        if (!evenementId) {
+            eventHeureDebut = null;
+            eventHeureFin = null;
+            clearErrors();
+            return;
+        }
+        
+        fetch('{{ path('app_programme_api_evenement_heures', {'id': '__ID__'}) }}'.replace('__ID__', evenementId))
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    eventHeureDebut = data.heureDebut;
+                    eventHeureFin = data.heureFin;
+                    
+                    // Afficher un message informatif
+                    let infoDiv = document.querySelector('.evenement-heures-info');
+                    if (!infoDiv) {
+                        infoDiv = document.createElement('div');
+                        infoDiv.className = 'alert alert-info mt-2 evenement-heures-info';
+                        evenementSelect.parentElement.appendChild(infoDiv);
+                    }
+                    infoDiv.innerHTML = `<i class="fas fa-info-circle me-1"></i> Horaires de l'événement : <strong>${eventHeureDebut}</strong> - <strong>${eventHeureFin}</strong>. La pause doit être dans cet intervalle.`;
+                    
+                    // Valider la pause si elle est déjà remplie
+                    validatePause();
+                } else {
+                    eventHeureDebut = null;
+                    eventHeureFin = null;
+                    clearErrors();
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors du chargement des heures:', error);
+                eventHeureDebut = null;
+                eventHeureFin = null;
+            });
+    }
+    
+    // Écouter les changements sur le select d'événement
+    if (evenementSelect) {
+        evenementSelect.addEventListener('change', function() {
+            const evenementId = this.value;
+            loadEvenementHeures(evenementId);
+        });
+        
+        // Charger les heures si un événement est déjà sélectionné
+        if (evenementSelect.value) {
+            loadEvenementHeures(evenementSelect.value);
+        }
+    }
+    
+    // Écouter les changements sur les champs de pause
+    if (pauseDebutInput) {
+        pauseDebutInput.addEventListener('change', validatePause);
+        pauseDebutInput.addEventListener('input', validatePause);
+    }
+    
+    if (pauseFinInput) {
+        pauseFinInput.addEventListener('change', validatePause);
+        pauseFinInput.addEventListener('input', validatePause);
+    }
+    
+    // Valider avant la soumission du formulaire
+    const form = document.querySelector('.new-added-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!validatePause()) {
+                e.preventDefault();
+                e.stopPropagation();
+                alert('Veuillez corriger les erreurs de validation de la pause avant de soumettre le formulaire.');
+                return false;
+            }
+        });
+    }
+    
+    // Fonctionnalité de génération d'activités avec l'IA
+    const btnGenerateActivities = document.getElementById('btn-generate-activities');
+    const activityLoading = document.getElementById('activity-loading');
+    const activitesTextarea = document.querySelector('#{{ form.activites.vars.id }}');
+    
+    if (btnGenerateActivities && activitesTextarea) {
+        btnGenerateActivities.addEventListener('click', function() {
+            const evenementId = evenementSelect ? evenementSelect.value : null;
+            
+            if (!evenementId) {
+                alert('Veuillez d\'abord sélectionner un événement.');
+                return;
+            }
+            
+            if (!eventHeureDebut || !eventHeureFin) {
+                alert('Veuillez attendre que les horaires de l\'événement soient chargés.');
+                return;
+            }
+            
+            const pauseDebut = pauseDebutInput ? pauseDebutInput.value : null;
+            const pauseFin = pauseFinInput ? pauseFinInput.value : null;
+            
+            // Afficher le loading
+            btnGenerateActivities.disabled = true;
+            activityLoading.classList.remove('d-none');
+            
+            // Appeler l'API
+            fetch('{{ path('app_programme_api_recommend_activities') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    evenement_id: evenementId,
+                    pause_debut: pauseDebut,
+                    pause_fin: pauseFin
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Erreur HTTP ' + response.status);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                activityLoading.classList.add('d-none');
+                btnGenerateActivities.disabled = false;
+                
+                if (data.success && data.activites) {
+                    // Remplir le champ activités
+                    activitesTextarea.value = data.activites;
+                    // Déclencher l'événement change pour valider
+                    activitesTextarea.dispatchEvent(new Event('change'));
+                    
+                    // Afficher un message de succès
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success alert-dismissible fade show mt-2';
+                    successAlert.innerHTML = `
+                        <i class="fas fa-check-circle me-2"></i> ${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    activitesTextarea.parentElement.insertBefore(successAlert, activitesTextarea);
+                    
+                    // Supprimer l'alerte après 5 secondes
+                    setTimeout(() => {
+                        successAlert.remove();
+                    }, 5000);
+                } else {
+                    // Afficher un message d'erreur plus détaillé
+                    const errorMessage = data.message || 'Impossible de générer les activités.';
+                    const errorAlert = document.createElement('div');
+                    errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-2';
+                    errorAlert.innerHTML = `
+                        <i class="fas fa-exclamation-triangle me-2"></i> <strong>Erreur :</strong> ${errorMessage}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    activitesTextarea.parentElement.insertBefore(errorAlert, activitesTextarea);
+                    
+                    // Supprimer l'alerte après 10 secondes
+                    setTimeout(() => {
+                        errorAlert.remove();
+                    }, 10000);
+                }
+            })
+            .catch(error => {
+                activityLoading.classList.add('d-none');
+                btnGenerateActivities.disabled = false;
+                console.error('Erreur lors de la génération des activités:', error);
+                
+                // Afficher un message d'erreur détaillé
+                const errorAlert = document.createElement('div');
+                errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-2';
+                errorAlert.innerHTML = `
+                    <i class="fas fa-exclamation-triangle me-2"></i> <strong>Erreur :</strong> ${error.message || 'Une erreur est survenue lors de la génération des activités. Vérifiez votre connexion internet et réessayez.'}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                if (activitesTextarea && activitesTextarea.parentElement) {
+                    activitesTextarea.parentElement.insertBefore(errorAlert, activitesTextarea);
+                    
+                    // Supprimer l'alerte après 10 secondes
+                    setTimeout(() => {
+                        errorAlert.remove();
+                    }, 10000);
+                } else {
+                    alert('Erreur : ' + (error.message || 'Une erreur est survenue lors de la génération des activités.'));
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
