@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Evenement;
-use App\Repository\UserEvenementInteractionRepository;
+use App\Repository\Evenement\UserEvenementInteractionRepository;
 use App\Service\InteractionService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

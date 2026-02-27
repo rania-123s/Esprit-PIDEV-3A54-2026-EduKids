@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\EvenementRepository;
+use App\Repository\Evenement\EvenementRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;

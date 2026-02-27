@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Evenement;
 use App\Entity\Programme;
 use App\Form\ProgrammeType;
-use App\Repository\EvenementRepository;
+use App\Repository\Evenement\EvenementRepository;
 use App\Repository\ProgrammeRepository;
 use App\Service\ActivityRecommendationService;
 use Doctrine\ORM\EntityManagerInterface;

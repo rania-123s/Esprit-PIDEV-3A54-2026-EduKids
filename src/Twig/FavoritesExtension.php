@@ -2,7 +2,7 @@
 
 namespace App\Twig;
 
-use App\Repository\UserEvenementInteractionRepository;
+use App\Repository\Evenement\UserEvenementInteractionRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;

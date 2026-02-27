@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\UserEvenementInteractionRepository;
+use App\Repository\Evenement\UserEvenementInteractionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserEvenementInteractionRepository::class)]

@@ -5,7 +5,7 @@ namespace App\Service;
 use App\Entity\Evenement;
 use App\Entity\User;
 use App\Entity\UserEvenementInteraction;
-use App\Repository\UserEvenementInteractionRepository;
+use App\Repository\Evenement\UserEvenementInteractionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class InteractionService
