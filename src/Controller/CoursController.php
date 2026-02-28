@@ -257,7 +257,7 @@ final class CoursController extends AbstractController
 
         if ($fileName === null) {
             return $this->json([
-                'error' => 'Generation image indisponible pour le moment.',
+                'error' => 'Génération image impossible pour le moment. Vous pouvez : 1) Ajouter OPENAI_API_KEY dans .env pour l\'IA, 2) Télécharger une image manuellement ci-dessous.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 

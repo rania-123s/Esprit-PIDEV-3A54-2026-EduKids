@@ -1,0 +1,4 @@
+easy_admin:
+    # Dashboard controller is in App\Controller\Admin\DashboardController
+    # CRUD: CoursCrudController, LeconCrudController
+    site_name: 'EduKids Admin'

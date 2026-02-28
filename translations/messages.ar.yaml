@@ -32,6 +32,7 @@ student.pro: 'محترف'
 common.search: 'بحث'
 common.continue: 'متابعة'
 common.completed: 'مكتمل'
+common.language: 'اللغة'
 
 student.chart.completion_title: 'حالة الدورات'
 student.chart.progress_title: 'التقدم حسب الدورة'

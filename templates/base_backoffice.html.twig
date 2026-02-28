@@ -110,104 +110,92 @@
 
 			<!-- Sidebar menu START -->
 			<ul class="navbar-nav flex-column" id="navbar-sidebar">
-				
-				<!-- Menu item 1 -->
-				<li class="nav-item"><a href="{{ path('app_admin_page') }}" class="nav-link active"><i class="bi bi-house fa-fw me-2"></i>Dashboard</a></li>
-				
-				<!-- Title -->
-				<li class="nav-item ms-2 my-2">Pages</li>
+				{% set _route = app.request.attributes.get('_route') ?? '' %}
+				{% set _isCourses = _route starts with 'app_cours_' %}
+				{% set _isLecons = _route starts with 'app_lecon_' %}
+				{% set _isEvents = _route starts with 'app_evenement_' %}
+				{% set _isProgramme = _route starts with 'app_programme_' %}
 
-				<!-- menu item 2 - EVENTS -->
+				<!-- Cours -->
 				<li class="nav-item">
-					<a class="nav-link" data-bs-toggle="collapse" href="#collapsepage" role="button" aria-expanded="false" aria-controls="collapsepage">
+					<a class="nav-link d-flex align-items-center {{ _isCourses ? '' : 'collapsed' }}"
+					   data-bs-toggle="collapse" href="#coursesMenu" role="button"
+					   aria-expanded="{{ _isCourses ? 'true' : 'false' }}" aria-controls="coursesMenu">
+						<i class="bi bi-collection-play fa-fw me-2"></i>Cours
+					</a>
+					<ul class="nav flex-column collapse {{ _isCourses ? 'show' : '' }}" id="coursesMenu" data-bs-parent="#navbar-sidebar">
+						<li class="nav-item">
+							<a class="nav-link ps-4 {{ _route == 'app_cours_index' ? 'active' : '' }}" href="{{ path('app_cours_index') }}">Liste des cours</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link ps-4" href="{{ path('app_cours_new') }}">Créer un cours</a>
+						</li>
+					</ul>
+				</li>
+
+				<!-- Leçons -->
+				<li class="nav-item">
+					<a class="nav-link d-flex align-items-center {{ _isLecons ? '' : 'collapsed' }}"
+					   data-bs-toggle="collapse" href="#leconsMenu" role="button"
+					   aria-expanded="{{ _isLecons ? 'true' : 'false' }}" aria-controls="leconsMenu">
+						<i class="bi bi-journal-text fa-fw me-2"></i>Leçons
+					</a>
+					<ul class="nav flex-column collapse {{ _isLecons ? 'show' : '' }}" id="leconsMenu" data-bs-parent="#navbar-sidebar">
+						<li class="nav-item">
+							<a class="nav-link ps-4 {{ _route == 'app_lecon_index' ? 'active' : '' }}" href="{{ path('app_lecon_index') }}">Liste des leçons</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link ps-4" href="{{ path('app_lecon_new') }}">Créer une leçon</a>
+						</li>
+					</ul>
+				</li>
+
+				<!-- Events -->
+				<li class="nav-item">
+					<a class="nav-link {{ _isEvents ? '' : 'collapsed' }}" data-bs-toggle="collapse" href="#collapsepage" role="button"
+					   aria-expanded="{{ _isEvents ? 'true' : 'false' }}" aria-controls="collapsepage">
 						<i class="bi bi-calendar-event fa-fw me-2"></i>Events
 					</a>
-					<!-- Submenu -->
-					<ul class="nav collapse flex-column" id="collapsepage" data-bs-parent="#navbar-sidebar">
+					<ul class="nav flex-column collapse {{ _isEvents ? 'show' : '' }}" id="collapsepage" data-bs-parent="#navbar-sidebar">
 						<li class="nav-item">
-							<a class="nav-link" href="{{ path('app_evenement_index') }}">
-								All Events
-							</a>
+							<a class="nav-link ps-4" href="{{ path('app_evenement_index') }}">Tous les événements</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="{{ path('app_evenement_new') }}">
-								Create Event
-							</a>
+							<a class="nav-link ps-4" href="{{ path('app_evenement_new') }}">Créer un événement</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="{{ path('app_evenement_statistiques') }}">
-								Statistiques
-							</a>
+							<a class="nav-link ps-4" href="{{ path('app_evenement_statistiques') }}">Statistiques</a>
 						</li>
 					</ul>
 				</li>
 
-				<!-- menu item - PROGRAMME (lié aux événements) -->
+				<!-- Programme -->
 				<li class="nav-item">
-					<a class="nav-link" data-bs-toggle="collapse" href="#collapseprogramme" role="button" aria-expanded="false" aria-controls="collapseprogramme">
+					<a class="nav-link {{ _isProgramme ? '' : 'collapsed' }}" data-bs-toggle="collapse" href="#collapseprogramme" role="button"
+					   aria-expanded="{{ _isProgramme ? 'true' : 'false' }}" aria-controls="collapseprogramme">
 						<i class="bi bi-clipboard2-check fa-fw me-2"></i>Programme
 					</a>
-					<ul class="nav collapse flex-column" id="collapseprogramme" data-bs-parent="#navbar-sidebar">
+					<ul class="nav flex-column collapse {{ _isProgramme ? 'show' : '' }}" id="collapseprogramme" data-bs-parent="#navbar-sidebar">
 						<li class="nav-item">
-							<a class="nav-link" href="{{ path('app_programme_index') }}">Liste des programmes</a>
+							<a class="nav-link ps-4" href="{{ path('app_programme_index') }}">Liste des programmes</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="{{ path('app_programme_new') }}">Créer un programme</a>
+							<a class="nav-link ps-4" href="{{ path('app_programme_new') }}">Créer un programme</a>
 						</li>
 					</ul>
 				</li>
 
-				<!-- Menu item 3 -->
-				<li class="nav-item"> <a class="nav-link" href="#"><i class="fas fa-user-graduate fa-fw me-2"></i>Students</a></li>
-
-				<!-- Menu item 4 -->
-				<li class="nav-item">
-					<a class="nav-link" data-bs-toggle="collapse" href="#collapseinstructors" role="button" aria-expanded="false" aria-controls="collapseinstructors">
-						<i class="fas fa-user-tie fa-fw me-2"></i>Instructors
-					</a>
-					<!-- Submenu -->
-					<ul class="nav collapse flex-column" id="collapseinstructors" data-bs-parent="#navbar-sidebar">
-						<li class="nav-item"> <a class="nav-link" href="#">Instructors</a></li>
-						<li class="nav-item"> <a class="nav-link" href="#">Instructor Detail</a></li>
-						<li class="nav-item"> 
-							<a class="nav-link" href="#">Instructor requests
-								<span class="badge text-bg-success rounded-circle ms-2">2</span>
-							</a>
-						</li>
-					</ul>
-				</li>
-				
-				<!-- Menu item 5 -->
-				<li class="nav-item"> <a class="nav-link" href="#"><i class="far fa-comment-dots fa-fw me-2"></i>Reviews</a></li>
-
-				<!-- Menu item 6 -->
-				<li class="nav-item"> <a class="nav-link" href="#"><i class="far fa-chart-bar fa-fw me-2"></i>Earnings</a></li>
-
-				<!-- Menu item 7 -->
-				<li class="nav-item"> <a class="nav-link" href="#"><i class="fas fa-user-cog fa-fw me-2"></i>Admin Settings</a></li>
-
-				<!-- Menu item 8 -->
+				<!-- Authentification -->
 				<li class="nav-item">
 					<a class="nav-link" data-bs-toggle="collapse" href="#collapseauthentication" role="button" aria-expanded="false" aria-controls="collapseauthentication">
-						<i class="bi bi-lock fa-fw me-2"></i>Authentication
+						<i class="bi bi-lock fa-fw me-2"></i>Authentification
 					</a>
-					<!-- Submenu -->
 					<ul class="nav collapse flex-column" id="collapseauthentication" data-bs-parent="#navbar-sidebar">
-						<li class="nav-item"> <a class="nav-link" href="#">Sign Up</a></li>
-						<li class="nav-item"> <a class="nav-link" href="#">Sign In</a></li>
-						<li class="nav-item"> <a class="nav-link" href="#">Forgot Password</a></li>
-						<li class="nav-item"> <a class="nav-link" href="#">Error 404</a></li>
+						<li class="nav-item"><a class="nav-link ps-4" href="{{ path('app_register') }}">Inscription</a></li>
+						<li class="nav-item"><a class="nav-link ps-4" href="{{ path('app_login') }}">Connexion</a></li>
+						<li class="nav-item"><a class="nav-link ps-4" href="{{ path('app_forgot_password') }}">Mot de passe oublié</a></li>
 					</ul>
 				</li>
-
-				<!-- Title -->
-				<li class="nav-item ms-2 my-2">Documentation</li>
-
-				<!-- Menu item 9 -->
-				<li class="nav-item"> <a class="nav-link" href="#"><i class="far fa-clipboard fa-fw me-2"></i>Documentation</a></li>
-
-				<!-- Menu item 10 -->
-				<li class="nav-item"> <a class="nav-link" href="#"><i class="fas fa-sitemap fa-fw me-2"></i>Changelog</a></li>
 			</ul>
 			<!-- Sidebar menu end -->
 

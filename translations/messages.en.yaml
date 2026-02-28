@@ -32,6 +32,7 @@ student.pro: 'Pro'
 common.search: 'Search'
 common.continue: 'Continue'
 common.completed: 'Completed'
+common.language: 'Language'
 
 student.chart.completion_title: 'Courses status'
 student.chart.progress_title: 'Progress by course'

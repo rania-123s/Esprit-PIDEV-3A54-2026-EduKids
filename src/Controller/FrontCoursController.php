@@ -7,6 +7,7 @@ use App\Entity\Lecon;
 use App\Entity\User;
 use App\Entity\UserCoursProgress;
 use App\Repository\CoursRepository;
+use App\Repository\LeconRepository;
 use App\Repository\UserCoursProgressRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -14,9 +15,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
-use Symfony\UX\Chartjs\Model\Chart;
 
 class FrontCoursController extends AbstractController
 {
@@ -59,6 +57,30 @@ class FrontCoursController extends AbstractController
         ]);
     }
 
+    #[Route('/lessons', name: 'front_lessons')]
+    public function lessons(
+        LeconRepository $leconRepository,
+        Request $request,
+        PaginatorInterface $paginator
+    ): Response {
+        $searchQuery = trim((string) $request->query->get('search', ''));
+        $sort = $request->query->get('order');
+
+        if ($searchQuery !== '') {
+            $qb = $leconRepository->searchLecons($searchQuery, $sort);
+        } else {
+            $qb = $leconRepository->findAllSorted($sort);
+        }
+
+        $lecons = $paginator->paginate($qb, $request->query->getInt('page', 1), 12);
+
+        return $this->render('front/lessons.html.twig', [
+            'lecons' => $lecons,
+            'searchQuery' => $searchQuery,
+            'sort' => $sort,
+        ]);
+    }
+
     #[Route('/courses/{id}', name: 'front_cours_show', requirements: ['id' => '\d+'])]
     public function courseShow(Cours $cours): Response
     {
@@ -70,8 +92,6 @@ class FrontCoursController extends AbstractController
 
     #[Route('/student/dashboard', name: 'front_student_dashboard')]
     public function studentDashboard(
-        ChartBuilderInterface $chartBuilder,
-        TranslatorInterface $translator,
         UserCoursProgressRepository $userCoursProgressRepository
     ): Response {
         $user = $this->getUser();
@@ -113,78 +133,12 @@ class FrontCoursController extends AbstractController
         ));
         $inProgressCourses = max(0, $totalCourses - $completedCourses);
 
-        $completionChart = null;
-        $progressByCourseChart = null;
-
-        if ($totalCourses > 0) {
-            $completionChart = $chartBuilder->createChart(Chart::TYPE_DOUGHNUT);
-            $completionChart->setData([
-                'labels' => [
-                    $translator->trans('student.chart.completed'),
-                    $translator->trans('student.chart.in_progress'),
-                ],
-                'datasets' => [[
-                    'label' => $translator->trans('student.chart.completion_dataset'),
-                    'data' => [$completedCourses, $inProgressCourses],
-                    'backgroundColor' => ['#28a745', '#4c64ff'],
-                    'borderWidth' => 0,
-                ]],
-            ]);
-            $completionChart->setOptions([
-                'plugins' => [
-                    'legend' => [
-                        'position' => 'bottom',
-                    ],
-                ],
-                'cutout' => '65%',
-            ]);
-
-            $courseTitles = array_map(
-                static fn (array $item): string => (string) $item['course']->getTitre(),
-                $studentCourses
-            );
-            $courseProgresses = array_map(
-                static fn (array $item): int => (int) $item['progress'],
-                $studentCourses
-            );
-
-            $progressByCourseChart = $chartBuilder->createChart(Chart::TYPE_BAR);
-            $progressByCourseChart->setData([
-                'labels' => $courseTitles,
-                'datasets' => [[
-                    'label' => $translator->trans('student.chart.progress_dataset'),
-                    'data' => $courseProgresses,
-                    'backgroundColor' => 'rgba(76, 100, 255, 0.65)',
-                    'borderColor' => '#4c64ff',
-                    'borderWidth' => 1,
-                    'borderRadius' => 8,
-                ]],
-            ]);
-            $progressByCourseChart->setOptions([
-                'plugins' => [
-                    'legend' => [
-                        'display' => false,
-                    ],
-                ],
-                'scales' => [
-                    'y' => [
-                        'beginAtZero' => true,
-                        'max' => 100,
-                        'ticks' => [
-                            'stepSize' => 20,
-                        ],
-                    ],
-                ],
-            ]);
-        }
-
         return $this->render('front/student_dashboard.html.twig', [
             'studentCourses' => $studentCourses,
             'totalCourses' => $totalCourses,
             'completedCourses' => $completedCourses,
             'completedLessonsTotal' => $completedLessonsTotal,
-            'completionChart' => $completionChart,
-            'progressByCourseChart' => $progressByCourseChart,
+            'inProgressCourses' => $inProgressCourses,
         ]);
     }
 

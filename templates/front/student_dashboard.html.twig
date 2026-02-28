@@ -119,8 +119,15 @@
 								<h5 class="mb-0">{{ 'student.chart.completion_title'|trans }}</h5>
 							</div>
 							<div class="card-body">
-								{% if completionChart %}
-									{{ render_chart(completionChart) }}
+								{% if totalCourses > 0 %}
+									<div class="d-flex flex-column gap-3">
+										<div class="d-flex align-items-center gap-2">
+											<span class="badge bg-success rounded-pill px-3 py-2">{{ completedCourses }} {{ 'student.chart.completed'|trans }}</span>
+										</div>
+										<div class="d-flex align-items-center gap-2">
+											<span class="badge bg-primary rounded-pill px-3 py-2">{{ inProgressCourses }} {{ 'student.chart.in_progress'|trans }}</span>
+										</div>
+									</div>
 								{% else %}
 									<p class="text-muted mb-0">{{ 'student.chart.no_data'|trans }}</p>
 								{% endif %}
@@ -133,8 +140,20 @@
 								<h5 class="mb-0">{{ 'student.chart.progress_title'|trans }}</h5>
 							</div>
 							<div class="card-body">
-								{% if progressByCourseChart %}
-									{{ render_chart(progressByCourseChart) }}
+								{% if studentCourses|length > 0 %}
+									<div class="d-flex flex-column gap-3">
+										{% for item in studentCourses %}
+											<div>
+												<div class="d-flex justify-content-between mb-1">
+													<small class="text-body">{{ item.course.titre }}</small>
+													<small class="fw-bold">{{ item.progress }}%</small>
+												</div>
+												<div class="progress" style="height: 8px;">
+													<div class="progress-bar bg-primary" role="progressbar" style="width: {{ item.progress }}%"></div>
+												</div>
+											</div>
+										{% endfor %}
+									</div>
 								{% else %}
 									<p class="text-muted mb-0">{{ 'student.chart.no_data'|trans }}</p>
 								{% endif %}
