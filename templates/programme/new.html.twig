@@ -361,20 +361,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify({
                     evenement_id: evenementId,
                     pause_debut: pauseDebut,
                     pause_fin: pauseFin
                 })
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.message || 'Erreur HTTP ' + response.status);
-                    });
+            .then(async response => {
+                const contentType = response.headers.get('content-type') || '';
+                const isJson = contentType.includes('application/json');
+
+                // Si le serveur renvoie une page HTML (ex: redirection vers login), éviter response.json()
+                if (!isJson) {
+                    const text = await response.text();
+                    if (text.includes('<html') || text.includes('<!DOCTYPE')) {
+                        throw new Error('Réponse HTML reçue. Vous devez être connecté en ADMIN pour utiliser la génération IA.');
+                    }
+                    throw new Error('Réponse inattendue (non JSON). Code HTTP ' + response.status);
                 }
-                return response.json();
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || ('Erreur HTTP ' + response.status));
+                }
+                return data;
             })
             .then(data => {
                 activityLoading.classList.add('d-none');
