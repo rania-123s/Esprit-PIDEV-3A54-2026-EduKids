@@ -1,0 +1,190 @@
+<div
+	class="chat-page"
+	id="chatApp"
+	data-user-id="{{ app.user.id }}"
+	data-role="{{ is_granted('ROLE_ADMIN') ? 'admin' : 'parent' }}"
+	data-csrf="{{ csrf_token('chat_action') }}"
+	data-mercure-url="{{ mercure(['chat/user/' ~ app.user.id]) }}"
+	data-websocket-url="{{ websocket_url|default('') }}"
+	data-websocket-token="{{ websocket_token|default('') }}"
+	data-initial-conversation-id="{{ initial_conversation_id|default('') }}"
+	data-initial-conversation-title="{{ initial_conversation_title|default('') }}"
+	data-chat-index-url="{{ path('chat_index') }}"
+	data-chat-show-url-template="{{ path('chat_show', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-conversations-url="{{ path('chat_conversations') }}"
+	data-conversation-summary-url-template="{{ path('chat_conversation_summary', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-conversation-hide-url-template="{{ path('chat_conversation_hide', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-create-private-url="{{ path('chat_private_create') }}"
+	data-create-group-url="{{ path('chat_group_create') }}"
+	data-parent-search-url="{{ path('chat_parent_search') }}"
+	data-messages-url-template="{{ path('chat_messages', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-message-create-url-template="{{ path('chat_message_create', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-message-audio-create-url-template="{{ path('chat_message_audio_create', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-typing-url-template="{{ path('chat_conversation_typing', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-message-update-url-template="{{ path('chat_message_update', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-message-delete-url-template="{{ path('chat_message_delete', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-attachment-summarize-url-template="{{ path('chat_attachment_summarize', {attachmentId: 999999})|replace({'999999': '{id}'}) }}"
+	data-group-leave-url-template="{{ path('chat_group_leave', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-group-member-list-url-template="{{ path('chat_group_members_list', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-group-member-add-url-template="{{ path('chat_group_members_add', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-group-member-remove-url-template="{{ path('chat_group_members_remove', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-conversation-images-url-template="{{ path('chat_conversation_images', {id: 999999})|replace({'999999': '{id}'}) }}"
+	data-translate-url="{{ path('api_translate') }}"
+>
+	<div class="chat-sidebar">
+		<div class="chat-search">
+			<input type="text" id="chatSearch" placeholder="Rechercher une conversation">
+			<button class="chat-new-btn" id="chatNewConversation" title="Nouvelle conversation">+</button>
+		</div>
+		<div class="chat-conversations" id="chatConversationList">
+			<div class="chat-empty">Aucune conversation</div>
+		</div>
+	</div>
+
+	<div class="chat-main">
+		<div class="chat-header">
+			<div class="chat-title" id="chatTitle">Selectionnez une conversation</div>
+			<div class="chat-header-actions">
+				<button class="chat-more-btn" id="chatConversationMenuBtn">...</button>
+				<div class="chat-menu" id="chatConversationMenu">
+					<button class="chat-menu-item" data-action="hide-conversation" id="chatHideConversationAction" hidden>Supprimer pour moi</button>
+					<button class="chat-menu-item" data-action="manage-members" id="chatManageMembersAction" hidden>Gerer les membres</button>
+					<button class="chat-menu-item" data-action="leave-group" id="chatLeaveGroupAction" hidden>Quitter le groupe</button>
+					<button class="chat-menu-item" data-action="images">Images recentes</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="chat-messages" id="chatMessages"></div>
+
+		<div class="chat-editor">
+			<div class="chat-edit-banner" id="chatEditBanner" hidden>
+				<span>Vous modifiez un message</span>
+				<button id="chatEditCancel" type="button">Annuler</button>
+			</div>
+			<div class="chat-typing" id="chatTypingIndicators" hidden></div>
+			<div class="chat-input-row">
+				<button class="chat-emoji-btn" id="chatEmojiBtn" type="button">:)</button>
+				<input type="text" id="chatInput" placeholder="Envoyer un message" autocomplete="off">
+				<label class="chat-upload-btn" title="Joindre des fichiers">
+					<input
+						type="file"
+						id="chatFileInput"
+						name="attachments[]"
+						accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+						multiple
+						hidden
+					>
+					📎 Joindre
+				</label>
+				<button class="chat-voice-btn" id="chatVoiceToggleBtn" type="button" title="Message vocal">&#127908;</button>
+				<button class="chat-send-btn" id="chatSendBtn" type="button">Envoyer</button>
+			</div>
+			<div class="chat-voice-recorder" id="chatVoiceRecorder" hidden>
+				<button class="chat-voice-side-btn chat-voice-cancel-btn" id="chatVoiceCancelBtn" type="button" aria-label="Annuler l enregistrement">x</button>
+				<div class="chat-voice-center">
+					<button class="chat-voice-main-btn chat-voice-stop-btn" id="chatVoiceStopBtn" type="button" aria-label="Arreter l enregistrement">&#9632;</button>
+					<button class="chat-voice-main-btn chat-voice-preview-btn" id="chatVoicePreviewPlayBtn" type="button" aria-label="Lire le message vocal" hidden>&#9654;</button>
+					<button class="chat-voice-main-btn chat-voice-start-btn" id="chatVoiceStartBtn" type="button" hidden>Demarrer</button>
+					<div class="chat-voice-wave" id="chatVoiceWave" aria-hidden="true">
+						<span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+						<span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+					</div>
+					<span class="chat-voice-duration" id="chatVoiceDuration">0:00</span>
+				</div>
+				<button class="chat-voice-side-btn chat-voice-send-btn" id="chatVoiceSendBtn" type="button" aria-label="Envoyer le message vocal">&#10148;</button>
+				<audio id="chatVoicePreviewAudio" hidden preload="metadata"></audio>
+			</div>
+			<div class="chat-voice-status" id="chatVoiceStatus" hidden></div>
+			<div class="chat-emoji-picker" id="chatEmojiPicker" hidden>
+				<button type="button">😀</button>
+				<button type="button">😂</button>
+				<button type="button">😍</button>
+				<button type="button">👍</button>
+				<button type="button">🙏</button>
+				<button type="button">🎉</button>
+				<button type="button">❤️</button>
+				<button type="button">😎</button>
+			</div>
+			<div class="chat-upload-preview" id="chatUploadPreview" hidden></div>
+			<div class="chat-upload-status" id="chatUploadStatus" hidden></div>
+		</div>
+	</div>
+</div>
+
+<div class="chat-modal" id="chatImagesModal" hidden>
+	<div class="chat-modal-backdrop"></div>
+	<div class="chat-modal-content">
+		<div class="chat-modal-header">
+			<h3>Images recentes</h3>
+			<button class="chat-modal-close" id="chatImagesClose">x</button>
+		</div>
+		<div class="chat-modal-body" id="chatImagesGrid"></div>
+	</div>
+</div>
+
+<div class="chat-modal" id="chatCreateModal" hidden>
+	<div class="chat-modal-backdrop"></div>
+	<div class="chat-modal-content chat-create-modal">
+		<div class="chat-modal-header">
+			<h3>Nouvelle conversation</h3>
+			<button class="chat-modal-close" id="chatCreateClose">x</button>
+		</div>
+		<div class="chat-modal-body chat-create-body">
+			<div class="chat-create-modes">
+				<button id="chatModePrivate" class="chat-mode-btn is-active" type="button">Privee</button>
+				<button id="chatModeGroup" class="chat-mode-btn" type="button">Groupe</button>
+			</div>
+
+			<label class="chat-field-label" for="chatParentSearchInput">Rechercher un parent</label>
+			<input id="chatParentSearchInput" class="chat-field-input" type="text" placeholder="Tapez un nom ou un email">
+			<div class="chat-inline-hint" id="chatCreateHint">Cliquez sur un parent pour creer une conversation privee.</div>
+
+			<div class="chat-create-error" id="chatCreateError" hidden></div>
+
+			<div class="chat-parent-results" id="chatParentResults">
+				<div class="chat-inline-hint">Entrez au moins 2 caracteres.</div>
+			</div>
+
+			<div class="chat-selected-section">
+				<div class="chat-selected-title">Parents selectionnes</div>
+				<div class="chat-selected-list" id="chatSelectedParents">
+					<div class="chat-inline-hint">Aucun parent selectionne.</div>
+				</div>
+			</div>
+
+			<div class="chat-group-name-wrap" id="chatGroupNameWrap" hidden>
+				<label class="chat-field-label" for="chatGroupNameInput">Nom du groupe</label>
+				<input id="chatGroupNameInput" class="chat-field-input" type="text" maxlength="120" placeholder="Ex: Parents Classe CE1">
+			</div>
+		</div>
+		<div class="chat-modal-footer">
+			<button class="chat-btn-secondary" id="chatCreateCancel" type="button">Annuler</button>
+			<button class="chat-btn-primary" id="chatCreateConfirm" type="button" hidden>Creer le groupe</button>
+		</div>
+	</div>
+</div>
+
+<div class="chat-modal" id="chatMembersModal" hidden>
+	<div class="chat-modal-backdrop"></div>
+	<div class="chat-modal-content chat-members-modal">
+		<div class="chat-modal-header">
+			<h3>Membres du groupe</h3>
+			<button class="chat-modal-close" id="chatMembersClose">x</button>
+		</div>
+		<div class="chat-members-search-wrap">
+			<label class="chat-field-label" for="chatMembersSearchInput">Ajouter un parent</label>
+			<input id="chatMembersSearchInput" class="chat-field-input" type="text" placeholder="Nom, prenom ou email">
+			<div class="chat-members-error" id="chatMembersError" hidden></div>
+			<div class="chat-parent-results chat-members-search-results" id="chatMembersSearchResults">
+				<div class="chat-inline-hint">Entrez au moins 2 caracteres.</div>
+			</div>
+		</div>
+		<div class="chat-members-list-wrap">
+			<div class="chat-selected-title">Membres actuels</div>
+			<div class="chat-members-list" id="chatMembersList">
+				<div class="chat-inline-hint">Chargement...</div>
+			</div>
+		</div>
+	</div>
+</div>

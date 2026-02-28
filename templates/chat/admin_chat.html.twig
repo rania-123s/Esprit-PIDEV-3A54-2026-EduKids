@@ -1,0 +1,29 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Chat Admin{% endblock %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<link rel="stylesheet" href="{{ asset('assets/css/chat.css') }}?v=20260222-translate2">
+	<style>
+		.page-content-wrapper {
+			padding: 0;
+			border: 0 !important;
+		}
+
+		.chat-page,
+		.chat-sidebar,
+		.chat-main {
+			height: calc(100vh - 72px);
+		}
+	</style>
+{% endblock %}
+
+{% block body %}
+	{% include 'chat/_chat_app.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('assets/js/chat.js') }}?v=20260222-translate3"></script>
+{% endblock %}

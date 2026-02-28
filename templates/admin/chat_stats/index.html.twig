@@ -1,0 +1,1384 @@
+
+{% extends 'base_backoffice.html.twig' %}
+{% import _self as ui %}
+
+{% macro initials(name) %}
+    {% set value = name|default('Utilisateur')|trim %}
+    {% set words = value|split(' ') %}
+    {% set first = words[0]|default('U') %}
+    {% set second = words[1]|default('') %}
+    {% if second %}
+        {{ (first|slice(0, 1) ~ second|slice(0, 1))|upper }}
+    {% else %}
+        {{ first|slice(0, 2)|upper }}
+    {% endif %}
+{% endmacro %}
+
+{% macro relative_time(value) %}
+    {% if not value %}
+        -
+    {% else %}
+        {% set nowTs = 'now'|date('U') %}
+        {% set valueTs = value|date('U') %}
+        {% set diff = nowTs - valueTs %}
+        {% if diff < 60 %}
+            a l'instant
+        {% elseif diff < 3600 %}
+            il y a {{ (diff / 60)|round(0, 'floor') }} min
+        {% elseif diff < 86400 %}
+            il y a {{ (diff / 3600)|round(0, 'floor') }} h
+        {% elseif diff < 604800 %}
+            il y a {{ (diff / 86400)|round(0, 'floor') }} j
+        {% else %}
+            {{ value|date('d/m/Y H:i') }}
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+
+{% block title %}Statistiques du Chat{% endblock %}
+
+{% set totalMessages = kpis.totalMessages ?? totalMessages ?? 0 %}
+{% set totalUsers = kpis.totalUsers ?? totalUsers ?? 0 %}
+{% set activeUsers7 = kpis.activeUsers7 ?? activeUsers7d ?? 0 %}
+{% set activeUsers30 = kpis.activeUsers30 ?? activeUsers30d ?? 0 %}
+{% set topUserName = kpis.topUserName ?? topUserName ?? 'N/A' %}
+{% set topUserMessages = kpis.topUserMessages ?? topUserCount ?? 0 %}
+{% set messagesToday = kpis.messagesToday ?? 0 %}
+{% set messagesWeek = kpis.messagesWeek ?? 0 %}
+{% set weekAvg = messagesWeek > 0 ? (messagesWeek / 7) : 0 %}
+{% set messagesDelta = weekAvg > 0 ? ((messagesToday - weekAvg) / weekAvg * 100)|round(0) : 0 %}
+{% set usersDelta = totalUsers > 0 ? ((activeUsers7 / totalUsers) * 100)|round(0) : 0 %}
+{% set active7Delta = activeUsers30 > 0 ? ((activeUsers7 / activeUsers30) * 100)|round(0) : 0 %}
+{% set active30Delta = totalUsers > 0 ? ((activeUsers30 / totalUsers) * 100)|round(0) : 0 %}
+{% set topUserShare = totalMessages > 0 ? ((topUserMessages / totalMessages) * 100)|round(1) : 0 %}
+{% set inactiveUsers30 = (totalUsers - activeUsers30) > 0 ? (totalUsers - activeUsers30) : 0 %}
+{% set activeRate30 = totalUsers > 0 ? ((activeUsers30 / totalUsers) * 100)|round(1) : 0 %}
+{% set currentPeriod = app.request.query.get('period', '7d') %}
+{% set routeName = app.request.attributes.get('_route') %}
+{% set routeParams = app.request.query.all %}
+{% set maxUserMessages = topUsers|length ? topUsers[0].messageCount : 0 %}
+{% set updateDiff = ('now'|date('U')) - (generatedAt|date('U')) %}
+{% set updateLabel = updateDiff <= 90 ? 'Updated just now' : 'Live' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .chat-stats-dashboard {
+            --bg-app: #f5f7fb;
+            --bg-card: #ffffff;
+            --radius: 12px;
+            --text-main: #0f172a;
+            --text-soft: #64748b;
+            --line: #e8edf5;
+            --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.05);
+            --shadow-md: 0 14px 30px rgba(15, 23, 42, 0.09);
+            background: var(--bg-app);
+            min-height: 100%;
+            padding: 1.5rem;
+            border-radius: 14px;
+        }
+
+        .premium-card {
+            background: var(--bg-card);
+            border: 0;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 1.25rem;
+        }
+
+        .dashboard-head {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .dashboard-subtitle {
+            color: var(--text-soft);
+            font-size: .875rem;
+        }
+
+        .live-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            padding: .25rem .65rem;
+            border-radius: 999px;
+            font-size: .75rem;
+            font-weight: 600;
+            color: #15803d;
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, .55);
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, .55); }
+            70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .period-switch .btn {
+            min-width: 92px;
+            border-radius: 10px !important;
+            font-weight: 600;
+        }
+
+        .kpi-card {
+            position: relative;
+            overflow: hidden;
+            transition: transform .22s ease, box-shadow .22s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .kpi-blue { background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%); }
+        .kpi-violet { background: linear-gradient(180deg, #faf7ff 0%, #ffffff 100%); }
+        .kpi-green { background: linear-gradient(180deg, #f7fdf9 0%, #ffffff 100%); }
+        .kpi-orange { background: linear-gradient(180deg, #fff9f4 0%, #ffffff 100%); }
+
+        .kpi-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kpi-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .icon-blue { background: rgba(37, 99, 235, .14); color: #1d4ed8; }
+        .icon-violet { background: rgba(124, 58, 237, .14); color: #6d28d9; }
+        .icon-green { background: rgba(34, 197, 94, .16); color: #15803d; }
+        .icon-orange { background: rgba(249, 115, 22, .14); color: #c2410c; }
+
+        .kpi-value {
+            color: var(--text-main);
+            font-weight: 700;
+            line-height: 1.1;
+            font-size: 1.75rem;
+            margin-top: .25rem;
+        }
+
+        .kpi-label {
+            color: var(--text-soft);
+            font-size: .85rem;
+            margin-top: .2rem;
+        }
+
+        .delta-badge {
+            font-size: .75rem;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: .25rem .55rem;
+        }
+
+        .delta-up {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .delta-down {
+            color: #991b1b;
+            background: #fee2e2;
+        }
+
+        .section-title {
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .section-caption {
+            color: var(--text-soft);
+            font-size: .82rem;
+            margin-top: .2rem;
+        }
+
+        .chart-wrap {
+            height: 340px;
+        }
+
+        .chart-wrap-sm {
+            height: 230px;
+        }
+
+        .donut-canvas-wrap {
+            height: 230px;
+            position: relative;
+        }
+
+        .donut-stat {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fafcff;
+            padding: .65rem .75rem;
+        }
+
+        .donut-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: .35rem;
+        }
+
+        .donut-dot-active {
+            background: #22c55e;
+        }
+
+        .donut-dot-inactive {
+            background: #94a3b8;
+        }
+
+        .trend-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: .22rem .6rem;
+            border-radius: 999px;
+            background: #f1f5ff;
+            color: #1e3a8a;
+            font-size: .74rem;
+            font-weight: 600;
+        }
+
+        .activity-scroll {
+            max-height: 340px;
+            overflow-y: auto;
+            padding-right: .35rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: .7rem;
+            padding: .72rem 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .activity-item:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .activity-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .activity-icon svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .activity-time {
+            color: var(--text-soft);
+            font-size: .74rem;
+            white-space: nowrap;
+        }
+
+        .status-good {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .status-warn {
+            color: #9a3412;
+            background: #ffedd5;
+        }
+
+        .avatar-initial {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: .8rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #dbeafe;
+        }
+
+        .top-pill {
+            font-size: .69rem;
+            background: #f59e0b;
+            color: #ffffff;
+            border-radius: 999px;
+            padding: .2rem .55rem;
+            font-weight: 700;
+            margin-left: .45rem;
+        }
+
+        .modern-table thead th {
+            color: var(--text-soft);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            font-size: .72rem;
+            border-bottom: 1px solid var(--line);
+            padding-top: .95rem;
+            padding-bottom: .95rem;
+        }
+
+        .modern-table tbody td {
+            border-color: var(--line);
+            padding-top: .9rem;
+            padding-bottom: .9rem;
+        }
+
+        .progress-thin {
+            height: 6px;
+            border-radius: 999px;
+            background: #edf2f7;
+        }
+
+        .progress-thin .progress-bar {
+            border-radius: 999px;
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+        }
+
+        .table-user-email {
+            color: var(--text-soft);
+            font-size: .78rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .chat-stats-dashboard {
+                padding: 1rem;
+            }
+
+            .chart-wrap {
+                height: 300px;
+            }
+
+            .activity-scroll {
+                max-height: 300px;
+            }
+
+            .chart-wrap-sm,
+            .donut-canvas-wrap {
+                height: 210px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="chat-stats-dashboard"
+     data-stats-endpoint="{{ path('admin_chat_stats_data') }}"
+     data-page-endpoint="{{ path(routeName) }}"
+     data-period="{{ currentPeriod }}">
+    <div class="premium-card dashboard-head mb-4">
+        <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
+            <div>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                    <h1 class="h3 mb-0">Statistiques du Chat</h1>
+                    <span class="live-pill" id="stats-live-badge">
+                        <span class="live-dot"></span>{{ updateLabel }}
+                    </span>
+                </div>
+                <p class="dashboard-subtitle mb-0">
+                    Timezone: <span id="stats-timezone">{{ timezone }}</span> | Last update: <span id="stats-last-update">{{ generatedAt|date('d/m/Y H:i') }}</span>
+                </p>
+            </div>
+            <div class="btn-group period-switch" role="group" aria-label="Filtre periode">
+                <a href="{{ path(routeName, routeParams|merge({ period: 'today' })) }}"
+                   data-period="today"
+                   class="btn btn-sm js-period-btn {{ currentPeriod == 'today' ? 'btn-primary' : 'btn-outline-secondary' }}">Aujourd'hui</a>
+                <a href="{{ path(routeName, routeParams|merge({ period: '7d' })) }}"
+                   data-period="7d"
+                   class="btn btn-sm js-period-btn {{ currentPeriod == '7d' ? 'btn-primary' : 'btn-outline-secondary' }}">7 jours</a>
+                <a href="{{ path(routeName, routeParams|merge({ period: '30d' })) }}"
+                   data-period="30d"
+                   class="btn btn-sm js-period-btn {{ currentPeriod == '30d' ? 'btn-primary' : 'btn-outline-secondary' }}">30 jours</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="premium-card kpi-card kpi-blue h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="kpi-icon icon-blue">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16M4 12h16M4 19h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </span>
+                    <span id="delta-total-messages" class="delta-badge {{ messagesDelta >= 0 ? 'delta-up' : 'delta-down' }}">
+                        {{ messagesDelta >= 0 ? '+' : '' }}{{ messagesDelta }}%
+                    </span>
+                </div>
+                <div class="kpi-value" id="kpi-total-messages">{{ totalMessages|number_format(0, ',', ' ') }}</div>
+                <div class="kpi-label">Total messages</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="premium-card kpi-card kpi-violet h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="kpi-icon icon-violet">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M16 11c1.66 0 3-1.79 3-4s-1.34-4-3-4-3 1.79-3 4 1.34 4 3 4ZM8 11c1.66 0 3-1.79 3-4S9.66 3 8 3 5 4.79 5 7s1.34 4 3 4ZM8 13c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Zm8 0c-.33 0-.7.02-1.08.05 1.33.97 2.08 2.24 2.08 3.95v2h7v-2c0-2.66-5.33-4-8-4Z" fill="currentColor"/></svg>
+                    </span>
+                    <span id="delta-total-users" class="delta-badge {{ usersDelta >= 0 ? 'delta-up' : 'delta-down' }}">
+                        {{ usersDelta >= 0 ? '+' : '' }}{{ usersDelta }}%
+                    </span>
+                </div>
+                <div class="kpi-value" id="kpi-total-users">{{ totalUsers|number_format(0, ',', ' ') }}</div>
+                <div class="kpi-label">Total utilisateurs</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="premium-card kpi-card kpi-green h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="kpi-icon icon-green">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </span>
+                    <span id="delta-active-users-7" class="delta-badge {{ active7Delta >= 0 ? 'delta-up' : 'delta-down' }}">
+                        {{ active7Delta >= 0 ? '+' : '' }}{{ active7Delta }}%
+                    </span>
+                </div>
+                <div class="kpi-value" id="kpi-active-users-7">{{ activeUsers7|number_format(0, ',', ' ') }}</div>
+                <div class="kpi-label">Actifs sur 7 jours</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="premium-card kpi-card kpi-orange h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="kpi-icon icon-orange">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5l3 3M12 3a9 9 0 100 18 9 9 0 000-18Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span id="delta-active-users-30" class="delta-badge {{ active30Delta >= 0 ? 'delta-up' : 'delta-down' }}">
+                        {{ active30Delta >= 0 ? '+' : '' }}{{ active30Delta }}%
+                    </span>
+                </div>
+                <div class="kpi-value" id="kpi-active-users-30">{{ activeUsers30|number_format(0, ',', ' ') }}</div>
+                <div class="kpi-label">Actifs sur 30 jours</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-8">
+            <div class="premium-card h-100">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                    <div>
+                        <h5 class="section-title">Activite des messages</h5>
+                        <div class="section-caption">Distribution horaire avec mise en avant du pic</div>
+                    </div>
+                    <span id="top-user-badge" class="badge rounded-pill text-bg-light">Top user: {{ topUserName }} ({{ topUserMessages|number_format(0, ',', ' ') }})</span>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="messagesActivityChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="premium-card h-100">
+                <div class="mb-2">
+                    <h5 class="section-title">Activite recente</h5>
+                    <div class="section-caption">Flux live des signaux importants</div>
+                </div>
+                <div class="activity-scroll" id="recent-activity-list">
+                    <div class="activity-item">
+                        <span class="activity-icon icon-blue">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v10H7l-3 3V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                        </span>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">Nouveaux messages detectes</div>
+                            <div class="small text-muted">{{ messagesToday|number_format(0, ',', ' ') }} messages aujourd'hui</div>
+                        </div>
+                        <span class="badge status-good">{{ messagesDelta >= 0 ? '+' : '' }}{{ messagesDelta }}%</span>
+                    </div>
+                    <div class="activity-item">
+                        <span class="activity-icon icon-orange">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M4 14l4-4 3 3 5-6 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">Pic d'activite observe</div>
+                            <div class="small text-muted">Le graphe principal annote automatiquement le max horaire.</div>
+                        </div>
+                        <span class="badge status-warn">peak</span>
+                    </div>
+                    <div class="activity-item">
+                        <span class="activity-icon icon-green">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        </span>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">Nouvelle activite utilisateur</div>
+                            <div class="small text-muted">{{ activeUsers7|number_format(0, ',', ' ') }} utilisateurs actifs sur 7 jours</div>
+                        </div>
+                        <small class="activity-time">{{ generatedAt|date('H:i') }}</small>
+                    </div>
+                    {% for user in topUsers|slice(0, 8) %}
+                        <div class="activity-item">
+                            <span class="activity-icon icon-violet">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a5 5 0 100-10 5 5 0 000 10Zm-8 9a8 8 0 0116 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            </span>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold">{{ user.username }}</div>
+                                <div class="small text-muted">{{ user.messageCount|number_format(0, ',', ' ') }} messages</div>
+                            </div>
+                            <small class="activity-time">{{ ui.relative_time(user.lastActivity) }}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="premium-card h-100">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                    <div>
+                        <h5 class="section-title">Repartition utilisateurs</h5>
+                        <div class="section-caption">Actifs (30j) vs inactifs</div>
+                    </div>
+                    <span id="active-rate-badge" class="badge rounded-pill text-bg-light">{{ activeRate30 }}% actifs</span>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="donut-stat">
+                            <div class="small text-muted mb-1"><span class="donut-dot donut-dot-active"></span>Actifs</div>
+                            <div id="donut-active-count" class="fw-bold">{{ activeUsers30|number_format(0, ',', ' ') }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="donut-stat">
+                            <div class="small text-muted mb-1"><span class="donut-dot donut-dot-inactive"></span>Inactifs</div>
+                            <div id="donut-inactive-count" class="fw-bold">{{ inactiveUsers30|number_format(0, ',', ' ') }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="donut-canvas-wrap">
+                    <canvas id="usersDonutChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="premium-card h-100">
+                <div class="d-flex align-items-start justify-content-between mb-2">
+                    <div>
+                        <h5 class="section-title">Tendance 7 jours</h5>
+                        <div class="section-caption">Courbe lisse avec zone gradient</div>
+                    </div>
+                    <span id="trend-total-badge" class="badge rounded-pill text-bg-light">{{ messagesWeek|number_format(0, ',', ' ') }} msgs</span>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span id="trend-average-pill" class="trend-pill">Moyenne: {{ weekAvg|round(1) }} / jour</span>
+                    <span id="trend-today-pill" class="trend-pill">Aujourd'hui: {{ messagesToday|number_format(0, ',', ' ') }}</span>
+                </div>
+                <div class="chart-wrap-sm">
+                    <canvas id="messagesTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="premium-card">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h5 class="section-title">Top 10 utilisateurs actifs</h5>
+            <span id="top-user-share-badge" class="badge rounded-pill text-bg-light">{{ topUserName }} domine avec {{ topUserShare }}%</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table modern-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">Rang</th>
+                        <th>Utilisateur</th>
+                        <th style="min-width: 260px;">Activite</th>
+                        <th style="width: 170px;">Derniere activite</th>
+                    </tr>
+                </thead>
+                <tbody id="top-users-table-body">
+                    {% for user in topUsers %}
+                        {% set progress = maxUserMessages > 0 ? ((user.messageCount / maxUserMessages) * 100)|round(0) : 0 %}
+                        <tr>
+                            <td class="fw-semibold text-muted">#{{ loop.index }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="avatar-initial">{{ ui.initials(user.username) }}</span>
+                                    <div>
+                                        <div class="fw-semibold">
+                                            {{ user.username }}
+                                            {% if loop.first %}
+                                                <span class="top-pill">Top 1</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="table-user-email">{{ user.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span class="fw-semibold">{{ user.messageCount|number_format(0, ',', ' ') }} msgs</span>
+                                    <span class="text-muted">{{ progress }}%</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar" role="progressbar" style="width: {{ progress }}%;"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-muted small">{{ ui.relative_time(user.lastActivity) }}</span>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">Aucune donnee.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            const root = document.querySelector('.chat-stats-dashboard');
+            const hourlyRaw = {{ (charts.hourly ?? messagesByHour ?? { labels: [], data: [] })|json_encode|raw }};
+            const dailyRaw = {{ (charts.daily ?? messagesByDay ?? { labels: [], data: [] })|json_encode|raw }};
+            const initialKpis = {{ kpis|json_encode|raw }};
+            const initialTimezone = {{ timezone|json_encode|raw }};
+            const initialGeneratedAt = {{ generatedAt|date('c')|json_encode|raw }};
+
+            const activityCanvas = document.getElementById('messagesActivityChart');
+            const trendCanvas = document.getElementById('messagesTrendChart');
+            const usersCanvas = document.getElementById('usersDonutChart');
+
+            if (!root || !activityCanvas || !trendCanvas || !usersCanvas || typeof Chart === 'undefined') {
+                return;
+            }
+
+            const refs = {
+                timezone: document.getElementById('stats-timezone'),
+                lastUpdate: document.getElementById('stats-last-update'),
+                liveBadge: document.getElementById('stats-live-badge'),
+                kpiTotalMessages: document.getElementById('kpi-total-messages'),
+                kpiTotalUsers: document.getElementById('kpi-total-users'),
+                kpiActiveUsers7: document.getElementById('kpi-active-users-7'),
+                kpiActiveUsers30: document.getElementById('kpi-active-users-30'),
+                deltaTotalMessages: document.getElementById('delta-total-messages'),
+                deltaTotalUsers: document.getElementById('delta-total-users'),
+                deltaActiveUsers7: document.getElementById('delta-active-users-7'),
+                deltaActiveUsers30: document.getElementById('delta-active-users-30'),
+                topUserBadge: document.getElementById('top-user-badge'),
+                topUserShareBadge: document.getElementById('top-user-share-badge'),
+                activeRateBadge: document.getElementById('active-rate-badge'),
+                donutActiveCount: document.getElementById('donut-active-count'),
+                donutInactiveCount: document.getElementById('donut-inactive-count'),
+                trendTotalBadge: document.getElementById('trend-total-badge'),
+                trendAveragePill: document.getElementById('trend-average-pill'),
+                trendTodayPill: document.getElementById('trend-today-pill'),
+                activityList: document.getElementById('recent-activity-list'),
+                topUsersBody: document.getElementById('top-users-table-body')
+            };
+
+            const parseSeries = function (rawValue) {
+                let value = rawValue;
+
+                if (typeof value === 'string') {
+                    try {
+                        value = JSON.parse(value);
+                    } catch (e) {
+                        return { labels: [], data: [] };
+                    }
+                }
+
+                if (Array.isArray(value)) {
+                    if (value.length > 0 && typeof value[0] === 'object' && value[0] !== null) {
+                        return {
+                            labels: value.map(function (item, index) {
+                                return item.label || item.date || item.day || item.hour || ('#' + (index + 1));
+                            }),
+                            data: value.map(function (item) {
+                                return Number(item.data ?? item.count ?? item.value ?? 0) || 0;
+                            })
+                        };
+                    }
+
+                    return {
+                        labels: value.map(function (_, index) { return String(index + 1); }),
+                        data: value.map(function (item) { return Number(item) || 0; })
+                    };
+                }
+
+                if (value && typeof value === 'object') {
+                    const labels = Array.isArray(value.labels) ? value.labels : [];
+                    const data = Array.isArray(value.data) ? value.data : [];
+
+                    return {
+                        labels: labels,
+                        data: data.map(function (item) { return Number(item) || 0; })
+                    };
+                }
+
+                return { labels: [], data: [] };
+            };
+
+            const normalizeSeries = function (series, fallbackLabel) {
+                const data = Array.isArray(series.data) ? series.data : [];
+                const labels = Array.isArray(series.labels) ? series.labels : [];
+                const hasSameLength = labels.length === data.length && labels.length > 0;
+
+                return {
+                    labels: hasSameLength ? labels : data.map(function (_, index) { return fallbackLabel + ' ' + (index + 1); }),
+                    data: data
+                };
+            };
+
+            const numberFormatter = new Intl.NumberFormat('fr-FR');
+            const dateFormatter = new Intl.DateTimeFormat('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const escapeHtml = function (value) {
+                return String(value ?? '')
+                    .replaceAll('&', '&amp;')
+                    .replaceAll('<', '&lt;')
+                    .replaceAll('>', '&gt;')
+                    .replaceAll('"', '&quot;')
+                    .replaceAll("'", '&#039;');
+            };
+
+            const formatNumber = function (value) {
+                return numberFormatter.format(Number(value) || 0);
+            };
+
+            const formatDateTime = function (value) {
+                const date = value ? new Date(value) : null;
+                if (!date || Number.isNaN(date.getTime())) {
+                    return '-';
+                }
+
+                return dateFormatter.format(date).replace(',', '');
+            };
+
+            const formatRelativeTime = function (value) {
+                const date = value ? new Date(value) : null;
+                if (!date || Number.isNaN(date.getTime())) {
+                    return '-';
+                }
+
+                const diffSeconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+                if (diffSeconds < 60) {
+                    return 'a l\'instant';
+                }
+                if (diffSeconds < 3600) {
+                    return 'il y a ' + Math.floor(diffSeconds / 60) + ' min';
+                }
+                if (diffSeconds < 86400) {
+                    return 'il y a ' + Math.floor(diffSeconds / 3600) + ' h';
+                }
+                if (diffSeconds < 604800) {
+                    return 'il y a ' + Math.floor(diffSeconds / 86400) + ' j';
+                }
+
+                return formatDateTime(value);
+            };
+
+            const getInitials = function (name) {
+                const value = String(name || 'Utilisateur').trim();
+                if (!value) {
+                    return 'U';
+                }
+
+                const parts = value.split(/\s+/).filter(Boolean);
+                if (parts.length >= 2) {
+                    return (parts[0].slice(0, 1) + parts[1].slice(0, 1)).toUpperCase();
+                }
+
+                return parts[0].slice(0, 2).toUpperCase();
+            };
+
+            const computeDerived = function (kpis) {
+                const totalMessages = Number(kpis.totalMessages) || 0;
+                const totalUsers = Number(kpis.totalUsers) || 0;
+                const activeUsers7 = Number(kpis.activeUsers7) || 0;
+                const activeUsers30 = Number(kpis.activeUsers30) || 0;
+                const topUserMessages = Number(kpis.topUserMessages) || 0;
+                const messagesToday = Number(kpis.messagesToday) || 0;
+                const messagesWeek = Number(kpis.messagesWeek) || 0;
+
+                const weekAvg = messagesWeek > 0 ? messagesWeek / 7 : 0;
+                const messagesDelta = weekAvg > 0 ? Math.round(((messagesToday - weekAvg) / weekAvg) * 100) : 0;
+                const usersDelta = totalUsers > 0 ? Math.round((activeUsers7 / totalUsers) * 100) : 0;
+                const active7Delta = activeUsers30 > 0 ? Math.round((activeUsers7 / activeUsers30) * 100) : 0;
+                const active30Delta = totalUsers > 0 ? Math.round((activeUsers30 / totalUsers) * 100) : 0;
+                const inactiveUsers30 = Math.max(totalUsers - activeUsers30, 0);
+                const activeRate30 = totalUsers > 0 ? Math.round((activeUsers30 / totalUsers) * 10) / 10 : 0;
+                const topUserShare = totalMessages > 0 ? Math.round((topUserMessages / totalMessages) * 10) / 10 : 0;
+                const activeRatio = totalUsers > 0 ? Math.min(100, Math.round((activeUsers30 / totalUsers) * 100)) : 0;
+
+                return {
+                    weekAvg: weekAvg,
+                    messagesDelta: messagesDelta,
+                    usersDelta: usersDelta,
+                    active7Delta: active7Delta,
+                    active30Delta: active30Delta,
+                    inactiveUsers30: inactiveUsers30,
+                    activeRate30: activeRate30,
+                    topUserShare: topUserShare,
+                    activeRatio: activeRatio
+                };
+            };
+
+            const setDeltaBadge = function (element, delta) {
+                if (!element) {
+                    return;
+                }
+
+                const value = Number(delta) || 0;
+                element.textContent = (value >= 0 ? '+' : '') + value + '%';
+                element.classList.remove('delta-up', 'delta-down');
+                element.classList.add(value >= 0 ? 'delta-up' : 'delta-down');
+            };
+
+            Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', Arial, sans-serif";
+            Chart.defaults.color = '#64748b';
+            Chart.defaults.animation = {
+                duration: 850,
+                easing: 'easeOutQuart'
+            };
+
+            const peakAnnotationPlugin = {
+                id: 'peakAnnotation',
+                afterDatasetsDraw(chart, args, pluginOptions) {
+                    if (!pluginOptions || !pluginOptions.enabled) {
+                        return;
+                    }
+
+                    const datasetIndex = pluginOptions.datasetIndex || 0;
+                    const dataset = chart.data.datasets[datasetIndex];
+                    if (!dataset || !Array.isArray(dataset.data) || dataset.data.length === 0) {
+                        return;
+                    }
+
+                    const maxValue = Math.max(...dataset.data);
+                    const index = dataset.data.indexOf(maxValue);
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    const element = meta && meta.data ? meta.data[index] : null;
+                    if (!element) {
+                        return;
+                    }
+
+                    const ctx = chart.ctx;
+                    const x = element.x;
+                    const y = element.y;
+                    const label = (pluginOptions.labelPrefix || 'Pic') + ': ' + maxValue;
+
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(249, 115, 22, 0.9)';
+                    ctx.fillStyle = 'rgba(249, 115, 22, 1)';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([4, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - 8);
+                    ctx.lineTo(x, chart.chartArea.top + 8);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#9a3412';
+                    ctx.font = '600 11px Segoe UI, sans-serif';
+                    ctx.fillText(label, x + 8, y - 10);
+                    ctx.restore();
+                }
+            };
+
+            const doughnutCenterTextPlugin = {
+                id: 'doughnutCenterText',
+                afterDraw(chart, args, pluginOptions) {
+                    if (chart.config.type !== 'doughnut' || !pluginOptions || !pluginOptions.text) {
+                        return;
+                    }
+
+                    const area = chart.chartArea;
+                    if (!area) {
+                        return;
+                    }
+
+                    const ctx = chart.ctx;
+                    const centerX = (area.left + area.right) / 2;
+                    const centerY = (area.top + area.bottom) / 2;
+
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#0f172a';
+                    ctx.font = '700 19px Segoe UI, sans-serif';
+                    ctx.fillText(pluginOptions.text, centerX, centerY - 6);
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '600 11px Segoe UI, sans-serif';
+                    ctx.fillText(pluginOptions.subtext || '', centerX, centerY + 13);
+                    ctx.restore();
+                }
+            };
+
+            const emptyStatePlugin = {
+                id: 'emptyState',
+                afterDraw(chart, args, pluginOptions) {
+                    if (!pluginOptions || !pluginOptions.enabled) {
+                        return;
+                    }
+
+                    const dataset = chart.data.datasets && chart.data.datasets[0];
+                    const values = dataset && Array.isArray(dataset.data)
+                        ? dataset.data.map(function (value) { return Number(value) || 0; })
+                        : [];
+                    const hasPositiveValue = values.some(function (value) { return value > 0; });
+
+                    if (hasPositiveValue) {
+                        return;
+                    }
+
+                    const area = chart.chartArea;
+                    if (!area) {
+                        return;
+                    }
+
+                    const ctx = chart.ctx;
+                    const centerX = (area.left + area.right) / 2;
+                    const centerY = (area.top + area.bottom) / 2;
+
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '600 12px Segoe UI, sans-serif';
+                    ctx.fillText(pluginOptions.label || 'Aucune donnee disponible', centerX, centerY);
+                    ctx.restore();
+                }
+            };
+
+            Chart.register(peakAnnotationPlugin, doughnutCenterTextPlugin, emptyStatePlugin);
+
+            const tooltipOptions = {
+                backgroundColor: '#0f172a',
+                titleColor: '#ffffff',
+                bodyColor: '#cbd5e1',
+                borderColor: 'rgba(255,255,255,.1)',
+                borderWidth: 1,
+                padding: 10,
+                displayColors: false
+            };
+
+            const gridColor = 'rgba(148, 163, 184, .18)';
+            const ticksColor = '#64748b';
+            const hourlySeries = normalizeSeries(parseSeries(hourlyRaw), 'H');
+            const dailySeries = normalizeSeries(parseSeries(dailyRaw), 'J');
+            const hourlyData = hourlySeries.data;
+            const dailyData = dailySeries.data;
+            const dailyMax = dailyData.length ? Math.max(...dailyData) : 0;
+            const safeTotalUsers = Math.max(Number(initialKpis.totalUsers) || 0, 0);
+            const safeActiveUsers = Math.max(Number(initialKpis.activeUsers30) || 0, 0);
+            const safeInactiveUsers = Math.max(safeTotalUsers - safeActiveUsers, 0);
+            const activeRatio = safeTotalUsers > 0 ? Math.min(100, Math.round((safeActiveUsers / safeTotalUsers) * 100)) : 0;
+
+            const activityChart = new Chart(activityCanvas, {
+                type: 'bar',
+                data: {
+                    labels: hourlySeries.labels || [],
+                    datasets: [
+                        {
+                            label: 'Messages',
+                            data: hourlyData,
+                            backgroundColor: 'rgba(37, 99, 235, .6)',
+                            borderRadius: 8,
+                            borderSkipped: false,
+                            maxBarThickness: 24
+                        },
+                        {
+                            type: 'line',
+                            label: 'Tendance',
+                            data: hourlyData,
+                            borderColor: '#4f46e5',
+                            borderWidth: 2.2,
+                            tension: .4,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: tooltipOptions,
+                        peakAnnotation: {
+                            enabled: true,
+                            datasetIndex: 0,
+                            labelPrefix: 'Pic'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: ticksColor }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: gridColor },
+                            ticks: { color: ticksColor, precision: 0 }
+                        }
+                    }
+                }
+            });
+
+            const usersChart = new Chart(usersCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Actifs (30j)', 'Inactifs'],
+                    datasets: [{
+                        data: [
+                            safeActiveUsers,
+                            safeInactiveUsers
+                        ],
+                        backgroundColor: ['#22c55e', '#94a3b8'],
+                        borderColor: '#ffffff',
+                        borderWidth: 4,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        tooltip: tooltipOptions,
+                        doughnutCenterText: {
+                            text: activeRatio + '%',
+                            subtext: 'actifs 30j'
+                        },
+                        emptyState: {
+                            enabled: true,
+                            label: 'Aucune activite utilisateur'
+                        },
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 8,
+                                padding: 14
+                            }
+                        }
+                    }
+                }
+            });
+
+            const trendChart = new Chart(trendCanvas, {
+                type: 'line',
+                data: {
+                    labels: dailySeries.labels || [],
+                    datasets: [{
+                        label: 'Messages',
+                        data: dailyData,
+                        borderColor: '#6366f1',
+                        borderWidth: 2.4,
+                        tension: .42,
+                        fill: true,
+                        pointRadius: dailyData.length <= 8 ? 3 : 0,
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: '#6366f1',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        spanGaps: true,
+                        backgroundColor: function (context) {
+                            const chart = context.chart;
+                            const area = chart.chartArea;
+                            if (!area) {
+                                return 'rgba(99, 102, 241, .24)';
+                            }
+                            const gradient = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
+                            gradient.addColorStop(0, 'rgba(99, 102, 241, .38)');
+                            gradient.addColorStop(1, 'rgba(99, 102, 241, .06)');
+                            return gradient;
+                        }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: tooltipOptions,
+                        emptyState: {
+                            enabled: true,
+                            label: 'Pas assez de donnees sur 7 jours'
+                        },
+                        peakAnnotation: {
+                            enabled: true,
+                            datasetIndex: 0,
+                            labelPrefix: 'Pic 7j'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: ticksColor }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: dailyMax > 0 ? Math.ceil(dailyMax * 1.25) : 5,
+                            grid: { color: gridColor },
+                            ticks: { color: ticksColor, precision: 0 }
+                        }
+                    }
+                }
+            });
+
+            const renderTopUsersTable = function (topUsers) {
+                if (!refs.topUsersBody || !Array.isArray(topUsers)) {
+                    return;
+                }
+
+                if (topUsers.length === 0) {
+                    refs.topUsersBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Aucune donnee.</td></tr>';
+                    return;
+                }
+
+                const maxMessages = topUsers.reduce(function (max, user) {
+                    return Math.max(max, Number(user.messageCount) || 0);
+                }, 0);
+
+                refs.topUsersBody.innerHTML = topUsers.map(function (user, index) {
+                    const count = Number(user.messageCount) || 0;
+                    const progress = maxMessages > 0 ? Math.round((count / maxMessages) * 100) : 0;
+
+                    return '' +
+                        '<tr>' +
+                            '<td class="fw-semibold text-muted">#' + (index + 1) + '</td>' +
+                            '<td>' +
+                                '<div class="d-flex align-items-center gap-3">' +
+                                    '<span class="avatar-initial">' + escapeHtml(getInitials(user.username)) + '</span>' +
+                                    '<div>' +
+                                        '<div class="fw-semibold">' + escapeHtml(user.username || '-') + (index === 0 ? '<span class="top-pill">Top 1</span>' : '') + '</div>' +
+                                        '<div class="table-user-email">' + escapeHtml(user.email || '-') + '</div>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</td>' +
+                            '<td>' +
+                                '<div class="d-flex justify-content-between small mb-1">' +
+                                    '<span class="fw-semibold">' + formatNumber(count) + ' msgs</span>' +
+                                    '<span class="text-muted">' + progress + '%</span>' +
+                                '</div>' +
+                                '<div class="progress progress-thin"><div class="progress-bar" role="progressbar" style="width:' + progress + '%;"></div></div>' +
+                            '</td>' +
+                            '<td><span class="text-muted small">' + escapeHtml(formatRelativeTime(user.lastActivity)) + '</span></td>' +
+                        '</tr>';
+                }).join('');
+            };
+
+            const renderRecentActivity = function (payload, derived) {
+                if (!refs.activityList) {
+                    return;
+                }
+
+                const kpis = payload.kpis || {};
+                const topUsers = Array.isArray(payload.topUsers) ? payload.topUsers : [];
+
+                const baseItems = '' +
+                    '<div class="activity-item">' +
+                        '<span class="activity-icon icon-blue"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v10H7l-3 3V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>' +
+                        '<div class="flex-grow-1"><div class="fw-semibold">Nouveaux messages detectes</div><div class="small text-muted">' + formatNumber(kpis.messagesToday) + ' messages aujourd\'hui</div></div>' +
+                        '<span class="badge status-good">' + (derived.messagesDelta >= 0 ? '+' : '') + derived.messagesDelta + '%</span>' +
+                    '</div>' +
+                    '<div class="activity-item">' +
+                        '<span class="activity-icon icon-orange"><svg viewBox="0 0 24 24" fill="none"><path d="M4 14l4-4 3 3 5-6 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
+                        '<div class="flex-grow-1"><div class="fw-semibold">Pic d\'activite observe</div><div class="small text-muted">Annotation automatique du max horaire.</div></div>' +
+                        '<span class="badge status-warn">peak</span>' +
+                    '</div>' +
+                    '<div class="activity-item">' +
+                        '<span class="activity-icon icon-green"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>' +
+                        '<div class="flex-grow-1"><div class="fw-semibold">Nouvelle activite utilisateur</div><div class="small text-muted">' + formatNumber(kpis.activeUsers7) + ' utilisateurs actifs sur 7 jours</div></div>' +
+                        '<small class="activity-time">' + escapeHtml(formatDateTime(payload.generatedAt)) + '</small>' +
+                    '</div>';
+
+                const userItems = topUsers.slice(0, 8).map(function (user) {
+                    return '' +
+                        '<div class="activity-item">' +
+                            '<span class="activity-icon icon-violet"><svg viewBox="0 0 24 24" fill="none"><path d="M12 12a5 5 0 100-10 5 5 0 000 10Zm-8 9a8 8 0 0116 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>' +
+                            '<div class="flex-grow-1"><div class="fw-semibold">' + escapeHtml(user.username || '-') + '</div><div class="small text-muted">' + formatNumber(user.messageCount) + ' messages</div></div>' +
+                            '<small class="activity-time">' + escapeHtml(formatRelativeTime(user.lastActivity)) + '</small>' +
+                        '</div>';
+                }).join('');
+
+                refs.activityList.innerHTML = baseItems + userItems;
+            };
+
+            const updateCharts = function (payload) {
+                const nextHourly = normalizeSeries(parseSeries(payload.charts && payload.charts.hourly ? payload.charts.hourly : { labels: [], data: [] }), 'H');
+                const nextDaily = normalizeSeries(parseSeries(payload.charts && payload.charts.daily ? payload.charts.daily : { labels: [], data: [] }), 'J');
+                const nextDailyMax = nextDaily.data.length ? Math.max(...nextDaily.data) : 0;
+                const totalUsers = Math.max(Number(payload.kpis.totalUsers) || 0, 0);
+                const activeUsers30 = Math.max(Number(payload.kpis.activeUsers30) || 0, 0);
+                const inactiveUsers30 = Math.max(totalUsers - activeUsers30, 0);
+                const activeRatio = totalUsers > 0 ? Math.min(100, Math.round((activeUsers30 / totalUsers) * 100)) : 0;
+
+                activityChart.data.labels = nextHourly.labels;
+                activityChart.data.datasets[0].data = nextHourly.data;
+                activityChart.data.datasets[1].data = nextHourly.data;
+                activityChart.update();
+
+                usersChart.data.datasets[0].data = [activeUsers30, inactiveUsers30];
+                usersChart.options.plugins.doughnutCenterText.text = activeRatio + '%';
+                usersChart.update();
+
+                trendChart.data.labels = nextDaily.labels;
+                trendChart.data.datasets[0].data = nextDaily.data;
+                trendChart.data.datasets[0].pointRadius = nextDaily.data.length <= 8 ? 3 : 0;
+                trendChart.options.scales.y.suggestedMax = nextDailyMax > 0 ? Math.ceil(nextDailyMax * 1.25) : 5;
+                trendChart.update();
+            };
+
+            const applyPayloadToDom = function (payload) {
+                if (!payload || !payload.kpis) {
+                    return;
+                }
+
+                const kpis = payload.kpis;
+                const derived = computeDerived(kpis);
+
+                if (refs.timezone) refs.timezone.textContent = payload.timezone || initialTimezone;
+                if (refs.lastUpdate) refs.lastUpdate.textContent = formatDateTime(payload.generatedAt || initialGeneratedAt);
+                if (refs.liveBadge) refs.liveBadge.innerHTML = '<span class="live-dot"></span>Updated just now';
+
+                if (refs.kpiTotalMessages) refs.kpiTotalMessages.textContent = formatNumber(kpis.totalMessages);
+                if (refs.kpiTotalUsers) refs.kpiTotalUsers.textContent = formatNumber(kpis.totalUsers);
+                if (refs.kpiActiveUsers7) refs.kpiActiveUsers7.textContent = formatNumber(kpis.activeUsers7);
+                if (refs.kpiActiveUsers30) refs.kpiActiveUsers30.textContent = formatNumber(kpis.activeUsers30);
+
+                setDeltaBadge(refs.deltaTotalMessages, derived.messagesDelta);
+                setDeltaBadge(refs.deltaTotalUsers, derived.usersDelta);
+                setDeltaBadge(refs.deltaActiveUsers7, derived.active7Delta);
+                setDeltaBadge(refs.deltaActiveUsers30, derived.active30Delta);
+
+                if (refs.topUserBadge) refs.topUserBadge.textContent = 'Top user: ' + (kpis.topUserName || 'N/A') + ' (' + formatNumber(kpis.topUserMessages) + ')';
+                if (refs.topUserShareBadge) refs.topUserShareBadge.textContent = (kpis.topUserName || 'N/A') + ' domine avec ' + derived.topUserShare + '%';
+                if (refs.activeRateBadge) refs.activeRateBadge.textContent = derived.activeRate30 + '% actifs';
+                if (refs.donutActiveCount) refs.donutActiveCount.textContent = formatNumber(kpis.activeUsers30);
+                if (refs.donutInactiveCount) refs.donutInactiveCount.textContent = formatNumber(derived.inactiveUsers30);
+                if (refs.trendTotalBadge) refs.trendTotalBadge.textContent = formatNumber(kpis.messagesWeek) + ' msgs';
+                if (refs.trendAveragePill) refs.trendAveragePill.textContent = 'Moyenne: ' + derived.weekAvg.toFixed(1) + ' / jour';
+                if (refs.trendTodayPill) refs.trendTodayPill.textContent = 'Aujourd\'hui: ' + formatNumber(kpis.messagesToday);
+
+                updateCharts(payload);
+
+                if (Array.isArray(payload.topUsers)) {
+                    renderTopUsersTable(payload.topUsers);
+                    renderRecentActivity(payload, derived);
+                }
+            };
+
+            const updatePeriodButtons = function (period) {
+                document.querySelectorAll('.js-period-btn').forEach(function (button) {
+                    const isActive = button.dataset.period === period;
+                    button.classList.toggle('btn-primary', isActive);
+                    button.classList.toggle('btn-outline-secondary', !isActive);
+                });
+            };
+
+            let currentPeriod = root.dataset.period || '7d';
+            let isRefreshing = false;
+
+            const fetchLiveStats = function () {
+                if (isRefreshing) {
+                    return;
+                }
+
+                const endpoint = root.dataset.statsEndpoint;
+                if (!endpoint) {
+                    return;
+                }
+
+                isRefreshing = true;
+                const url = new URL(endpoint, window.location.origin);
+                url.searchParams.set('period', currentPeriod);
+
+                fetch(url.toString(), { method: 'GET', headers: { 'Accept': 'application/json' } })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('stats fetch failed');
+                        }
+                        return response.json();
+                    })
+                    .then(function (payload) {
+                        applyPayloadToDom(payload);
+                    })
+                    .catch(function () {
+                        if (refs.liveBadge) {
+                            refs.liveBadge.innerHTML = '<span class="live-dot"></span>Live';
+                        }
+                    })
+                    .finally(function () {
+                        isRefreshing = false;
+                    });
+            };
+
+            document.querySelectorAll('.js-period-btn').forEach(function (button) {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const period = button.dataset.period || '7d';
+                    if (period === currentPeriod) {
+                        return;
+                    }
+
+                    currentPeriod = period;
+                    root.dataset.period = period;
+                    updatePeriodButtons(period);
+
+                    const nextUrl = new URL(window.location.href);
+                    nextUrl.searchParams.set('period', period);
+                    window.history.replaceState({}, '', nextUrl.toString());
+
+                    fetchLiveStats();
+                });
+            });
+
+            applyPayloadToDom({
+                timezone: initialTimezone,
+                generatedAt: initialGeneratedAt,
+                kpis: initialKpis,
+                charts: { hourly: hourlyRaw, daily: dailyRaw }
+            });
+            updatePeriodButtons(currentPeriod);
+            window.setInterval(fetchLiveStats, 30000);
+            fetchLiveStats();
+        })();
+    </script>
+{% endblock %}

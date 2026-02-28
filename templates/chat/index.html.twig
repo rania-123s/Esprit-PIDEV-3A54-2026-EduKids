@@ -1,0 +1,15 @@
+{% extends 'index.html.twig' %}
+
+{% block title %}Chat{% endblock %}
+
+{% block stylesheets %}
+	<link rel="stylesheet" href="{{ asset('assets/css/chat.css') }}?v=20260222-translate2">
+{% endblock %}
+
+{% block body %}
+{% include 'chat/_chat_app.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+	<script src="{{ asset('assets/js/chat.js') }}?v=20260222-translate3"></script>
+{% endblock %}
