@@ -85,8 +85,12 @@ class MessageController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function sendMessage(Conversation $conversation, Request $request): JsonResponse
     {
-        $this->assertCsrf($request);
-        $this->denyAccessUnlessGranted(ConversationVoter::MESSAGE, $conversation);
+        if (!$this->isCsrfTokenValid('chat_action', (string) ($request->headers->get('X-CSRF-TOKEN') ?? $request->request->get('_token')))) {
+            return $this->json(['error' => 'Token de sécurité invalide. Rechargez la page du chat.'], Response::HTTP_FORBIDDEN);
+        }
+        if (!$this->isGranted(ConversationVoter::MESSAGE, $conversation)) {
+            return $this->json(['error' => 'Vous n\'avez pas le droit d\'envoyer des messages dans cette conversation.'], Response::HTTP_FORBIDDEN);
+        }
         /** @var User $user */
         $user = $this->getUser();
 
@@ -94,26 +98,32 @@ class MessageController extends AbstractController
         $attachments = $this->extractAttachments($request);
 
         if ($content === '' && $attachments === []) {
-            return $this->json(['error' => 'Empty message.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['error' => 'Message vide.'], Response::HTTP_BAD_REQUEST);
         }
 
         try {
             $message = $this->chatService->createMessage($conversation, $user, $content, $attachments);
+
+            return $this->json($this->chatService->serializeMessage($message), Response::HTTP_CREATED);
         } catch (\InvalidArgumentException $exception) {
             return $this->json(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
-        } catch (\RuntimeException) {
-            return $this->json(['error' => 'Unable to upload attachment.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\RuntimeException $exception) {
+            return $this->json(['error' => $exception->getMessage() ?: 'Impossible d\'envoyer la pièce jointe.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Throwable $e) {
+            return $this->json(['error' => 'Erreur serveur : ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        return $this->json($this->chatService->serializeMessage($message), Response::HTTP_CREATED);
     }
 
     #[Route('/{id}/messages/audio', name: 'chat_message_audio_create', methods: ['POST'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_USER')]
     public function sendAudioMessage(Conversation $conversation, Request $request): JsonResponse
     {
-        $this->assertCsrf($request);
-        $this->denyAccessUnlessGranted(ConversationVoter::MESSAGE, $conversation);
+        if (!$this->isCsrfTokenValid('chat_action', (string) ($request->headers->get('X-CSRF-TOKEN') ?? $request->request->get('_token')))) {
+            return $this->json(['error' => 'Token de sécurité invalide. Rechargez la page du chat.'], Response::HTTP_FORBIDDEN);
+        }
+        if (!$this->isGranted(ConversationVoter::MESSAGE, $conversation)) {
+            return $this->json(['error' => 'Vous n\'avez pas le droit d\'envoyer des messages dans cette conversation.'], Response::HTTP_FORBIDDEN);
+        }
         /** @var User $user */
         $user = $this->getUser();
 

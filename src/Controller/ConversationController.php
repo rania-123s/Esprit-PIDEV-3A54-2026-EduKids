@@ -41,6 +41,10 @@ class ConversationController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function index(): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertCanUseChat($user);
+
         return $this->renderChatPage();
     }
 
@@ -48,6 +52,9 @@ class ConversationController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function show(Conversation $conversation): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->assertCanUseChat($user);
         $this->denyAccessUnlessGranted(ConversationVoter::VIEW, $conversation);
 
         return $this->renderChatPage($conversation);
@@ -59,6 +66,7 @@ class ConversationController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+        $this->assertCanUseChat($user);
         $search = $request->query->get('q');
         $conversations = $this->conversationRepository->findForUser($user, $search);
 
@@ -74,9 +82,10 @@ class ConversationController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function conversationSummary(Conversation $conversation): JsonResponse
     {
-        $this->denyAccessUnlessGranted(ConversationVoter::VIEW, $conversation);
         /** @var User $user */
         $user = $this->getUser();
+        $this->assertCanUseChat($user);
+        $this->denyAccessUnlessGranted(ConversationVoter::VIEW, $conversation);
 
         return $this->json($this->serializeConversationListItem($conversation, $user));
     }
@@ -506,6 +515,6 @@ class ConversationController extends AbstractController
             return;
         }
 
-        throw $this->createAccessDeniedException('Only admins and parents can perform this action.');
+        throw $this->createAccessDeniedException('Seuls les parents et les administrateurs peuvent accéder au chat.');
     }
 }

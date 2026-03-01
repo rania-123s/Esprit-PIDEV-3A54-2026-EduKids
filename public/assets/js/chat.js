@@ -1325,10 +1325,12 @@
     formData.append('audio', recordedAudioBlob, `voice-message.${extension}`);
     formData.append('duration', String(duration));
     formData.append('durationMs', String(duration * 1000));
+    formData.append('_token', csrf);
 
     try {
       const response = await apiFetch(resolveUrl(urls.messageAudioCreate, activeConversationId), {
         method: 'POST',
+        headers: { Accept: 'application/json' },
         body: formData,
       });
       const payload = await readJsonSafe(response);
@@ -2232,6 +2234,7 @@
 
     const formData = new FormData();
     formData.append('content', content);
+    formData.append('_token', csrf);
     selectedFiles.forEach((file) => {
       formData.append('attachments[]', file);
     });
@@ -2249,6 +2252,7 @@
     try {
       const response = await apiFetch(resolveUrl(urls.messageCreate, activeConversationId), {
         method: 'POST',
+        headers: { Accept: 'application/json' },
         body: formData,
       });
       const data = await readJsonSafe(response);

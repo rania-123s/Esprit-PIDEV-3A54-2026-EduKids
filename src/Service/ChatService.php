@@ -767,12 +767,13 @@ class ChatService
                 continue;
             }
 
+            $text = mb_substr($notificationText, 0, 255);
             $notification = (new Notification())
                 ->setReceiver($receiver)
                 ->setSender($sender)
                 ->setType(Notification::TYPE_MESSAGE)
                 ->setConversationId($conversationId)
-                ->setText($notificationText)
+                ->setText($text)
                 ->setIsRead(false);
 
             $this->em->persist($notification);

@@ -123,10 +123,12 @@
 						<a class="nav-link" href="{{ path('ecommerce_catalogue') }}">E-commerce</a>
 					</li>
 					{% if app.user %}
-					<!-- Nav item Chat -->
+					{% if is_granted('ROLE_ADMIN') or is_granted('ROLE_PARENT') %}
+					<!-- Nav item Chat (parents et admins uniquement) -->
 					<li class="nav-item">
-						<a class="nav-link" href="{{ path('chat_entry') }}">Chat</a>
+						<a class="nav-link" href="{{ path('chat_entry') }}" target="_blank" rel="noopener">Chat</a>
 					</li>
+					{% endif %}
 					{% endif %}
 
 				</ul>
@@ -247,7 +249,9 @@
 					</li>
 					<li> <hr class="dropdown-divider"></li>
 					<!-- Links -->
-					<li><a class="dropdown-item" href="{{ path('chat_entry') }}"><i class="bi bi-chat-dots fa-fw me-2"></i>Chat</a></li>
+					{% if is_granted('ROLE_ADMIN') or is_granted('ROLE_PARENT') %}
+					<li><a class="dropdown-item" href="{{ path('chat_entry') }}" target="_blank" rel="noopener"><i class="bi bi-chat-dots fa-fw me-2"></i>Chat</a></li>
+					{% endif %}
 					<li><a class="dropdown-item" href="{{ path('quiz_front_list') }}"><i class="bi bi-patch-question fa-fw me-2"></i>Quiz</a></li>
 					<li><a class="dropdown-item" href="{{ path('ecommerce_catalogue') }}"><i class="bi bi-cart fa-fw me-2"></i>E-commerce</a></li>
 					<li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>

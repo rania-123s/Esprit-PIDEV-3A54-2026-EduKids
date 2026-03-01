@@ -40,4 +40,50 @@ class UserRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * Returns one user with ROLE_ADMIN, or null if none.
+     */
+    public function findOneAdmin(): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.isActive = true')
+            ->andWhere('u.roles LIKE :roleAdmin')
+            ->setParameter('roleAdmin', '%ROLE_ADMIN%')
+            ->orderBy('u.id', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * Search users with ROLE_PARENT by first name, last name or email.
+     * Excludes the given user ID and returns at most $limit results.
+     *
+     * @return User[]
+     */
+    public function searchParentsByName(string $query, int $excludeUserId, int $limit = 20): array
+    {
+        if (mb_strlen($query) < 2) {
+            return [];
+        }
+
+        $term = '%' . addcslashes($query, '%_') . '%';
+
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.id != :excludeId')
+            ->andWhere('u.isActive = true')
+            ->andWhere('u.roles LIKE :roleParent')
+            ->andWhere(
+                'u.firstName LIKE :term OR u.lastName LIKE :term OR u.email LIKE :term'
+            )
+            ->setParameter('excludeId', $excludeUserId)
+            ->setParameter('roleParent', '%ROLE_PARENT%')
+            ->setParameter('term', $term)
+            ->orderBy('u.lastName', 'ASC')
+            ->addOrderBy('u.firstName', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

@@ -25,7 +25,7 @@ class ParentSearchController extends AbstractController
         $actor = $this->getUser();
 
         if (!$this->canUseParentChat($actor)) {
-            return $this->json(['error' => 'Only admins and parents can search parents.'], JsonResponse::HTTP_FORBIDDEN);
+            return $this->json(['error' => 'Seuls les parents et les administrateurs peuvent accéder au chat.'], JsonResponse::HTTP_FORBIDDEN);
         }
 
         $query = trim((string) $request->query->get('q', ''));

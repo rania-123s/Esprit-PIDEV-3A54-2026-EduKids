@@ -7,19 +7,39 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    uploads_directory: '%kernel.project_dir%/public/uploads'
-    images_directory: '%kernel.project_dir%/public/uploads/images'
-    # Chat (branche chat1)
-    chat_audio_max_size_bytes: 5242880
-    chat_audio_max_duration_seconds: 120
-    chat_audio_allowed_mime_types: ['audio/webm', 'audio/mpeg', 'audio/ogg', 'audio/wav']
     chat_upload_dir: '%kernel.project_dir%/public/uploads/chat'
     chat_upload_public_prefix: '/uploads/chat'
     chat_upload_max_size_bytes: 10485760
-    chat_upload_max_files_per_message: 5
-    chat_upload_allowed_mime_types: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf']
-    chat_auto_reply_admin_email: ''
-    chat_auto_reply_cooldown_minutes: 5
+    chat_upload_max_files_per_message: 10
+    chat_upload_allowed_mime_types:
+        - 'image/jpeg'
+        - 'image/jpg'
+        - 'image/png'
+        - 'image/webp'
+        - 'image/gif'
+        - 'image/bmp'
+        - 'application/pdf'
+        - 'application/msword'
+        - 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        - 'application/vnd.ms-excel'
+        - 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        - 'text/plain'
+        - 'audio/webm'
+        - 'audio/ogg'
+        - 'audio/mp4'
+        - 'audio/mpeg'
+        - 'video/webm'
+    chat_audio_max_size_bytes: 7340032
+    chat_audio_max_duration_seconds: 120
+    chat_audio_allowed_mime_types:
+        - 'audio/webm'
+        - 'audio/ogg'
+        - 'audio/mp4'
+        - 'audio/mpeg'
+        - 'video/webm'
+    chat_auto_reply_admin_email: 'admin@site.com'
+    chat_auto_reply_cooldown_minutes: 0
+    libretranslate_url: '%env(string:LIBRETRANSLATE_URL)%'
 
 services:
     # default configuration for services in *this* file
@@ -50,7 +70,6 @@ services:
 
     App\Service\LibreTranslateService:
         arguments:
-            $baseUrl: '%env(LIBRETRANSLATE_URL)%'
-
+            $baseUrl: '%libretranslate_url%'
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
