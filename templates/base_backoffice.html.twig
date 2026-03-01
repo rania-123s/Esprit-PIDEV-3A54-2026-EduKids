@@ -220,6 +220,34 @@
 					</ul>
 				</li>
 
+				<!-- E-commerce -->
+				<li class="nav-item">
+					<a class="nav-link {{ _isEcommerce ? '' : 'collapsed' }}" data-bs-toggle="collapse" href="#collapseecommerce" role="button"
+					   aria-expanded="{{ _isEcommerce ? 'true' : 'false' }}" aria-controls="collapseecommerce">
+						<i class="bi bi-cart fa-fw me-2"></i>E-commerce
+					</a>
+					<ul class="nav flex-column collapse {{ _isEcommerce ? 'show' : '' }}" id="collapseecommerce" data-bs-parent="#navbar-sidebar">
+						<li class="nav-item">
+							<a class="nav-link ps-4 {{ _route == 'ecommerce_admin_index' ? 'active' : '' }}" href="{{ path('ecommerce_admin_index') }}">Tableau de bord</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link ps-4 {{ _route == 'ecommerce_admin_category_index' ? 'active' : '' }}" href="{{ path('ecommerce_admin_category_index') }}">Catégories</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link ps-4 {{ _route == 'ecommerce_admin_produit_index' ? 'active' : '' }}" href="{{ path('ecommerce_admin_produit_index') }}">Produits</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link ps-4 {{ _route == 'ecommerce_admin_commande_index' ? 'active' : '' }}" href="{{ path('ecommerce_admin_commande_index') }}">Commandes</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link ps-4 {{ _route == 'ecommerce_admin_review_index' ? 'active' : '' }}" href="{{ path('ecommerce_admin_review_index') }}">Avis</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link ps-4 {{ _route == 'ecommerce_admin_analytics' ? 'active' : '' }}" href="{{ path('ecommerce_admin_analytics') }}">Analytics</a>
+						</li>
+					</ul>
+				</li>
+
 				<!-- Authentification -->
 				<li class="nav-item">
 					<a class="nav-link" data-bs-toggle="collapse" href="#collapseauthentication" role="button" aria-expanded="false" aria-controls="collapseauthentication">

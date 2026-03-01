@@ -1,0 +1,85 @@
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block body %}
+<div class="ecommerce-content">
+{% block ecommerce_content %}{% endblock %}
+</div>
+{# Chatbot widget #}
+<div id="ecommerce-chatbot" class="ecommerce-chatbot">
+    <button type="button" id="ecommerce-chatbot-toggle" class="ecommerce-chatbot-toggle btn btn-primary rounded-circle shadow" aria-label="Ouvrir le chat">
+        <i class="bi bi-chat-dots-fill"></i>
+    </button>
+    <div id="ecommerce-chatbot-panel" class="ecommerce-chatbot-panel shadow rounded-3 d-none">
+        <div class="ecommerce-chatbot-header bg-primary text-white rounded-top-3 p-3 d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-robot me-2"></i> Assistant E-commerce</span>
+            <button type="button" id="ecommerce-chatbot-close" class="btn btn-sm btn-light text-dark">&times;</button>
+        </div>
+        <div id="ecommerce-chatbot-messages" class="ecommerce-chatbot-messages p-3"></div>
+        <div class="ecommerce-chatbot-input p-3 border-top">
+            <form id="ecommerce-chatbot-form" class="d-flex gap-2">
+                <input type="text" id="ecommerce-chatbot-field" class="form-control" placeholder="Votre message..." autocomplete="off">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill"></i></button>
+            </form>
+        </div>
+    </div>
+</div>
+<style>
+.ecommerce-chatbot { position: fixed; bottom: 24px; right: 24px; z-index: 1050; }
+.ecommerce-chatbot-toggle { width: 56px; height: 56px; font-size: 1.5rem; }
+.ecommerce-chatbot-panel { width: 360px; max-width: calc(100vw - 48px); height: 420px; background: #fff; display: flex; flex-direction: column; }
+.ecommerce-chatbot-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; min-height: 200px; }
+.ecommerce-chatbot-msg { max-width: 85%; padding: 0.5rem 0.75rem; border-radius: 1rem; font-size: 0.9rem; }
+.ecommerce-chatbot-msg.user { align-self: flex-end; background: #0d6efd; color: #fff; }
+.ecommerce-chatbot-msg.bot { align-self: flex-start; background: #f0f0f0; color: #1f2937; }
+/* E-commerce front: darker text & improved design */
+.ecommerce-content .text-muted { color: #4b5563 !important; }
+.ecommerce-content .card-title { color: #1f2937 !important; font-weight: 700; }
+.ecommerce-content .form-label { color: #374151 !important; }
+.ecommerce-content .lead { color: #374151 !important; }
+.ecommerce-content .table thead th { color: #1f2937 !important; font-weight: 600; }
+.ecommerce-content .table td { color: #374151 !important; }
+.ecommerce-content .card { border-radius: 12px; border: 1px solid #e5e7eb; }
+.ecommerce-content .btn { font-weight: 600; }
+</style>
+<script>
+(function() {
+    var panel = document.getElementById('ecommerce-chatbot-panel');
+    var toggle = document.getElementById('ecommerce-chatbot-toggle');
+    var closeBtn = document.getElementById('ecommerce-chatbot-close');
+    var form = document.getElementById('ecommerce-chatbot-form');
+    var field = document.getElementById('ecommerce-chatbot-field');
+    var messagesEl = document.getElementById('ecommerce-chatbot-messages');
+
+    function addMessage(text, isUser) {
+        var div = document.createElement('div');
+        div.className = 'ecommerce-chatbot-msg ' + (isUser ? 'user' : 'bot');
+        div.textContent = text;
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function sendMessage() {
+        var msg = (field.value || '').trim();
+        if (!msg) return;
+        addMessage(msg, true);
+        field.value = '';
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '{{ path('ecommerce_chat') }}');
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.onload = function() {
+            var data = {};
+            try { data = JSON.parse(xhr.responseText); } catch (e) {}
+            addMessage(data.reply || 'Désolé, une erreur est survenue.', false);
+        };
+        xhr.onerror = function() { addMessage('Connexion impossible. Réessayez plus tard.', false); };
+        xhr.send('message=' + encodeURIComponent(msg) + '&_token=' + encodeURIComponent('{{ csrf_token('ecommerce_chat') }}'));
+    }
+
+    if (toggle) toggle.addEventListener('click', function() { panel.classList.toggle('d-none'); if (!panel.classList.contains('d-none')) field.focus(); });
+    if (closeBtn) closeBtn.addEventListener('click', function() { panel.classList.add('d-none'); });
+    if (form) form.addEventListener('submit', function(e) { e.preventDefault(); sendMessage(); });
+    addMessage('Bonjour ! Posez-moi une question sur nos produits ou la commande.', false);
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'ecommerce/base_ecommerce.html.twig' %}
+
+{% block title %}{{ produit.nom }} - E-commerce Éducatif{% endblock %}
+
+{% block ecommerce_content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <div class="row g-5">
+        <!-- Product Image -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm overflow-hidden mb-4 rounded-3" style="border: 1px solid #e5e7eb !important;">
+                {% if produit.imageUrl %}
+                    <img src="{{ produit.imageUrl }}" alt="{{ produit.nom }}" class="img-fluid w-100" style="object-fit: contain; max-height: 500px;">
+                {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 400px; width: 100%;">
+                        <i class="bi bi-image fs-1 opacity-25"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="d-none d-lg-block">
+                <h5 class="fw-bold mb-3" style="color: #1f2937 !important;">Service Client</h5>
+                <div class="row text-center g-3">
+                    <div class="col-4">
+                        <div class="p-3 border rounded-3 h-100 bg-light" style="border-color: #e5e7eb !important;">
+                            <i class="bi bi-truck fs-4 text-primary d-block mb-2"></i>
+                            <span class="small fw-semibold" style="color: #374151 !important;">Livraison Rapide</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 border rounded-3 h-100 bg-light" style="border-color: #e5e7eb !important;">
+                            <i class="bi bi-shield-check fs-4 text-primary d-block mb-2"></i>
+                            <span class="small fw-semibold" style="color: #374151 !important;">Paiement Sécurisé</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 border rounded-3 h-100 bg-light" style="border-color: #e5e7eb !important;">
+                            <i class="bi bi-arrow-counterclockwise fs-4 text-primary d-block mb-2"></i>
+                            <span class="small fw-semibold" style="color: #374151 !important;">Retours Faciles</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details -->
+        <div class="col-lg-6">
+            <span class="badge bg-primary bg-opacity-10 text-primary mb-2 rounded-pill px-3">{{ produit.category ? produit.category.nom : 'Divers' }}</span>
+            <h1 class="display-6 fw-bold mb-3" style="color: #1f2937 !important;">{{ produit.nom }}</h1>
+            {% if reviewCount > 0 and avgRating is not null %}
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="text-warning">
+                        {% for i in 1..5 %}
+                            <i class="bi bi-star{{ i <= avgRating|round(0, 'floor') ? '-fill' : '' }}"></i>
+                        {% endfor %}
+                    </span>
+                    <span class="small" style="color: #4b5563 !important;">{{ avgRating|number_format(1, ',', ' ') }} ({{ reviewCount }} avis)</span>
+                </div>
+            {% endif %}
+            <div class="mb-4">
+                <span class="display-6 text-primary fw-bold">{{ (produit.prix / 100)|number_format(2, ',', ' ') }} €</span>
+            </div>
+
+            <p class="lead mb-4" style="color: #374151 !important;">{{ produit.description|nl2br }}</p>
+
+            <div class="card bg-light border-0 rounded-3 mb-4" style="border: 1px solid #e5e7eb !important;">
+                <div class="card-body p-4">
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger alert-dismissible fade show mb-3">{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+
+                    <form method="post" action="{{ path('ecommerce_panier_ajouter', { id: produit.id }) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('panier_ajouter_' ~ produit.id) }}">
+                        
+                        <div class="row align-items-center g-3 mb-3">
+                            <div class="col-auto">
+                                <label class="col-form-label fw-semibold">Quantité</label>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group input-group-sm" style="width: 120px;">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="this.parentNode.querySelector('input[type=number]').stepDown()">-</button>
+                                    <input type="number" name="quantite" value="1" min="1" class="form-control text-center bg-white" placeholder="1">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="this.parentNode.querySelector('input[type=number]').stepUp()">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-semibold">
+                                <i class="bi bi-cart-plus me-2"></i> Ajouter au panier
+                            </button>
+                            <a href="{{ path('ecommerce_catalogue') }}" class="btn btn-outline-secondary btn-lg rounded-pill fw-semibold">
+                                Continuer mes achats
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="accordion" id="productAccordion">
+                <div class="accordion-item border-0 shadow-sm mb-2 rounded-3 overflow-hidden">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            Description détaillée
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#productAccordion">
+                        <div class="accordion-body" style="color: #4b5563 !important;">
+                            {{ produit.description|nl2br }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Avis clients #}
+            <div id="avis" class="mt-5 pt-4 border-top">
+                <h5 class="fw-bold mb-3" style="color: #1f2937 !important;"><i class="bi bi-chat-quote me-2 text-primary"></i>Avis clients ({{ reviewCount }})</h5>
+                {% if canReview and app.user and reviewForm is not null %}
+                    <div class="card bg-light border-0 rounded-3 mb-4" style="border: 1px solid #e5e7eb !important;">
+                        <div class="card-body p-4">
+                            <h6 class="fw-semibold mb-3" style="color: #374151 !important;">Laisser un avis</h6>
+                            {{ form_start(reviewForm, { 'action': path('ecommerce_review_submit', { id: produit.id }), 'method': 'POST' }) }}
+                            {{ form_widget(reviewForm) }}
+                            <button type="submit" class="btn btn-primary rounded-pill mt-2">Publier mon avis</button>
+                            {{ form_end(reviewForm) }}
+                        </div>
+                    </div>
+                {% elseif not app.user %}
+                    <p class="small" style="color: #4b5563 !important;"><a href="{{ path('app_login') }}">Connectez-vous</a> pour laisser un avis.</p>
+                {% endif %}
+                {% if reviews|length > 0 %}
+                    <ul class="list-unstyled">
+                        {% for review in reviews %}
+                            <li class="border-bottom pb-3 mb-3" style="border-color: #e5e7eb !important;">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <span class="text-warning small">
+                                            {% for i in 1..5 %}<i class="bi bi-star{{ i <= review.rating ? '-fill' : '' }}"></i>{% endfor %}
+                                        </span>
+                                        <strong class="d-block" style="color: #1f2937 !important;">{{ review.user.firstName ?? review.user.email }}</strong>
+                                        {% if review.user.id is defined and verifiedUserIds[review.user.id] is defined %}
+                                            <span class="badge bg-success bg-opacity-10 text-success small">Achat vérifié</span>
+                                        {% endif %}
+                                    </div>
+                                    <span class="small" style="color: #6b7280 !important;">{{ review.createdAt|date('d/m/Y') }}</span>
+                                </div>
+                                {% if review.comment %}
+                                    <p class="mb-0 mt-1 small" style="color: #4b5563 !important;">{{ review.comment|nl2br }}</p>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="small" style="color: #4b5563 !important;">Aucun avis pour le moment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
