@@ -1,0 +1,317 @@
+{% extends 'back_office/quiz_base.html.twig' %}
+
+{% block title %}{{ question.id ? 'Modifier' : 'Nouvelle' }} question - {{ quiz.titre }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ path('quiz_admin_quiz_list') }}">Quiz</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('quiz_admin_question_list', { id: quiz.id }) }}">{{ quiz.titre }}</a></li>
+            <li class="breadcrumb-item active">{{ question.id ? 'Modifier la question' : 'Nouvelle question' }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-xl-9 col-lg-10 mx-auto">
+            <div class="card ecommerce-admin-card shadow-sm border-0 overflow-hidden">
+                <div class="card-header bg-light border-0 py-3 px-4">
+                    <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">
+                        <i class="bi bi-patch-question text-primary me-2"></i>
+                        {{ question.id ? 'Modifier la question' : 'Ajouter une question' }}
+                    </h5>
+                    <p class="small mb-0 mt-1" style="color: #6b7280 !important;">Énoncé, type (QCM ou texte), et pour un QCM : ajoutez des options et cochez la bonne réponse.</p>
+                </div>
+
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'question-form'}}) }}
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Énoncé de la question <span class="text-danger">*</span></label>
+                        {{ form_widget(form.texte, {'attr': {'class': 'form-control form-control-lg', 'rows': 3, 'placeholder': 'Ex: Quelle est la capitale de la France ?'}}) }}
+                        {{ form_errors(form.texte) }}
+                        <div class="form-text small">Phrase claire et complète. Maximum 2000 caractères.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Type de question <span class="text-danger">*</span></label>
+                        {{ form_widget(form.type, {'attr': {'class': 'form-select form-select-lg question-type-select'}}) }}
+                        {{ form_errors(form.type) }}
+                        <div class="form-text small">QCM = plusieurs choix, une seule bonne réponse. Texte = réponse libre.</div>
+                    </div>
+
+                    {% set option_prototype = form_widget(form.questionOptions.vars.prototype) %}
+                    {% set is_qcm_type = question.type is defined ? (question.type == 'qcm') : true %}
+                    <div id="question-options-block" class="mb-4" style="display: {{ is_qcm_type ? 'block' : 'none' }};">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-semibold mb-0">Options du QCM</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="add-option-btn" onclick="typeof window.addQuizOption === 'function' && window.addQuizOption(event);">
+                                <i class="bi bi-plus-lg me-1"></i> Ajouter une option
+                            </button>
+                        </div>
+                        <script type="text/template" id="option-prototype">{{ option_prototype|raw }}</script>
+                        <div id="options-list" data-index="{{ form.questionOptions|length }}" data-prototype="{{ option_prototype|e('html_attr') }}">
+                            {% for option in form.questionOptions %}
+                                <div class="option-entry row g-2 align-items-center border rounded-3 p-3 mb-2" style="border-color: #e5e7eb !important;">
+                                    <div class="col-num col-md-1 text-muted small">{{ loop.index }}</div>
+                                    <div class="col-texte col-md-6">{{ form_widget(option.texte, {'attr': {'class': 'form-control', 'placeholder': 'Texte de l\'option'}}) }}</div>
+                                    <div class="col-ordre col-md-2">{{ form_widget(option.ordre, {'attr': {'class': 'form-control form-control-sm', 'min': 0}}) }}</div>
+                                    <div class="col-correct col-md-2">
+                                        <div class="form-check">
+                                            {{ form_widget(option.correct, {'attr': {'class': 'form-check-input'}}) }}
+                                            <label class="form-check-label small" for="{{ option.correct.vars.id }}">Bonne réponse</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-del col-md-1"><button type="button" class="btn btn-sm btn-outline-danger remove-option" title="Supprimer"><i class="bi bi-trash"></i></button></div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {{ form_errors(form.questionOptions) }}
+                        <div class="form-text small mt-1">Cochez une seule « Bonne réponse » par question. Au moins 2 options pour un QCM.</div>
+                    </div>
+
+                    <div class="mb-4" id="bonne-reponse-texte-block" style="display: {{ is_qcm_type ? 'none' : 'block' }};">
+                        <label class="form-label fw-semibold">Réponse attendue (texte)</label>
+                        {{ form_widget(form.bonneReponse, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Paris'}}) }}
+                        {{ form_errors(form.bonneReponse) }}
+                        <div class="form-text small">La réponse exacte à comparer avec la saisie de l'utilisateur.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Ordre d'affichage</label>
+                        {{ form_widget(form.ordre, {'attr': {'class': 'form-control', 'min': 0}}) }}
+                        {{ form_errors(form.ordre) }}
+                        <div class="form-text small">0 = première question, 1 = deuxième, etc.</div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                        <a href="{{ path('quiz_admin_question_list', { id: quiz.id }) }}" class="btn btn-outline-secondary rounded-pill px-4">Annuler</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 fw-semibold">
+                            <i class="bi bi-check-lg me-2"></i> Enregistrer la question
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var form, typeSelect, optionsBlock, bonneReponseTexteBlock, optionsList, addOptionBtn, prototypeEl, prototype, formName, index;
+
+    function init() {
+        form = document.getElementById('question-form');
+        typeSelect = document.querySelector('.question-type-select');
+        if (!typeSelect && form) typeSelect = form.querySelector('.question-type-select');
+        optionsBlock = document.getElementById('question-options-block');
+        bonneReponseTexteBlock = document.getElementById('bonne-reponse-texte-block');
+        optionsList = document.getElementById('options-list');
+        addOptionBtn = document.getElementById('add-option-btn');
+
+        prototypeEl = document.getElementById('option-prototype');
+        prototype = (prototypeEl && prototypeEl.textContent) ? prototypeEl.textContent.trim() : null;
+        if (!prototype && optionsList) {
+            var raw = optionsList.getAttribute('data-prototype');
+            if (raw) {
+                var tmp = document.createElement('div');
+                tmp.innerHTML = raw;
+                prototype = tmp.innerHTML;
+            }
+        }
+        formName = 'question';
+        if (optionsList) {
+            var firstOptInput = optionsList.querySelector('input[name*="[questionOptions]"]');
+            if (firstOptInput && firstOptInput.name) {
+                var m = firstOptInput.name.match(/^([^\[]+)\[questionOptions\]/);
+                if (m) formName = m[1];
+            }
+            index = parseInt(optionsList.getAttribute('data-index') || '0', 10);
+        } else {
+            index = 0;
+        }
+
+        if (typeSelect && !typeSelect._changeListenerAttached) {
+            typeSelect._changeListenerAttached = true;
+            typeSelect.addEventListener('change', updateUI);
+        }
+        if (typeSelect) updateUI();
+        if (optionsList) {
+            optionsList.querySelectorAll('.remove-option').forEach(function(btn) {
+                if (btn._removeListenerAttached) return;
+                btn._removeListenerAttached = true;
+                btn.addEventListener('click', function() {
+                    var row = btn.closest('.option-entry');
+                    if (row && optionsList.querySelectorAll('.option-entry').length > 1) row.remove();
+                    renumberRows();
+                });
+            });
+        }
+        if (form && !form._submitListenerAttached) {
+            form._submitListenerAttached = true;
+            form.addEventListener('submit', onFormSubmit);
+        }
+    }
+
+    function updateUI() {
+        var type = (typeSelect && typeSelect.value) ? String(typeSelect.value).trim() : 'qcm';
+        var isQcm = type === 'qcm';
+        if (optionsBlock) optionsBlock.style.display = isQcm ? 'block' : 'none';
+        if (bonneReponseTexteBlock) bonneReponseTexteBlock.style.display = isQcm ? 'none' : 'block';
+    }
+
+    function onFormSubmit(e) {
+        var type = (typeSelect && typeSelect.value) || 'qcm';
+        var errors = [];
+        var texteField = form && form.querySelector('textarea[id*="texte"]');
+        if (texteField && (texteField.value || '').trim().length === 0) {
+            errors.push('L\'énoncé de la question est obligatoire.');
+            texteField.classList.add('is-invalid');
+        } else if (texteField) texteField.classList.remove('is-invalid');
+        if (type === 'qcm' && optionsList) {
+            var entries = optionsList.querySelectorAll('.option-entry');
+            var optionTexts = Array.from(entries).map(function(r) { var i = r.querySelector('input[type="text"]'); return i ? i.value.trim() : ''; }).filter(Boolean);
+            if (optionTexts.length < 2) errors.push('Un QCM doit avoir au moins 2 options.');
+        }
+        if (errors.length > 0) {
+            e.preventDefault();
+            alert('Veuillez corriger :\n' + errors.join('\n'));
+        }
+    }
+
+    function addOptionRow() {
+        if (!optionsList) return;
+        var currentIndex = index;
+        var wrapper = document.createElement('div');
+        wrapper.className = 'option-entry row g-2 align-items-center border rounded-3 p-3 mb-2';
+        wrapper.style.borderColor = '#e5e7eb';
+
+        var texteInput, ordreInput, correctInput, formCheck;
+        if (prototype && typeof prototype === 'string' && prototype.indexOf('__name__') !== -1) {
+            var proto = prototype.replace(/__name__/g, currentIndex);
+            var tmp = document.createElement('div');
+            tmp.innerHTML = proto.trim();
+            texteInput = tmp.querySelector('input[type="text"]');
+            ordreInput = tmp.querySelector('input[type="number"]');
+            correctInput = tmp.querySelector('input[type="checkbox"]');
+        }
+        if (!texteInput || !ordreInput || !correctInput) {
+            var prefix = formName + '[questionOptions][' + currentIndex + ']';
+            texteInput = document.createElement('input');
+            texteInput.type = 'text';
+            texteInput.name = prefix + '[texte]';
+            texteInput.id = formName + '_questionOptions_' + currentIndex + '_texte';
+            ordreInput = document.createElement('input');
+            ordreInput.type = 'number';
+            ordreInput.name = prefix + '[ordre]';
+            ordreInput.id = formName + '_questionOptions_' + currentIndex + '_ordre';
+            ordreInput.value = currentIndex;
+            ordreInput.min = 0;
+            var hiddenCorrect = document.createElement('input');
+            hiddenCorrect.type = 'hidden';
+            hiddenCorrect.name = prefix + '[correct]';
+            hiddenCorrect.value = '0';
+            correctInput = document.createElement('input');
+            correctInput.type = 'checkbox';
+            correctInput.name = prefix + '[correct]';
+            correctInput.value = '1';
+            correctInput.id = formName + '_questionOptions_' + currentIndex + '_correct';
+            formCheck = document.createElement('div');
+            formCheck.className = 'form-check';
+            formCheck.appendChild(hiddenCorrect);
+            formCheck.appendChild(correctInput);
+        }
+        texteInput.className = 'form-control';
+        texteInput.placeholder = 'Texte de l\'option';
+        ordreInput.className = 'form-control form-control-sm';
+        ordreInput.setAttribute('min', 0);
+        if (ordreInput.value === '' || ordreInput.value === undefined) ordreInput.value = currentIndex;
+        correctInput.className = 'form-check-input';
+
+        var numCell = document.createElement('div');
+        numCell.className = 'col-num col-md-1 text-muted small';
+        numCell.textContent = (optionsList.querySelectorAll('.option-entry').length + 1);
+        var colTexte = document.createElement('div');
+        colTexte.className = 'col-texte col-md-6';
+        colTexte.appendChild(texteInput);
+        var colOrdre = document.createElement('div');
+        colOrdre.className = 'col-ordre col-md-2';
+        colOrdre.appendChild(ordreInput);
+        var colCorrect = document.createElement('div');
+        colCorrect.className = 'col-correct col-md-2';
+        if (!formCheck) {
+            formCheck = document.createElement('div');
+            formCheck.className = 'form-check';
+            formCheck.appendChild(correctInput);
+        }
+        var label = document.createElement('label');
+        label.className = 'form-check-label small';
+        label.htmlFor = correctInput.id || '';
+        label.textContent = 'Bonne réponse';
+        formCheck.appendChild(label);
+        colCorrect.appendChild(formCheck);
+        var delCell = document.createElement('div');
+        delCell.className = 'col-del col-md-1';
+        var delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'btn btn-sm btn-outline-danger remove-option';
+        delBtn.title = 'Supprimer';
+        delBtn.innerHTML = '<i class="bi bi-trash"></i>';
+        delBtn.addEventListener('click', function() {
+            if (optionsList.querySelectorAll('.option-entry').length > 1) wrapper.remove();
+            renumberRows();
+        });
+        delCell.appendChild(delBtn);
+        wrapper.appendChild(numCell);
+        wrapper.appendChild(colTexte);
+        wrapper.appendChild(colOrdre);
+        wrapper.appendChild(colCorrect);
+        wrapper.appendChild(delCell);
+        optionsList.appendChild(wrapper);
+        index++;
+        optionsList.setAttribute('data-index', index);
+        renumberRows();
+    }
+
+    function renumberRows() {
+        var entries = optionsList && optionsList.querySelectorAll('.option-entry');
+        if (entries) entries.forEach(function(r, i) {
+            var first = r.firstElementChild;
+            if (first && first.classList.contains('text-muted')) first.textContent = i + 1;
+        });
+    }
+
+    window.addQuizOption = function(ev) {
+        if (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+        }
+        init();
+        if (!optionsList) {
+            optionsList = document.getElementById('options-list');
+            if (optionsList) index = parseInt(optionsList.getAttribute('data-index') || '0', 10);
+        }
+        addOptionRow();
+    };
+
+    document.addEventListener('click', function(e) {
+        if (e.target && (e.target.id === 'add-option-btn' || e.target.closest('#add-option-btn'))) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.addQuizOption(e);
+        }
+    });
+
+    init();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+        });
+    }
+})();
+</script>
+{% endblock %}

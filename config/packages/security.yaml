@@ -55,6 +55,9 @@ security:
         # User profile area - requires authentication
         - { path: ^/profile, roles: ROLE_USER }
 
+        # Chat - requires authentication
+        - { path: ^/chat, roles: ROLE_USER }
+
         # Public pages
         - { path: ^/$, roles: PUBLIC_ACCESS }
         - { path: ^/evenements, roles: PUBLIC_ACCESS }

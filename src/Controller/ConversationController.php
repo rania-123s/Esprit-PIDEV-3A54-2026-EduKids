@@ -321,9 +321,8 @@ class ConversationController extends AbstractController
     {
         /** @var User $viewer */
         $viewer = $this->getUser();
-        $template = $this->isGranted('ROLE_ADMIN')
-            ? 'chat/admin_chat.html.twig'
-            : 'chat/chat_parent.html.twig';
+        // Toujours utiliser le layout front office pour /chat (navbar front, lien "Ouvrir le chat" du back ouvre en nouvel onglet)
+        $template = 'chat/index.html.twig';
 
         return $this->render($template, [
             'initial_conversation_id' => $conversation?->getId(),

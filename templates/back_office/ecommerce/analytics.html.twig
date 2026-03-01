@@ -1,0 +1,106 @@
+{% extends 'back_office/ecommerce_base.html.twig' %}
+
+{% block title %}Tableau de bord - Admin E-commerce{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <h1 class="h3 fw-bold mb-0 ecommerce-admin-header"><i class="bi bi-graph-up me-2 text-primary"></i>Tableau de bord</h1>
+    <p class="small mb-4" style="color: #4b5563 !important;">KPIs, ventes et top produits.</p>
+
+    {# KPIs #}
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card ecommerce-admin-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase small fw-semibold mb-2" style="color: #6b7280 !important;">Commandes ce mois</h6>
+                    <h3 class="mb-0 fw-bold" style="color: #1f2937 !important;">{{ ordersThisMonth }}</h3>
+                    <small class="text-muted">Mois dernier : {{ ordersLastMonth }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card ecommerce-admin-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase small fw-semibold mb-2" style="color: #6b7280 !important;">Chiffre d'affaires ce mois</h6>
+                    <h3 class="mb-0 fw-bold text-primary">{{ (revenueThisMonth / 100)|number_format(2, ',', ' ') }} €</h3>
+                    <small class="text-muted">Mois dernier : {{ (revenueLastMonth / 100)|number_format(2, ',', ' ') }} €</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card ecommerce-admin-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase small fw-semibold mb-2" style="color: #6b7280 !important;">Commandes par statut</h6>
+                    <ul class="list-unstyled mb-0 small">
+                        {% for row in ordersByStatus %}
+                            <li class="d-flex justify-content-between"><span style="color: #4b5563 !important;">{{ row.statut }}</span><strong>{{ row.count }}</strong></li>
+                        {% else %}
+                            <li style="color: #4b5563 !important;">Aucune</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card ecommerce-admin-card border-0 shadow-sm h-100">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <a href="{{ path('ecommerce_admin_export') }}" class="btn btn-outline-primary rounded-pill"><i class="bi bi-download me-2"></i>Exporter les commandes (CSV)</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {# Chart - Sales last 30 days #}
+        <div class="col-lg-8">
+            <div class="card ecommerce-admin-card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">Ventes (30 derniers jours)</h5>
+                </div>
+                <div class="card-body">
+                    <div id="chartSales" style="min-height: 280px;"></div>
+                </div>
+            </div>
+        </div>
+        {# Top products #}
+        <div class="col-lg-4">
+            <div class="card ecommerce-admin-card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">Top 10 produits</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for row in topProduits %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
+                                <span class="fw-semibold text-truncate" style="max-width: 180px; color: #374151 !important;" title="{{ row.produit ? row.produit.nom : 'Produit #' ~ row.produit.id }}">{{ row.produit ? row.produit.nom : 'N/A' }}</span>
+                                <span class="badge bg-primary rounded-pill">{{ row.qty }} vendus</span>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item border-0" style="color: #4b5563 !important;">Aucune vente.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof ApexCharts === 'undefined') return;
+    var salesLabels = {{ salesLabels|json_encode|raw }};
+    var salesValues = {{ salesValues|json_encode|raw }};
+    var options = {
+        series: [{ name: 'CA (€)', data: salesValues.map(function(v) { return Math.round(v / 100 * 100) / 100; }) }],
+        chart: { type: 'area', height: 280, toolbar: { show: false } },
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 2 },
+        xaxis: { categories: salesLabels },
+        yaxis: { labels: { formatter: function(v) { return v + ' €'; } } },
+        colors: ['#0d6efd'],
+        fill: { type: 'gradient', opacity: 0.3 }
+    };
+    new ApexCharts(document.querySelector('#chartSales'), options).render();
+});
+</script>
+{% endblock %}

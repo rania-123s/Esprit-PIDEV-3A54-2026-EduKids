@@ -1,0 +1,138 @@
+{% extends 'back_office/quiz_base.html.twig' %}
+
+{% block title %}Gestion des Quiz - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-0 ecommerce-admin-header"><i class="bi bi-collection me-2 text-primary"></i>Gestion des Quiz</h1>
+            <p class="small mb-0" style="color: #4b5563 !important;">Recherche, tri et publication.</p>
+        </div>
+        <a href="{{ path('quiz_admin_quiz_new') }}" class="btn btn-primary shadow-sm rounded-pill px-4">
+            <i class="bi bi-plus-circle me-2"></i> Nouveau Quiz
+        </a>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-success border-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+
+    <div class="card ecommerce-admin-card border-0 shadow-sm mb-4">
+        <div class="card-body bg-light rounded-3 p-3">
+            <form method="get" action="{{ path('quiz_admin_quiz_list') }}" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small text-uppercase" style="color: #374151 !important;">Recherche</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0" value="{{ searchQuery ?? '' }}" placeholder="Titre, description...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small text-uppercase" style="color: #374151 !important;">Publication</label>
+                    <select name="published" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="1" {{ filterPublished === true ? 'selected' : '' }}>Publiés</option>
+                        <option value="0" {{ filterPublished === false ? 'selected' : '' }}>Non publiés</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small text-uppercase" style="color: #374151 !important;">Tri</label>
+                    <div class="input-group">
+                        <select name="sort" class="form-select">
+                            <option value="titre" {{ sort == 'titre' ? 'selected' : '' }}>Titre</option>
+                            <option value="createdAt" {{ sort == 'createdAt' ? 'selected' : '' }}>Date création</option>
+                        </select>
+                        <select name="order" class="form-select" style="max-width: 80px;">
+                            <option value="ASC" {{ order == 'ASC' ? 'selected' : '' }}>A-Z</option>
+                            <option value="DESC" {{ order == 'DESC' ? 'selected' : '' }}>Z-A</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-pill"><i class="bi bi-funnel me-1"></i> Filtrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card ecommerce-admin-card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-uppercase small" style="color: #1f2937 !important;">
+                    <tr>
+                        <th class="ps-4 py-3 border-0 rounded-start">Quiz</th>
+                        <th class="py-3 border-0">Questions</th>
+                        <th class="py-3 border-0">Statut</th>
+                        <th class="py-3 border-0">Créé le</th>
+                        <th class="pe-4 py-3 border-0 rounded-end text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for quiz in quizzes %}
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <div class="d-flex align-items-center">
+                                    {% if quiz.imageUrl %}
+                                        <img src="{{ quiz.imageUrl }}" class="rounded-3 shadow-sm me-3 bg-white" alt="" width="48" height="48" style="object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-3 bg-light d-flex align-items-center justify-content-center me-3 text-muted" style="width: 48px; height: 48px;">
+                                            <i class="bi bi-question-circle fs-5"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ quiz.titre }}</div>
+                                        <div class="small text-truncate" style="max-width: 250px; color: #4b5563 !important;">{{ quiz.description|striptags|slice(0, 60) }}{% if quiz.description|length > 60 %}...{% endif %}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3">{{ quiz.questions|length }}</td>
+                            <td class="py-3">
+                                {% if quiz.published %}
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Publié</span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">Brouillon</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3" style="color: #4b5563 !important;">{{ quiz.createdAt|date('d/m/Y') }}</td>
+                            <td class="pe-4 py-3 text-end">
+                                <div class="btn-group flex-wrap">
+                                    <a href="{{ path('quiz_admin_quiz_preview', { id: quiz.id }) }}" class="btn btn-sm btn-outline-info" target="_blank" rel="noopener noreferrer" title="Afficher le quiz comme pour un étudiant">
+                                        <i class="bi bi-eye me-1"></i> Voir comme l'étudiant
+                                    </a>
+                                    <a href="{{ path('quiz_admin_question_list', { id: quiz.id }) }}" class="btn btn-sm btn-outline-primary" title="Questions">
+                                        <i class="bi bi-list-ol"></i>
+                                    </a>
+                                    <a href="{{ path('quiz_admin_quiz_edit', { id: quiz.id }) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="post" action="{{ path('quiz_admin_quiz_delete', { id: quiz.id }) }}" class="d-inline" onsubmit="return confirm('Supprimer ce quiz et toutes ses questions ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_quiz' ~ quiz.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-start-0" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5" style="color: #4b5563 !important;">
+                                <div class="mb-3"><i class="bi bi-inbox fs-1" style="opacity: .4;"></i></div>
+                                <p class="mb-0">Aucun quiz trouvé.</p>
+                                <a href="{{ path('quiz_admin_quiz_new') }}" class="btn btn-primary rounded-pill mt-2">Créer un quiz</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white py-3 border-0">
+            <small style="color: #4b5563 !important;">{{ quizzes|length }} quiz affiché(s)</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

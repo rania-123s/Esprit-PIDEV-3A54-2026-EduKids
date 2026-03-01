@@ -1,0 +1,21 @@
+{% extends 'back_office/ecommerce_base.html.twig' %}
+
+{% block title %}Statut commande #{{ commande.id }} - Admin E-commerce{% endblock %}
+
+{% block body %}
+<div class="container-fluid p-4">
+    <h1 class="h3 mb-4 ecommerce-admin-header">Changer le statut de la commande #{{ commande.id }}</h1>
+
+    <div class="card ecommerce-admin-card shadow-sm" style="max-width: 480px;">
+        <div class="card-body p-4">
+            {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary rounded-pill px-4">Enregistrer</button>
+                <a href="{{ path('ecommerce_admin_commande_show', { id: commande.id }) }}" class="btn btn-outline-secondary rounded-pill">Annuler</a>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

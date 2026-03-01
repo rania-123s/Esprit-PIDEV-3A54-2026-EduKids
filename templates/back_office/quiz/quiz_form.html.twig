@@ -1,0 +1,162 @@
+{% extends 'back_office/quiz_base.html.twig' %}
+
+{% block title %}{{ quiz.id ? 'Modifier' : 'Nouveau' }} quiz - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <nav aria-label="breadcrumb" class="mb-2">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('quiz_admin_quiz_list') }}">Quiz</a></li>
+                            <li class="breadcrumb-item active">{{ quiz.id ? 'Modifier' : 'Nouveau quiz' }}</li>
+                        </ol>
+                    </nav>
+                    <h2 class="mb-0 fw-bold ecommerce-admin-header">
+                        <i class="bi bi-collection text-primary me-2"></i> {{ quiz.id ? 'Modifier le quiz' : 'Créer un quiz' }}
+                    </h2>
+                    <p class="small mt-1 mb-0" style="color: #4b5563 !important;">Remplissez les informations puis ajoutez les questions.</p>
+                </div>
+                <a href="{{ path('quiz_admin_quiz_list') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="bi bi-arrow-left me-2"></i> Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-8 col-lg-10 mx-auto">
+            <div class="card ecommerce-admin-card shadow-sm border-0 overflow-hidden">
+                <div class="card-header bg-light border-0 py-3 px-4">
+                    <div class="d-flex align-items-center gap-3">
+                        {% if quiz.imageUrl %}
+                            <img src="{{ quiz.imageUrl }}" alt="" class="rounded-3 shadow-sm" style="width: 64px; height: 64px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-3 bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                                <i class="bi bi-question-circle text-primary" style="font-size: 1.75rem;"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">{{ quiz.id ? quiz.titre : 'Nouveau quiz' }}</h5>
+                            <p class="mb-0 small" style="color: #6b7280 !important;">{{ quiz.id ? (quiz.published ? 'Publié' : 'Brouillon') : 'Étape 1 : Informations du quiz' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'quiz-form'}}) }}
+
+                    <div class="quiz-form-section mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.9rem;">1</span>
+                            <h6 class="mb-0 fw-bold text-uppercase small" style="color: #374151 !important;">Informations générales</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Titre du quiz <span class="text-danger">*</span></label>
+                                {{ form_widget(form.titre, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Ex: Mathématiques - Niveau 1'}}) }}
+                                {{ form_errors(form.titre) }}
+                                <div class="form-text small">Entre 3 et 255 caractères.</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Description</label>
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Décrivez le thème et les objectifs du quiz...'}}) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="quiz-form-section mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.9rem;">2</span>
+                            <h6 class="mb-0 fw-bold text-uppercase small" style="color: #374151 !important;">Image du quiz</h6>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 align-items-end">
+                            <div class="flex-grow-1" style="min-width: 200px;">
+                                {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control', 'placeholder': 'https://... ou générer avec l\'IA'}}) }}
+                                {{ form_errors(form.imageUrl) }}
+                            </div>
+                            <button type="button" id="btn-generate-image" class="btn btn-outline-primary">
+                                <i class="bi bi-image me-1"></i> Générer une image IA
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="quiz-form-section mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.9rem;">3</span>
+                            <h6 class="mb-0 fw-bold text-uppercase small" style="color: #374151 !important;">Publication & assistant</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form_widget(form.published, {'attr': {'class': 'form-check-input'}}) }}
+                                    <label class="form-check-label fw-semibold" for="{{ form.published.vars.id }}">Publier le quiz (visible pour les utilisateurs)</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form_widget(form.chatbotEnabled, {'attr': {'class': 'form-check-input'}}) }}
+                                    <label class="form-check-label fw-semibold" for="{{ form.chatbotEnabled.vars.id }}">Activer l'assistant chatbot pendant le quiz</label>
+                                </div>
+                                <div class="form-text small">Les utilisateurs pourront demander des indices pendant qu'ils passent le quiz.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                        <a href="{{ path('quiz_admin_quiz_list') }}" class="btn btn-outline-secondary rounded-pill px-4">Annuler</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 fw-semibold">
+                            <i class="bi bi-save me-2"></i> Enregistrer et ajouter les questions
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var titreInput = document.getElementById('{{ form.titre.vars.id }}');
+    var imageInput = document.getElementById('{{ form.imageUrl.vars.id }}');
+    var btnImage = document.getElementById('btn-generate-image');
+    if (btnImage && titreInput && imageInput) {
+        btnImage.addEventListener('click', function() {
+            var prompt = (titreInput.value || '').trim();
+            if (!prompt) {
+                alert('Veuillez d\'abord saisir le titre du quiz.');
+                return;
+            }
+            btnImage.disabled = true;
+            btnImage.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Génération...';
+            fetch('{{ path('quiz_admin_generate_image_url') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+                body: 'prompt=' + encodeURIComponent(prompt) + '&_token={{ csrf_token('quiz_generate_image') }}'
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.url) imageInput.value = data.url;
+                if (data.error) alert(data.error);
+            })
+            .catch(function() { alert('Erreur lors de la génération.'); })
+            .finally(function() {
+                btnImage.disabled = false;
+                btnImage.innerHTML = '<i class="bi bi-image me-1"></i> Générer une image IA';
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

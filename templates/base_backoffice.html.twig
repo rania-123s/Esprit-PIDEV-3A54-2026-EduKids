@@ -115,6 +115,9 @@
 				{% set _isLecons = _route starts with 'app_lecon_' %}
 				{% set _isEvents = _route starts with 'app_evenement_' %}
 				{% set _isProgramme = _route starts with 'app_programme_' %}
+				{% set _isChat = _route == 'admin_chat_stats' or _route == 'admin_chat_stats_data' %}
+				{% set _isEcommerce = _route starts with 'ecommerce_admin_' %}
+				{% set _isQuiz = _route starts with 'quiz_admin_' %}
 
 				<!-- Cours -->
 				<li class="nav-item">
@@ -181,6 +184,38 @@
 						</li>
 						<li class="nav-item">
 							<a class="nav-link ps-4" href="{{ path('app_programme_new') }}">Créer un programme</a>
+						</li>
+					</ul>
+				</li>
+
+				<!-- Gestion Chat -->
+				<li class="nav-item">
+					<a class="nav-link {{ _isChat ? '' : 'collapsed' }}" data-bs-toggle="collapse" href="#collapsechat" role="button"
+					   aria-expanded="{{ _isChat ? 'true' : 'false' }}" aria-controls="collapsechat">
+						<i class="bi bi-chat-dots fa-fw me-2"></i>Gestion Chat
+					</a>
+					<ul class="nav flex-column collapse {{ _isChat ? 'show' : '' }}" id="collapsechat" data-bs-parent="#navbar-sidebar">
+						<li class="nav-item">
+							<a class="nav-link ps-4" href="{{ path('admin_chat_stats') }}">Statistiques chat</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link ps-4" href="{{ path('chat_entry') }}" target="_blank">Ouvrir le chat</a>
+						</li>
+					</ul>
+				</li>
+
+				<!-- Quizz et questions -->
+				<li class="nav-item">
+					<a class="nav-link {{ _isQuiz ? '' : 'collapsed' }}" data-bs-toggle="collapse" href="#collapsequiz" role="button"
+					   aria-expanded="{{ _isQuiz ? 'true' : 'false' }}" aria-controls="collapsequiz">
+						<i class="bi bi-patch-question fa-fw me-2"></i>Quizz et questions
+					</a>
+					<ul class="nav flex-column collapse {{ _isQuiz ? 'show' : '' }}" id="collapsequiz" data-bs-parent="#navbar-sidebar">
+						<li class="nav-item">
+							<a class="nav-link ps-4 {{ _route == 'quiz_admin_index' or _route == 'quiz_admin_quiz_list' ? 'active' : '' }}" href="{{ path('quiz_admin_index') }}">Liste des quiz</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link ps-4 {{ _route == 'quiz_admin_statistics' ? 'active' : '' }}" href="{{ path('quiz_admin_statistics') }}">Statistiques</a>
 						</li>
 					</ul>
 				</li>

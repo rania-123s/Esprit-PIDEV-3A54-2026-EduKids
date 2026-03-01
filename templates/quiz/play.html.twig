@@ -1,0 +1,358 @@
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}Jouer - {{ quiz.titre }}{% endblock %}
+
+{% block body %}
+<div class="quiz-play-page min-vh-100 pb-5 bg-light">
+    <div class="container py-5">
+        {% if isAdminPreview|default(false) %}
+            <div class="alert alert-info border-0 rounded-4 shadow-sm mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <span><i class="bi bi-eye me-2"></i><strong>Prévisualisation</strong> — Affichage comme pour l'étudiant. Les réponses ne sont pas enregistrées.</span>
+                <a href="{{ backPath|default(path('quiz_admin_quiz_list')) }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                    <i class="bi bi-arrow-left me-1"></i> Retour à la liste des quiz
+                </a>
+            </div>
+        {% endif %}
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                
+                {# Progress Header #}
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden position-relative">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <h1 class="h5 fw-bold mb-1 text-dark">{{ quiz.titre }}</h1>
+                                <p class="small text-muted mb-0">
+                                    Question <span id="current-question-num">1</span> sur {{ questions|length }}
+                                </p>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
+                                    <i class="bi bi-clock-history me-1"></i> <span id="quiz-timer">00:00</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="progress rounded-pill bg-light" style="height: 10px;">
+                            <div class="progress-bar bg-primary rounded-pill transition-width" id="quiz-progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" action="{{ (isAdminPreview|default(false)) ? '#' : path('quiz_front_submit', { id: quiz.id }) }}" id="quiz-play-form" class="position-relative" data-preview="{{ isAdminPreview|default(false) ? '1' : '0' }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('quiz_submit_' ~ quiz.id) }}">
+                    
+                    <div id="quiz-questions-container">
+                        {% for question in questions %}
+                            <div class="quiz-step card border-0 shadow rounded-4 mb-3 d-none fade-in-up" data-step-index="{{ loop.index0 }}">
+                                <div class="card-body p-4 p-md-5">
+                                    <span class="badge bg-primary mb-3 rounded-pill px-3 py-2">Question {{ loop.index }}</span>
+                                    <h2 class="h4 fw-bold mb-4 text-dark lh-base">{{ question.texte }}</h2>
+
+                                    {% if question.imageUrl is defined and question.imageUrl %}
+                                        <div class="mb-4 rounded-3 overflow-hidden text-center bg-light">
+                                             <img src="{{ question.imageUrl }}" class="img-fluid" style="max-height: 300px; object-fit: contain;" alt="Question Image">
+                                        </div>
+                                    {% endif %}
+
+                                    {% if question.type == 'qcm' and question.questionOptions|length > 0 %}
+                                        <div class="quiz-options d-grid gap-3">
+                                            {% for option in question.questionOptions %}
+                                                <label class="quiz-option-card position-relative p-3 p-md-4 rounded-3 border bg-white cursor-pointer transition-all d-flex align-items-center gap-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input quiz-option-input stretched-link" type="radio" name="q_{{ question.id }}" id="q_{{ question.id }}_{{ loop.index0 }}" value="{{ loop.index0 }}" required>
+                                                    </div>
+                                                    <span class="fw-medium text-dark flex-grow-1">{{ option.texte }}</span>
+                                                </label>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control form-control-lg border-primary bg-light" name="q_{{ question.id }}" id="q_{{ question.id }}" placeholder="Votre réponse" maxlength="500" required>
+                                            <label for="q_{{ question.id }}" class="text-muted">Saisissez votre réponse ici...</label>
+                                        </div>
+                                        <p class="small text-muted"><i class="bi bi-info-circle me-1"></i> Soyez précis, l'orthographe compte.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {# Navigation Controls #}
+                    <div class="card border-0 shadow-sm rounded-4 mt-4">
+                        <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                            <button type="button" id="btn-prev" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-semibold d-none">
+                                <i class="bi bi-arrow-left me-2"></i> Précédent
+                            </button>
+                            
+                            <div class="ms-auto">
+                                <button type="button" id="btn-next" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold shadow-sm">
+                                    Suivant <i class="bi bi-arrow-right ms-2"></i>
+                                </button>
+                                <button type="submit" id="btn-submit" class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow-sm d-none">
+                                    Valider le Quiz <i class="bi bi-check-lg ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .transition-width { transition: width 0.4s ease; }
+    .transition-all { transition: all 0.2s ease; }
+    
+    .quiz-option-card:hover {
+        border-color: var(--bs-primary) !important;
+        background-color: var(--bs-light) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+    }
+    
+    .quiz-option-card:has(.quiz-option-input:checked) {
+        border-color: var(--bs-primary) !important;
+        background-color: rgba(13, 110, 253, 0.05) !important;
+        box-shadow: 0 0 0 1px var(--bs-primary);
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.4s ease-out forwards;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Timer badge pulse */
+    #quiz-timer { font-variant-numeric: tabular-nums; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const steps = document.querySelectorAll('.quiz-step');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnSubmit = document.getElementById('btn-submit');
+    const progressBar = document.getElementById('quiz-progress-bar');
+    const currentNumEl = document.getElementById('current-question-num');
+    const timerEl = document.getElementById('quiz-timer');
+    const totalSteps = steps.length;
+    let currentStep = 0;
+    
+    // Timer Logic
+    let seconds = 0;
+    setInterval(() => {
+        seconds++;
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        if(timerEl) timerEl.textContent = `${m}:${s}`;
+    }, 1000);
+
+    function showStep(index) {
+        steps.forEach((step, i) => {
+            if (i === index) {
+                step.classList.remove('d-none');
+                // Trigger reflow for animation replay if needed, simple remove d-none triggers animation defined in CSS
+            } else {
+                step.classList.add('d-none');
+            }
+        });
+        
+        // Update texts
+        if(currentNumEl) currentNumEl.textContent = index + 1;
+        
+        // Update Progress
+        const progress = ((index + 1) / totalSteps) * 100;
+        if(progressBar) progressBar.style.width = `${progress}%`;
+
+        // Update Buttons
+        if (index === 0) {
+            btnPrev.classList.add('d-none');
+        } else {
+            btnPrev.classList.remove('d-none');
+        }
+
+        if (index === totalSteps - 1) {
+            btnNext.classList.add('d-none');
+            btnSubmit.classList.remove('d-none');
+        } else {
+            btnNext.classList.remove('d-none');
+            btnSubmit.classList.add('d-none');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validateStep(index) {
+        const step = steps[index];
+        const inputs = step.querySelectorAll('input, textarea, select');
+        let valid = false;
+        
+        // Check if at least one input in the current step has a value (for radios) or is filled (text)
+        // If question is optional, this logic might need adjustment, but usually quiz questions are required.
+        // The original template had 'required' attributes.
+        
+        // Find if there are radios
+        const radios = step.querySelectorAll('input[type="radio"]');
+        if (radios.length > 0) {
+            const checked = step.querySelector('input[type="radio"]:checked');
+            if (checked) valid = true;
+        } else {
+            // Text inputs
+            inputs.forEach(input => {
+                if (input.value.trim() !== '') valid = true;
+            });
+        }
+        
+        return valid;
+    }
+
+    btnNext.addEventListener('click', function() {
+        if(validateStep(currentStep)) {
+            currentStep++;
+            showStep(currentStep);
+        } else {
+            // Shake animation or alert
+            const card = steps[currentStep].querySelector('.card-body');
+            card.classList.add('border-danger');
+            card.style.border = "1px solid #dc3545";
+            setTimeout(() => { card.style.border = ""; }, 2000);
+            
+            // Optional: Bootstrap toast or alert
+            alert("Veuillez répondre à la question pour continuer.");
+        }
+    });
+
+    btnPrev.addEventListener('click', function() {
+        if (currentStep > 0) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    });
+
+    // Initial State
+    showStep(0);
+
+    // Mode prévisualisation admin : ne pas envoyer le formulaire
+    var form = document.getElementById('quiz-play-form');
+    if (form && form.getAttribute('data-preview') === '1') {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Prévisualisation : les réponses ne sont pas enregistrées.');
+        });
+    }
+});
+</script>
+
+{% if quiz.chatbotEnabled %}
+<div id="quiz-chatbot" class="quiz-chatbot">
+    <button type="button" id="quiz-chatbot-toggle" class="quiz-chatbot-toggle btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center transition-transform hover-scale" aria-label="Ouvrir l'assistant">
+        <i class="bi bi-chat-dots-fill fs-4"></i>
+    </button>
+    <div id="quiz-chatbot-panel" class="quiz-chatbot-panel shadow-lg rounded-4 d-none flex-column overflow-hidden">
+        <div class="quiz-chatbot-header bg-gradient-primary text-white p-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <div class="bg-white bg-opacity-25 rounded-circle p-1">
+                    <i class="bi bi-robot fs-5"></i>
+                </div>
+                <span class="fw-semibold">Assistant Quiz</span>
+            </div>
+            <button type="button" id="quiz-chatbot-close" class="btn btn-sm btn-link text-white opacity-75 hover-opacity-100 p-0 fs-5 text-decoration-none">&times;</button>
+        </div>
+        <div id="quiz-chatbot-messages" class="quiz-chatbot-messages p-3 bg-light"></div>
+        <div class="quiz-chatbot-input p-3 bg-white border-top">
+            <form id="quiz-chatbot-form" class="d-flex gap-2">
+                <input type="text" id="quiz-chatbot-field" class="form-control rounded-pill bg-light border-0 px-3" placeholder="Besoin d'un indice ?" autocomplete="off">
+                <button type="submit" class="btn btn-primary rounded-circle shadow-sm" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-send-fill small"></i></button>
+            </form>
+        </div>
+    </div>
+</div>
+<style>
+.quiz-chatbot { position: fixed; bottom: 30px; right: 30px; z-index: 1050; }
+.quiz-chatbot-toggle { width: 60px; height: 60px; }
+.hover-scale:hover { transform: scale(1.05); }
+.quiz-chatbot-panel { 
+    position: absolute; bottom: 80px; right: 0; 
+    width: 350px; max-width: calc(100vw - 40px); height: 450px; 
+    background: #fff; border: none; 
+    animation: slideInUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.bg-gradient-primary { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
+.quiz-chatbot-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.8rem; }
+.quiz-chatbot-msg { max-width: 85%; padding: 0.75rem 1rem; border-radius: 1.2rem; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.quiz-chatbot-msg.user { align-self: flex-end; background: #0d6efd; color: #fff; border-bottom-right-radius: 0.25rem; }
+.quiz-chatbot-msg.bot { align-self: flex-start; background: #fff; color: #1f2937; border-bottom-left-radius: 0.25rem; }
+@keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+<script>
+(function() {
+    var panel = document.getElementById('quiz-chatbot-panel');
+    var toggle = document.getElementById('quiz-chatbot-toggle');
+    var closeBtn = document.getElementById('quiz-chatbot-close');
+    var form = document.getElementById('quiz-chatbot-form');
+    var field = document.getElementById('quiz-chatbot-field');
+    var messagesEl = document.getElementById('quiz-chatbot-messages');
+    var chatUrl = '{{ path('quiz_front_chat', { id: quiz.id }) }}';
+    var token = '{{ csrf_token('quiz_chat_' ~ quiz.id) }}';
+    
+    function addMessage(text, isUser) {
+        var div = document.createElement('div');
+        div.className = 'quiz-chatbot-msg ' + (isUser ? 'user' : 'bot');
+        div.textContent = text;
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    
+    function sendMessage() {
+        var msg = (field.value || '').trim();
+        if (!msg) return;
+        addMessage(msg, true);
+        field.value = '';
+        
+        // Show typing indicator? (Optional)
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', chatUrl);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.onload = function() {
+            var data = {};
+            try { data = JSON.parse(xhr.responseText); } catch (e) {}
+            addMessage(data.reply || 'Désolé, une erreur est survenue.', false);
+        };
+        xhr.onerror = function() { addMessage('Connexion impossible. Réessayez plus tard.', false); };
+        xhr.send('message=' + encodeURIComponent(msg) + '&_token=' + encodeURIComponent(token));
+    }
+
+    if (toggle) toggle.addEventListener('click', function() { 
+        panel.classList.toggle('d-none'); 
+        if (!panel.classList.contains('d-none')) {
+            field.focus(); 
+            // Scroll to bottom
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+    });
+
+    if (closeBtn) closeBtn.addEventListener('click', function() { panel.classList.add('d-none'); });
+    if (form) form.addEventListener('submit', function(e) { e.preventDefault(); sendMessage(); });
+    
+    // Initial greeting if empty
+    if(messagesEl && messagesEl.children.length === 0) {
+        addMessage('Bonjour ! Je suis l\'assistant du quiz « {{ quiz.titre|e('js') }} ». Demandez-moi un indice ou une précision.', false);
+    }
+})();
+</script>
+{% endif %}
+{% endblock %}

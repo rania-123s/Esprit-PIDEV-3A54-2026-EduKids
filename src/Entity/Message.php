@@ -47,7 +47,7 @@ class Message
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $filePath = null;
 
-    #[ORM\Column]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]

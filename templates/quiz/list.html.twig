@@ -1,0 +1,141 @@
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}Quiz - EduKids{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-3 px-xl-5 py-5 bg-light">
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-5 fw-bold mb-3" style="color: #1e3a5f;">Quiz Éducatifs</h1>
+            <p class="lead mx-auto" style="max-width: 600px; color: #374151 !important;">Testez vos connaissances avec nos quiz. Connectez-vous pour enregistrer vos scores.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm sticky-top rounded-3" style="top: 100px; z-index: 1020; border: 1px solid #e5e7eb !important;">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="fw-bold mb-0" style="color: #1f2937 !important;"><i class="bi bi-funnel me-2 text-primary"></i>Rechercher</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{{ path('quiz_front_list') }}">
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" style="color: #374151 !important;">Recherche</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" name="q" id="quiz-search-query" class="form-control border-start-0 ps-0 bg-light" value="{{ searchQuery ?? '' }}" placeholder="Titre, thème..." autocomplete="off">
+                                <button type="button" id="quiz-voice-search-btn" class="btn btn-outline-secondary border-start-0" title="Recherche vocale" aria-label="Recherche vocale">
+                                    <i class="bi bi-mic-fill" id="quiz-voice-icon"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted d-block mt-1" style="color: #6b7280 !important;"><i class="bi bi-mic me-1"></i> Cliquez sur le micro pour rechercher à la voix</small>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" style="color: #374151 !important;">Trier par</label>
+                            <select name="sort" class="form-select bg-light mb-2">
+                                <option value="titre" {{ sort == 'titre' ? 'selected' : '' }}>Titre</option>
+                                <option value="createdAt" {{ sort == 'createdAt' ? 'selected' : '' }}>Date</option>
+                            </select>
+                            <select name="order" class="form-select bg-light">
+                                <option value="ASC" {{ order == 'ASC' ? 'selected' : '' }}>A-Z</option>
+                                <option value="DESC" {{ order == 'DESC' ? 'selected' : '' }}>Z-A</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary fw-semibold w-100">Appliquer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded-3 shadow-sm" style="border: 1px solid #e5e7eb;">
+                <span class="small" style="color: #4b5563 !important;">{{ quizzes|length }} quiz disponible(s)</span>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                {% for quiz in quizzes %}
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden" style="border: 1px solid #e5e7eb !important;">
+                            <div class="position-relative">
+                                {% if quiz.imageUrl %}
+                                    <img src="{{ quiz.imageUrl }}" class="card-img-top" alt="{{ quiz.titre }}" style="height: 180px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
+                                        <i class="bi bi-question-circle fs-1 opacity-25"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title fw-bold mb-2" style="color: #1f2937 !important;">{{ quiz.titre }}</h5>
+                                <p class="card-text small flex-grow-1 mb-3" style="color: #4b5563 !important;">
+                                    {{ quiz.description|striptags|slice(0, 100) }}{% if quiz.description|length > 100 %}...{% endif %}
+                                </p>
+                                <div class="mt-auto d-flex gap-2">
+                                    <a href="{{ path('quiz_front_show', { id: quiz.id }) }}" class="btn btn-outline-primary btn-sm rounded-pill">Voir</a>
+                                    {% if app.user %}
+                                        <a href="{{ path('quiz_front_play', { id: quiz.id }) }}" class="btn btn-primary btn-sm rounded-pill">Jouer</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12 py-5 text-center">
+                        <i class="bi bi-search fs-1" style="color: #9ca3af !important; opacity: .6;"></i>
+                        <h4 style="color: #374151 !important;">Aucun quiz trouvé</h4>
+                        <p class="small" style="color: #4b5563 !important;">Modifiez votre recherche ou revenez plus tard.</p>
+                        <a href="{{ path('quiz_front_list') }}" class="btn btn-primary mt-3 rounded-pill px-4">Voir tous les quiz</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+#quiz-voice-search-btn.recording { background: #dc3545; color: #fff; border-color: #dc3545; }
+#quiz-voice-search-btn.recording i { animation: quiz-pulse 1s ease-in-out infinite; }
+@keyframes quiz-pulse { 50% { opacity: 0.6; } }
+</style>
+<script>
+(function() {
+    var input = document.getElementById('quiz-search-query');
+    var btn = document.getElementById('quiz-voice-search-btn');
+    if (!input || !btn) return;
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        btn.title = 'Recherche vocale non supportée';
+        btn.disabled = true;
+        return;
+    }
+    var recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'fr-FR';
+    btn.addEventListener('click', function() {
+        if (btn.classList.contains('recording')) {
+            recognition.stop();
+            return;
+        }
+        btn.classList.add('recording');
+        btn.title = 'Arrêter l\'écoute';
+        recognition.start();
+    });
+    recognition.onresult = function(e) {
+        var transcript = (e.results[e.resultIndex][0].transcript || '').trim();
+        if (transcript) {
+            input.value = transcript;
+            input.form && input.form.submit();
+        }
+        btn.classList.remove('recording');
+        btn.title = 'Recherche vocale';
+    };
+    recognition.onend = function() { btn.classList.remove('recording'); btn.title = 'Recherche vocale'; };
+    recognition.onerror = function(e) {
+        btn.classList.remove('recording');
+        btn.title = 'Recherche vocale';
+        if (e.error === 'not-allowed') alert('Autorisez le micro pour la recherche vocale.');
+    };
+})();
+</script>
+{% endblock %}

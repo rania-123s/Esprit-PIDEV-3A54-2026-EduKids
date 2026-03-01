@@ -1,0 +1,30 @@
+{% extends 'back_office/quiz_base.html.twig' %}
+
+{% block title %}Quiz & Questions - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid p-4">
+    <h1 class="h3 mb-1 ecommerce-admin-header">Quiz & Questions</h1>
+    <p class="text-body mb-4" style="color: #4b5563 !important;">Créez des quiz, ajoutez des questions et publiez-les pour les utilisateurs.</p>
+    <div class="row g-4">
+        <div class="col-md-4 col-lg-3">
+            <div class="card ecommerce-admin-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-collection me-2 text-primary"></i>Quiz</h5>
+                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Gérer les quiz (CRUD, recherche, tri).</p>
+                    <a href="{{ path('quiz_admin_quiz_list') }}" class="btn btn-primary rounded-pill px-4">Gérer les quiz</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="card ecommerce-admin-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-graph-up me-2 text-primary"></i>Statistiques</h5>
+                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Tentatives, scores moyens et export.</p>
+                    <a href="{{ path('quiz_admin_statistics') }}" class="btn btn-primary rounded-pill px-4">Tableau de bord</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

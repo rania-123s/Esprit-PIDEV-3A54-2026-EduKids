@@ -1,0 +1,129 @@
+{% extends 'back_office/ecommerce_base.html.twig' %}
+
+{% block title %}Gestion des Produits - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-0 ecommerce-admin-header"><i class="bi bi-basket me-2 text-primary"></i>Gestion des Produits</h1>
+            <p class="small mb-0" style="color: #4b5563 !important;">Visualisez et gérez votre catalogue.</p>
+        </div>
+        <a href="{{ path('ecommerce_admin_produit_new') }}" class="btn btn-primary shadow-sm rounded-pill px-4">
+            <i class="bi bi-plus-circle me-2"></i> Nouveau Produit
+        </a>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-success border-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+
+    <div class="card ecommerce-admin-card border-0 shadow-sm mb-4">
+        <div class="card-body bg-light rounded-3 p-3">
+            <form method="get" action="{{ path('ecommerce_admin_produit_index') }}" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small text-uppercase" style="color: #374151 !important;">Recherche</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0" value="{{ searchQuery ?? '' }}" placeholder="Nom, description...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small text-uppercase" style="color: #374151 !important;">Catégorie</label>
+                    <select name="category" class="form-select">
+                        <option value="">Toutes les catégories</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}" {{ (filterCategoryId ?? '') == cat.id ? 'selected' : '' }}>{{ cat.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                     <label class="form-label fw-semibold small text-uppercase" style="color: #374151 !important;">Tri</label>
+                     <div class="input-group">
+                        <select name="sort" class="form-select">
+                            <option value="nom" {{ sort == 'nom' ? 'selected' : '' }}>Nom</option>
+                            <option value="prix" {{ sort == 'prix' ? 'selected' : '' }}>Prix</option>
+                        </select>
+                        <select name="order" class="form-select" style="max-width: 80px;">
+                            <option value="ASC" {{ order == 'ASC' ? 'selected' : '' }}>A-Z</option>
+                            <option value="DESC" {{ order == 'DESC' ? 'selected' : '' }}>Z-A</option>
+                        </select>
+                     </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-pill"><i class="bi bi-funnel me-1"></i> Filtrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card ecommerce-admin-card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-uppercase small" style="color: #1f2937 !important;">
+                    <tr>
+                        <th class="ps-4 py-3 border-0 rounded-start">Produit</th>
+                        <th class="py-3 border-0">Catégorie</th>
+                        <th class="py-3 border-0">Prix</th>
+                        <th class="pe-4 py-3 border-0 rounded-end text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for produit in produits %}
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <div class="d-flex align-items-center">
+                                    {% if produit.imageUrl %}
+                                        <img src="{{ produit.imageUrl }}" class="rounded-3 shadow-sm me-3 bg-white" alt="" width="48" height="48" style="object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-3 bg-light d-flex align-items-center justify-content-center me-3 text-muted" style="width: 48px; height: 48px;">
+                                            <i class="bi bi-image fs-5"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ produit.nom }}</div>
+                                        <div class="small text-truncate" style="max-width: 250px; color: #4b5563 !important;">{{ produit.description|striptags }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">{{ produit.category ? produit.category.nom : 'Non classé' }}</span>
+                            </td>
+                            <td class="py-3 fw-bold text-dark">
+                                {{ (produit.prix / 100)|number_format(2, ',', ' ') }} €
+                            </td>
+                            <td class="pe-4 py-3 text-end">
+                                <div class="btn-group">
+                                    <a href="{{ path('ecommerce_admin_produit_edit', { id: produit.id }) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="post" action="{{ path('ecommerce_admin_produit_delete', { id: produit.id }) }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ produit.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-start-0" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5" style="color: #4b5563 !important;">
+                                <div class="mb-3"><i class="bi bi-inbox fs-1" style="opacity: .4;"></i></div>
+                                <p class="mb-0">Aucun produit trouvé.</p>
+                                <a href="{{ path('ecommerce_admin_produit_new') }}" class="btn btn-primary rounded-pill mt-2">Créer un produit</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white py-3 border-0">
+             <small style="color: #4b5563 !important;">{{ produits|length }} produit(s) affiché(s)</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

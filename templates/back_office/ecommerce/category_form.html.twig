@@ -1,0 +1,84 @@
+{% extends 'back_office/ecommerce_base.html.twig' %}
+
+{% block title %}{{ category.id ? 'Modifier' : 'Nouvelle' }} catégorie - Admin E-commerce{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0 fw-bold ecommerce-admin-header">
+                        <i class="bi bi-tags text-primary me-2"></i> Catégories
+                    </h2>
+                    <p class="small mt-1" style="color: #4b5563 !important;">{{ category.id ? 'Modifier la catégorie' : 'Créer une nouvelle catégorie' }}</p>
+                </div>
+                <a href="{{ path('ecommerce_admin_category_index') }}" class="btn btn-outline-secondary btn-lg rounded-pill">
+                    <i class="bi bi-arrow-left me-2"></i> Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 m-auto">
+            <div class="card ecommerce-admin-card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white border-bottom-0 p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-img rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                            <i class="bi bi-tags text-primary" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">{{ category.id ? category.nom : 'New category' }}</h5>
+                            <p class="mb-0 small" style="color: #4b5563 !important;">Nom et description (contrôle de saisie dans l'entité)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'class': 'form-content', 'novalidate': 'novalidate'}}) }}
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase small mb-3" style="color: #374151 !important;">
+                            <i class="bi bi-info-circle me-2"></i> Informations
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Nom de la catégorie</label>
+                                {{ form_widget(form.nom, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Ex: Livre, Abonnement'}}) }}
+                                {{ form_errors(form.nom) }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Description</label>
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control form-control-lg', 'rows': 4, 'placeholder': 'Optionnel'}}) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-lg btn-primary fw-semibold rounded-pill px-4">Enregistrer</button>
+                        <a href="{{ path('ecommerce_admin_category_index') }}" class="btn btn-lg btn-outline-secondary fw-semibold rounded-pill">
+                            <i class="bi bi-x me-2"></i> Annuler
+                        </a>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control { border-color: #e0e0e0; transition: all 0.3s ease; }
+    .form-control:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15); }
+    .form-control-lg { border-radius: 0.5rem; font-size: 1rem; padding: 0.75rem 1rem; }
+    .form-control.is-invalid { border-color: #dc3545; }
+    .invalid-feedback { color: #dc3545; font-size: 0.875rem; margin-top: 0.5rem; display: block; }
+    hr { opacity: 0.5; }
+    .btn-lg { padding: 0.75rem 2rem; font-size: 1rem; border-radius: 0.5rem; }
+</style>
+{% endblock %}

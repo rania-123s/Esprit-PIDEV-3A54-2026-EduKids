@@ -9,6 +9,17 @@
 parameters:
     uploads_directory: '%kernel.project_dir%/public/uploads'
     images_directory: '%kernel.project_dir%/public/uploads/images'
+    # Chat (branche chat1)
+    chat_audio_max_size_bytes: 5242880
+    chat_audio_max_duration_seconds: 120
+    chat_audio_allowed_mime_types: ['audio/webm', 'audio/mpeg', 'audio/ogg', 'audio/wav']
+    chat_upload_dir: '%kernel.project_dir%/public/uploads/chat'
+    chat_upload_public_prefix: '/uploads/chat'
+    chat_upload_max_size_bytes: 10485760
+    chat_upload_max_files_per_message: 5
+    chat_upload_allowed_mime_types: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf']
+    chat_auto_reply_admin_email: ''
+    chat_auto_reply_cooldown_minutes: 5
 
 services:
     # default configuration for services in *this* file
@@ -36,6 +47,10 @@ services:
     App\Service\ActivityRecommendationService:
         arguments:
             $groqApiKey: '%env(GROQ_API_KEY)%'
+
+    App\Service\LibreTranslateService:
+        arguments:
+            $baseUrl: '%env(LIBRETRANSLATE_URL)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

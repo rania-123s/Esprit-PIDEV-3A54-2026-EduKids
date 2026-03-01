@@ -1,0 +1,42 @@
+{% extends 'back_office/ecommerce_base.html.twig' %}
+
+{% block title %}Exporter les commandes - Admin E-commerce{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <h1 class="h3 fw-bold mb-0 ecommerce-admin-header"><i class="bi bi-download me-2 text-primary"></i>Exporter les commandes</h1>
+    <p class="small mb-4" style="color: #4b5563 !important;">Filtrez par période et statut, puis téléchargez au format CSV.</p>
+
+    <div class="card ecommerce-admin-card border-0 shadow-sm" style="max-width: 560px;">
+        <div class="card-body p-4">
+            <form method="get" action="{{ path('ecommerce_admin_export') }}" class="row g-3">
+                <input type="hidden" name="format" value="csv">
+                <div class="col-12">
+                    <label class="form-label fw-semibold" style="color: #374151 !important;">Date de début</label>
+                    <input type="date" name="date_from" class="form-control" value="{{ date_from ?? '' }}">
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold" style="color: #374151 !important;">Date de fin</label>
+                    <input type="date" name="date_to" class="form-control" value="{{ date_to ?? '' }}">
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold" style="color: #374151 !important;">Statut</label>
+                    <select name="status" class="form-select">
+                        <option value="">Tous les statuts</option>
+                        <option value="en_attente" {{ status == 'en_attente' ? 'selected' : '' }}>En attente</option>
+                        <option value="paye" {{ status == 'paye' ? 'selected' : '' }}>Payé</option>
+                        <option value="confirme" {{ status == 'confirme' ? 'selected' : '' }}>Confirmé</option>
+                        <option value="livre" {{ status == 'livre' ? 'selected' : '' }}>Livré</option>
+                        <option value="annule" {{ status == 'annule' ? 'selected' : '' }}>Annulé</option>
+                        <option value="rejete" {{ status == 'rejete' ? 'selected' : '' }}>Rejeté</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Télécharger le CSV</button>
+                    <a href="{{ path('ecommerce_admin_analytics') }}" class="btn btn-outline-secondary rounded-pill ms-2">Retour</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

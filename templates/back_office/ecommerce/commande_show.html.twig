@@ -1,0 +1,70 @@
+{% extends 'back_office/ecommerce_base.html.twig' %}
+
+{% block title %}Commande #{{ commande.id }} - Admin E-commerce{% endblock %}
+
+{% block body %}
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 ecommerce-admin-header">Commande #{{ commande.id }}</h1>
+        <div class="d-flex gap-2">
+            <a href="{{ path('ecommerce_admin_commande_statut', { id: commande.id }) }}" class="btn btn-primary rounded-pill">Changer le statut</a>
+            <form method="post" action="{{ path('ecommerce_admin_commande_delete', { id: commande.id }) }}" class="d-inline-block" onsubmit="return confirm('Supprimer définitivement cette commande ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commande.id) }}">
+                <button type="submit" class="btn btn-outline-danger rounded-pill"><i class="bi bi-trash me-1"></i>Supprimer la commande</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card ecommerce-admin-card mb-3">
+                <div class="card-header bg-light fw-semibold" style="color: #1f2937 !important;">Client</div>
+                <div class="card-body">
+                    <p class="mb-0" style="color: #374151 !important;"><strong>Email :</strong> {{ commande.user ? commande.user.email : '-' }}</p>
+                    {% if commande.user %}
+                        <p class="mb-0" style="color: #374151 !important;"><strong>Nom :</strong> {{ commande.user.firstName }} {{ commande.user.lastName }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card ecommerce-admin-card mb-3">
+                <div class="card-header bg-light fw-semibold" style="color: #1f2937 !important;">Résumé</div>
+                <div class="card-body">
+                    <p class="mb-0" style="color: #374151 !important;"><strong>Date :</strong> {{ commande.date ? commande.date|date('d/m/Y H:i') : '-' }}</p>
+                    <p class="mb-0" style="color: #374151 !important;"><strong>Statut :</strong> <span class="badge bg-secondary">{{ commande.statut }}</span></p>
+                    <p class="mb-0" style="color: #374151 !important;"><strong>Montant total :</strong> {{ (commande.montantTotal / 100)|number_format(2, ',', ' ') }} €</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card ecommerce-admin-card">
+        <div class="card-header bg-light fw-semibold" style="color: #1f2937 !important;">Lignes de commande</div>
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="color: #1f2937 !important;">Produit</th>
+                        <th style="color: #1f2937 !important;">Quantité</th>
+                        <th style="color: #1f2937 !important;">Prix unitaire</th>
+                        <th style="color: #1f2937 !important;">Sous-total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ligne in commande.ligneCommandes %}
+                        <tr>
+                            <td style="color: #374151 !important;">{{ ligne.produit ? ligne.produit.nom : '-' }}</td>
+                            <td style="color: #374151 !important;">{{ ligne.quantite }}</td>
+                            <td style="color: #374151 !important;">{{ (ligne.prixUnitaire / 100)|number_format(2, ',', ' ') }} €</td>
+                            <td style="color: #374151 !important;">{{ (ligne.sousTotal / 100)|number_format(2, ',', ' ') }} €</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="4" class="text-center" style="color: #4b5563 !important;">Aucune ligne.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

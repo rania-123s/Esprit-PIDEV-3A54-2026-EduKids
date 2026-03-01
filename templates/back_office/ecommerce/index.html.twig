@@ -1,0 +1,57 @@
+{% extends 'back_office/ecommerce_base.html.twig' %}
+
+{% block title %}E-commerce Éducatif - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid p-4">
+    <h1 class="h3 mb-1 ecommerce-admin-header">E-commerce Éducatif</h1>
+    <p class="text-body mb-4" style="color: #4b5563 !important;">Gérez vos produits, catégories, commandes et avis.</p>
+    <div class="row g-4">
+        <div class="col-md-4 col-lg-3">
+            <div class="card ecommerce-admin-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-basket me-2 text-primary"></i>Produits</h5>
+                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Gérer le catalogue des produits éducatifs (CRUD).</p>
+                    <a href="{{ path('ecommerce_admin_produit_index') }}" class="btn btn-primary rounded-pill px-4">Gérer les produits</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="card ecommerce-admin-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-chat-quote me-2 text-primary"></i>Avis</h5>
+                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Modérer les avis clients (approuver / rejeter).</p>
+                    <a href="{{ path('ecommerce_admin_review_index') }}" class="btn btn-primary rounded-pill px-4">Modérer les avis</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="card ecommerce-admin-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-tags me-2 text-primary"></i>Catégories</h5>
+                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Créer et gérer les catégories de produits.</p>
+                    <a href="{{ path('ecommerce_admin_category_index') }}" class="btn btn-primary rounded-pill px-4">Gérer les catégories</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="card ecommerce-admin-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-cart-check me-2 text-primary"></i>Commandes</h5>
+                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Liste des commandes et mise à jour des statuts.</p>
+                    <a href="{{ path('ecommerce_admin_commande_index') }}" class="btn btn-primary rounded-pill px-4">Voir les commandes</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="card ecommerce-admin-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-graph-up me-2 text-primary"></i>Statistiques</h5>
+                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Tableau de bord, export et ventes par période.</p>
+                    <a href="{{ path('ecommerce_admin_analytics') }}" class="btn btn-primary rounded-pill px-4">Tableau de bord</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

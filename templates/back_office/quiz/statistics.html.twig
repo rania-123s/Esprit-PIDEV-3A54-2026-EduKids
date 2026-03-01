@@ -1,0 +1,80 @@
+{% extends 'back_office/quiz_base.html.twig' %}
+
+{% block title %}Statistiques Quiz - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <h1 class="h3 fw-bold mb-0 ecommerce-admin-header"><i class="bi bi-graph-up me-2 text-primary"></i>Statistiques Quiz</h1>
+    <p class="small mb-4" style="color: #4b5563 !important;">Tentatives et scores par quiz.</p>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-4">
+            <div class="card ecommerce-admin-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase small fw-semibold mb-2" style="color: #6b7280 !important;">Total tentatives</h6>
+                    <h3 class="mb-0 fw-bold" style="color: #1f2937 !important;">{{ totalAttempts }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-4">
+            <div class="card ecommerce-admin-card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center">
+                    <a href="{{ path('quiz_admin_export', { format: 'csv' }) }}" class="btn btn-outline-primary rounded-pill w-100">
+                        <i class="bi bi-download me-2"></i>Exporter (CSV)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card ecommerce-admin-card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">Tentatives (30 derniers jours)</h5>
+                </div>
+                <div class="card-body">
+                    <div id="chartAttempts" style="min-height: 280px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card ecommerce-admin-card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">Par quiz</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for row in quizStats %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
+                                <span class="fw-semibold text-truncate" style="max-width: 180px; color: #374151 !important;" title="{{ row.quiz.titre }}">{{ row.quiz.titre }}</span>
+                                <span class="badge bg-primary rounded-pill">{{ row.attemptCount }} tentatives · {{ row.averageScore|number_format(1) }}%</span>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item border-0" style="color: #4b5563 !important;">Aucune tentative.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof ApexCharts === 'undefined') return;
+    var labels = {{ chartLabels|json_encode|raw }};
+    var values = {{ chartValues|json_encode|raw }};
+    var options = {
+        series: [{ name: 'Tentatives', data: values }],
+        chart: { type: 'area', height: 280, toolbar: { show: false } },
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 2 },
+        xaxis: { categories: labels },
+        colors: ['#0d6efd'],
+        fill: { type: 'gradient', opacity: 0.3 }
+    };
+    new ApexCharts(document.querySelector('#chartAttempts'), options).render();
+});
+</script>
+{% endblock %}

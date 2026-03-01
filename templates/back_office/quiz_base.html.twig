@@ -1,0 +1,18 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .page-content-wrapper .text-muted { color: #374151 !important; }
+        .page-content-wrapper .card-title { color: #1f2937 !important; font-weight: 700; }
+        .page-content-wrapper .form-label { color: #374151 !important; }
+        .page-content-wrapper .table thead th { color: #1f2937 !important; font-weight: 600; }
+        .page-content-wrapper .table td { color: #374151 !important; }
+        .page-content-wrapper .card-body p { color: #4b5563 !important; }
+        .ecommerce-admin-card { border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,.06); transition: box-shadow .2s, border-color .2s; }
+        .ecommerce-admin-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); border-color: #d1d5db; }
+        .ecommerce-admin-card .card-body { padding: 1.5rem 1.75rem; }
+        .ecommerce-admin-card .card-title { font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .ecommerce-admin-header { color: #1f2937 !important; font-weight: 700; letter-spacing: -0.02em; }
+    </style>
+{% endblock %}
