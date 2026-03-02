@@ -3,128 +3,397 @@
 {% block title %}{{ quiz.id ? 'Modifier' : 'Nouveau' }} quiz - Admin{% endblock %}
 
 {% block body %}
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <div>
-                    <nav aria-label="breadcrumb" class="mb-2">
-                        <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="{{ path('quiz_admin_quiz_list') }}">Quiz</a></li>
-                            <li class="breadcrumb-item active">{{ quiz.id ? 'Modifier' : 'Nouveau quiz' }}</li>
-                        </ol>
-                    </nav>
-                    <h2 class="mb-0 fw-bold ecommerce-admin-header">
-                        <i class="bi bi-collection text-primary me-2"></i> {{ quiz.id ? 'Modifier le quiz' : 'Créer un quiz' }}
-                    </h2>
-                    <p class="small mt-1 mb-0" style="color: #4b5563 !important;">Remplissez les informations puis ajoutez les questions.</p>
-                </div>
-                <a href="{{ path('quiz_admin_quiz_list') }}" class="btn btn-outline-secondary rounded-pill px-4">
-                    <i class="bi bi-arrow-left me-2"></i> Retour à la liste
-                </a>
-            </div>
+<style>
+    .quiz-form-page {
+        --ink: #0f172a;
+        --muted: #5b667a;
+        --line: #d7dfeb;
+        --surface: #ffffff;
+        --brand: #0ea5a3;
+        --brand-dark: #0b7f7d;
+        --hero-a: #0f766e;
+        --hero-b: #155e75;
+        --hero-c: #1d4ed8;
+        font-family: "Heebo", sans-serif;
+    }
+
+    .create-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        margin: 1.75rem 1rem 0;
+        padding: 3rem 1.25rem;
+        background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c));
+        color: #fff;
+        box-shadow: 0 24px 60px rgba(2, 44, 34, 0.24);
+    }
+
+    .create-hero::before,
+    .create-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .create-hero::before {
+        width: 240px;
+        height: 240px;
+        right: -70px;
+        top: -70px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.33), rgba(255, 255, 255, 0));
+    }
+
+    .create-hero::after {
+        width: 200px;
+        height: 200px;
+        left: -55px;
+        bottom: -80px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.45), rgba(245, 158, 11, 0));
+    }
+
+    .create-hero h1 {
+        margin: 0;
+        font-size: clamp(1.75rem, 4vw, 2.65rem);
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+
+    .create-hero p {
+        margin: 0.85rem 0 0;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .create-shell {
+        padding: 1.75rem 1rem 2.2rem;
+    }
+
+    .create-card {
+        background: linear-gradient(170deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.96));
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 24px;
+        box-shadow: 0 22px 55px rgba(15, 23, 42, 0.1);
+        backdrop-filter: blur(2px);
+    }
+
+    .create-card .card-body {
+        padding: clamp(1.1rem, 2.8vw, 2.4rem);
+    }
+
+    .info-header {
+        text-align: center;
+        margin-bottom: 1.35rem;
+    }
+
+    .info-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(14, 165, 163, 0.12);
+        color: #0d7e7b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 0.55rem;
+    }
+
+    .create-heading {
+        color: var(--ink);
+        font-size: clamp(1.15rem, 2.5vw, 1.55rem);
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+        letter-spacing: 0.2px;
+    }
+
+    .info-subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+    }
+
+    .form-section {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 16px;
+        background: #fff;
+        padding: 1rem;
+    }
+
+    .form-section-title {
+        margin: 0 0 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-section-title i {
+        color: var(--brand-dark);
+    }
+
+    .field-label {
+        color: var(--ink);
+        font-size: 0.94rem;
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+    }
+
+    .modern-input {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 0.82rem 0.95rem;
+        font-size: 0.96rem;
+        color: var(--ink);
+        background: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .modern-input:focus {
+        border-color: rgba(14, 165, 163, 0.65);
+        box-shadow: 0 0 0 4px rgba(14, 165, 163, 0.14);
+        transform: translateY(-1px);
+    }
+
+    .form-note {
+        margin-top: 0.4rem;
+        color: var(--muted);
+        font-size: 0.83rem;
+    }
+
+    .image-box {
+        border-style: dashed;
+        border-color: rgba(14, 165, 163, 0.36);
+        background: linear-gradient(135deg, rgba(14, 165, 163, 0.07), rgba(29, 78, 216, 0.05));
+    }
+
+    .quiz-avatar {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+    }
+
+    .quiz-avatar-placeholder {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+        border: 1px dashed rgba(14, 165, 163, 0.36);
+        background: rgba(14, 165, 163, 0.08);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #0d7e7b;
+    }
+
+    .create-actions {
+        padding-top: 0.5rem;
+    }
+
+    .btn-create-modern {
+        border: 0;
+        border-radius: 13px;
+        padding: 0.9rem 1.4rem;
+        background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+        color: #fff;
+        font-weight: 700;
+        letter-spacing: 0.15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        box-shadow: 0 14px 28px rgba(11, 127, 125, 0.34);
+    }
+
+    .btn-create-modern:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.02);
+        box-shadow: 0 16px 30px rgba(11, 127, 125, 0.4);
+        color: #fff;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 1rem;
+        color: var(--brand-dark);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        color: #095957;
+        text-decoration: underline;
+    }
+
+    .reveal-up {
+        animation: revealUp 0.45s ease both;
+    }
+
+    .reveal-up.delay-1 {
+        animation-delay: 0.08s;
+    }
+
+    @keyframes revealUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .create-hero {
+            margin: 1rem 0.75rem 0;
+            border-radius: 18px;
+            padding: 2.3rem 1rem;
+        }
+
+        .create-shell {
+            padding: 1rem 0.75rem 1.5rem;
+        }
+    }
+</style>
+
+<section class="quiz-form-page">
+    <div class="create-hero reveal-up">
+        <div class="container">
+            <h1>{{ quiz.id ? 'Modifier le quiz' : 'Creer un quiz' }}</h1>
+            <p>Renseignez les informations principales puis ajoutez les questions.</p>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-xl-8 col-lg-10 mx-auto">
-            <div class="card ecommerce-admin-card shadow-sm border-0 overflow-hidden">
-                <div class="card-header bg-light border-0 py-3 px-4">
-                    <div class="d-flex align-items-center gap-3">
-                        {% if quiz.imageUrl %}
-                            <img src="{{ quiz.imageUrl }}" alt="" class="rounded-3 shadow-sm" style="width: 64px; height: 64px; object-fit: cover;">
-                        {% else %}
-                            <div class="rounded-3 bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
-                                <i class="bi bi-question-circle text-primary" style="font-size: 1.75rem;"></i>
+    <div class="create-shell">
+        <div class="container">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ path('quiz_admin_quiz_list') }}">Quiz</a></li>
+                    <li class="breadcrumb-item active">{{ quiz.id ? 'Modifier' : 'Nouveau quiz' }}</li>
+                </ol>
+            </nav>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xl-9">
+                    <div class="card create-card reveal-up delay-1">
+                        <div class="card-body">
+                            <div class="info-header">
+                                <span class="info-kicker">
+                                    <i class="bi bi-collection"></i>
+                                    Gestion quiz
+                                </span>
+                                <h3 class="create-heading">{{ quiz.id ? 'Modifier le quiz' : 'Informations du quiz' }}</h3>
+                                <p class="info-subtitle">{{ quiz.id ? 'Mettez a jour les informations du quiz.' : 'Completez les champs pour creer le quiz.' }}</p>
                             </div>
-                        {% endif %}
-                        <div>
-                            <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">{{ quiz.id ? quiz.titre : 'Nouveau quiz' }}</h5>
-                            <p class="mb-0 small" style="color: #6b7280 !important;">{{ quiz.id ? (quiz.published ? 'Publié' : 'Brouillon') : 'Étape 1 : Informations du quiz' }}</p>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="card-body p-4">
-                    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'quiz-form'}}) }}
-
-                    <div class="quiz-form-section mb-4">
-                        <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.9rem;">1</span>
-                            <h6 class="mb-0 fw-bold text-uppercase small" style="color: #374151 !important;">Informations générales</h6>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Titre du quiz <span class="text-danger">*</span></label>
-                                {{ form_widget(form.titre, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Ex: Mathématiques - Niveau 1'}}) }}
-                                {{ form_errors(form.titre) }}
-                                <div class="form-text small">Entre 3 et 255 caractères.</div>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Description</label>
-                                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Décrivez le thème et les objectifs du quiz...'}}) }}
-                                {{ form_errors(form.description) }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="quiz-form-section mb-4">
-                        <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.9rem;">2</span>
-                            <h6 class="mb-0 fw-bold text-uppercase small" style="color: #374151 !important;">Image du quiz</h6>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2 align-items-end">
-                            <div class="flex-grow-1" style="min-width: 200px;">
-                                {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control', 'placeholder': 'https://... ou générer avec l\'IA'}}) }}
-                                {{ form_errors(form.imageUrl) }}
-                            </div>
-                            <button type="button" id="btn-generate-image" class="btn btn-outline-primary">
-                                <i class="bi bi-image me-1"></i> Générer une image IA
-                            </button>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="quiz-form-section mb-4">
-                        <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.9rem;">3</span>
-                            <h6 class="mb-0 fw-bold text-uppercase small" style="color: #374151 !important;">Publication & assistant</h6>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <div class="form-check form-switch">
-                                    {{ form_widget(form.published, {'attr': {'class': 'form-check-input'}}) }}
-                                    <label class="form-check-label fw-semibold" for="{{ form.published.vars.id }}">Publier le quiz (visible pour les utilisateurs)</label>
+                            <div class="d-flex align-items-center justify-content-center gap-3 mb-4">
+                                {% if quiz.imageUrl %}
+                                    <img src="{{ quiz.imageUrl }}" alt="" class="quiz-avatar">
+                                {% else %}
+                                    <div class="quiz-avatar-placeholder">
+                                        <i class="bi bi-question-circle fs-4"></i>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold" style="color: #1f2937 !important;">{{ quiz.id ? quiz.titre : 'Nouveau quiz' }}</div>
+                                    <div class="small" style="color: #6b7280 !important;">{{ quiz.id ? (quiz.published ? 'Publie' : 'Brouillon') : 'Etape 1: Informations du quiz' }}</div>
                                 </div>
                             </div>
-                            <div class="col-12">
-                                <div class="form-check form-switch">
-                                    {{ form_widget(form.chatbotEnabled, {'attr': {'class': 'form-check-input'}}) }}
-                                    <label class="form-check-label fw-semibold" for="{{ form.chatbotEnabled.vars.id }}">Activer l'assistant chatbot pendant le quiz</label>
+
+                            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+
+                            <div class="row g-3 g-md-4">
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-info-circle"></i>
+                                            Informations generales
+                                        </h4>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                {{ form_label(form.titre, 'Titre du quiz', { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.titre, {'attr': {'class': 'modern-input form-control form-control-lg', 'placeholder': 'Ex: Mathematiques - Niveau 1'}}) }}
+                                                {{ form_errors(form.titre) }}
+                                                <div class="form-note">Entre 3 et 255 caracteres.</div>
+                                            </div>
+                                            <div class="col-12">
+                                                {{ form_label(form.description, 'Description', { 'label_attr': {'class': 'field-label'} }) }}
+                                                {{ form_widget(form.description, {'attr': {'class': 'modern-input form-control', 'rows': 4, 'placeholder': 'Decrivez le theme et les objectifs du quiz...'}}) }}
+                                                {{ form_errors(form.description) }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-text small">Les utilisateurs pourront demander des indices pendant qu'ils passent le quiz.</div>
+
+                                <div class="col-12">
+                                    <div class="form-section image-box">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-image"></i>
+                                            Image du quiz
+                                        </h4>
+                                        <div class="d-flex flex-wrap gap-2 align-items-end">
+                                            <div class="flex-grow-1" style="min-width: 200px;">
+                                                {{ form_widget(form.imageUrl, {'attr': {'class': 'modern-input form-control', 'placeholder': 'https://... ou generer avec l IA'}}) }}
+                                                {{ form_errors(form.imageUrl) }}
+                                            </div>
+                                            <button type="button" id="btn-generate-image" class="btn btn-outline-secondary">
+                                                <i class="bi bi-image me-1"></i> Generer une image IA
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-sliders"></i>
+                                            Publication et assistant
+                                        </h4>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <div class="form-check form-switch">
+                                                    {{ form_widget(form.published, {'attr': {'class': 'form-check-input'}}) }}
+                                                    <label class="form-check-label fw-semibold" for="{{ form.published.vars.id }}">Publier le quiz (visible pour les utilisateurs)</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-check form-switch">
+                                                    {{ form_widget(form.chatbotEnabled, {'attr': {'class': 'form-check-input'}}) }}
+                                                    <label class="form-check-label fw-semibold" for="{{ form.chatbotEnabled.vars.id }}">Activer l assistant chatbot pendant le quiz</label>
+                                                </div>
+                                                <div class="form-note">Les utilisateurs pourront demander des indices pendant qu ils passent le quiz.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+
+                            <div class="create-actions mt-4 text-center">
+                                <button type="submit" class="btn btn-create-modern w-100">
+                                    <i class="bi bi-save me-2"></i> Enregistrer et ajouter les questions
+                                </button>
+                            </div>
+
+                            {{ form_end(form) }}
                         </div>
                     </div>
 
-                    <hr class="my-4">
-
-                    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
-                        <a href="{{ path('quiz_admin_quiz_list') }}" class="btn btn-outline-secondary rounded-pill px-4">Annuler</a>
-                        <button type="submit" class="btn btn-primary rounded-pill px-5 fw-semibold">
-                            <i class="bi bi-save me-2"></i> Enregistrer et ajouter les questions
-                        </button>
+                    <div class="text-center">
+                        <a href="{{ path('quiz_admin_quiz_list') }}" class="back-link">
+                            <span aria-hidden="true">&larr;</span>
+                            Retour a la liste des quiz
+                        </a>
                     </div>
-
-                    {{ form_end(form) }}
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -135,11 +404,11 @@ document.addEventListener('DOMContentLoaded', function() {
         btnImage.addEventListener('click', function() {
             var prompt = (titreInput.value || '').trim();
             if (!prompt) {
-                alert('Veuillez d\'abord saisir le titre du quiz.');
+                alert('Veuillez d abord saisir le titre du quiz.');
                 return;
             }
             btnImage.disabled = true;
-            btnImage.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Génération...';
+            btnImage.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Generation...';
             fetch('{{ path('quiz_admin_generate_image_url') }}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
@@ -150,10 +419,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.url) imageInput.value = data.url;
                 if (data.error) alert(data.error);
             })
-            .catch(function() { alert('Erreur lors de la génération.'); })
+            .catch(function() { alert('Erreur lors de la generation.'); })
             .finally(function() {
                 btnImage.disabled = false;
-                btnImage.innerHTML = '<i class="bi bi-image me-1"></i> Générer une image IA';
+                btnImage.innerHTML = '<i class="bi bi-image me-1"></i> Generer une image IA';
             });
         });
     }

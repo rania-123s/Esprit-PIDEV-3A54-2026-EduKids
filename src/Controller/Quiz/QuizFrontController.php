@@ -13,17 +13,23 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route('/quiz')]
 class QuizFrontController extends AbstractController
 {
+    private const POLLINATIONS_IMAGE_BASE = 'https://gen.pollinations.ai/image';
+
     public function __construct(
         private QuizRepository $quizRepository,
         private QuestionRepository $questionRepository,
         private QuizAttemptRepository $attemptRepository,
         private EntityManagerInterface $em,
+        private HttpClientInterface $httpClient,
+        private string $pollinationsApiKey = '',
     ) {
     }
 
@@ -34,9 +40,14 @@ class QuizFrontController extends AbstractController
         $sort = $request->query->get('sort', 'titre');
         $order = $request->query->get('order', 'ASC');
         $quizzes = $this->quizRepository->findPublished($q, $sort, $order);
+        $quizImageUrls = [];
+        foreach ($quizzes as $quiz) {
+            $quizImageUrls[$quiz->getId()] = $this->normalizeImageUrlForPublic($quiz->getImageUrl());
+        }
 
         return $this->render('quiz/list.html.twig', [
             'quizzes' => $quizzes,
+            'quizImageUrls' => $quizImageUrls,
             'searchQuery' => $q,
             'sort' => $sort,
             'order' => $order,
@@ -52,8 +63,84 @@ class QuizFrontController extends AbstractController
         $questions = $this->questionRepository->findByQuizOrdered($quiz);
         return $this->render('quiz/show.html.twig', [
             'quiz' => $quiz,
+            'quizImageUrl' => $this->normalizeImageUrlForPublic($quiz->getImageUrl()),
             'questions' => $questions,
         ]);
+    }
+
+    #[Route('/generated-image', name: 'quiz_front_generated_image', methods: ['GET'])]
+    public function generatedImage(Request $request): Response
+    {
+        if ($this->pollinationsApiKey === '') {
+            return new Response('Image generation not configured.', 503);
+        }
+        $prompt = trim((string) $request->query->get('prompt', ''));
+        if ($prompt === '') {
+            return new Response('Missing prompt.', 400);
+        }
+
+        $imagePrompt = $prompt . ', educational quiz, clean illustration, professional, kids friendly';
+        $encodedPrompt = rawurlencode($imagePrompt);
+        $url = self::POLLINATIONS_IMAGE_BASE . '/' . $encodedPrompt . '?model=flux';
+        $response = $this->httpClient->request('GET', $url, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->pollinationsApiKey,
+            ],
+            'timeout' => 60,
+        ]);
+
+        $statusCode = $response->getStatusCode();
+        if ($statusCode < 200 || $statusCode >= 300) {
+            return new Response('Image generation failed.', $statusCode);
+        }
+
+        $headers = $response->getHeaders(false);
+        $contentType = $headers['content-type'][0] ?? 'image/png';
+        return new StreamedResponse(function () use ($response): void {
+            foreach ($this->httpClient->stream($response) as $chunk) {
+                echo $chunk->getContent();
+                if (ob_get_level()) {
+                    ob_flush();
+                }
+                flush();
+            }
+        }, 200, ['Content-Type' => $contentType]);
+    }
+
+    private function normalizeImageUrlForPublic(?string $imageUrl): ?string
+    {
+        if ($imageUrl === null || $imageUrl === '') {
+            return $imageUrl;
+        }
+
+        $parts = parse_url($imageUrl);
+        if ($parts === false) {
+            return $imageUrl;
+        }
+        if (($parts['path'] ?? '') !== '/admin/quiz/generated-image') {
+            return $imageUrl;
+        }
+
+        $parts['path'] = '/quiz/generated-image';
+        return $this->buildUrlFromParts($parts);
+    }
+
+    /**
+     * @param array<string, mixed> $parts
+     */
+    private function buildUrlFromParts(array $parts): string
+    {
+        $scheme = isset($parts['scheme']) ? $parts['scheme'] . '://' : '';
+        $user = $parts['user'] ?? '';
+        $pass = isset($parts['pass']) ? ':' . $parts['pass'] : '';
+        $auth = $user !== '' ? $user . $pass . '@' : '';
+        $host = $parts['host'] ?? '';
+        $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+        $path = $parts['path'] ?? '';
+        $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+        $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
+
+        return $scheme . $auth . $host . $port . $path . $query . $fragment;
     }
 
     #[Route('/{id}/play', name: 'quiz_front_play', requirements: ['id' => '\d+'], methods: ['GET'])]

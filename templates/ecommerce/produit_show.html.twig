@@ -9,8 +9,8 @@
         <!-- Product Image -->
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm overflow-hidden mb-4 rounded-3" style="border: 1px solid #e5e7eb !important;">
-                {% if produit.imageUrl %}
-                    <img src="{{ produit.imageUrl }}" alt="{{ produit.nom }}" class="img-fluid w-100" style="object-fit: contain; max-height: 500px;">
+                {% if produitImageUrl %}
+                    <img src="{{ produitImageUrl }}" alt="{{ produit.nom }}" class="img-fluid w-100" style="object-fit: contain; max-height: 500px;">
                 {% else %}
                     <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 400px; width: 100%;">
                         <i class="bi bi-image fs-1 opacity-25"></i>

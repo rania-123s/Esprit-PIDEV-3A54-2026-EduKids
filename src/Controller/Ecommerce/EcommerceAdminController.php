@@ -46,7 +46,12 @@ class EcommerceAdminController extends AbstractController
     #[Route('', name: 'ecommerce_admin_index', methods: ['GET'])]
     public function index(): Response
     {
-        return $this->render('back_office/ecommerce/index.html.twig');
+        return $this->render('back_office/ecommerce/index.html.twig', [
+            'totalProduits' => $this->produitRepository->count([]),
+            'totalCategories' => $this->categoryProduitRepository->count([]),
+            'totalCommandes' => $this->commandeRepository->count([]),
+            'pendingReviews' => $this->reviewRepository->count(['status' => Review::STATUS_PENDING]),
+        ]);
     }
 
     // ---------- Catégories CRUD ----------

@@ -41,11 +41,21 @@ class ActivityRecommendationService
         ?string $pauseFin = null
     ): array {
         if (!$this->groqApiKey) {
-            $this->logger->warning('ActivityRecommendationService: Groq API Key non configurée');
+            $this->logger->warning('ActivityRecommendationService: Groq API Key non configuree, utilisation du fallback local');
+
+            $activitesFallback = $this->genererActivitesFallback(
+                $titre,
+                $description,
+                $heureDebut,
+                $heureFin,
+                $pauseDebut,
+                $pauseFin
+            );
+
             return [
-                'success' => false,
-                'activites' => null,
-                'message' => 'Clé API Groq non configurée. Veuillez configurer GROQ_API_KEY dans votre fichier .env.local'
+                'success' => true,
+                'activites' => $activitesFallback,
+                'message' => 'Activites generees en mode local (GROQ_API_KEY non configuree).'
             ];
         }
 
@@ -596,3 +606,4 @@ Génère maintenant le programme d'activités :";
         return strtr($texte, $accents);
     }
 }
+

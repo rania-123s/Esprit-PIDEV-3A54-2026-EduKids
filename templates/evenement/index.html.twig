@@ -1,295 +1,409 @@
 {% extends 'base_backoffice.html.twig' %}
 
-{% block title %}Liste des Événements{% endblock %}
+{% block title %}Liste des Evenements{% endblock %}
 
 {% block body %}
-<div class="dashboard-content-one">
+<style>
+    .evenement-index-tuned .card {
+        border-radius: 14px;
+        overflow: hidden;
+        animation: panelIn 0.45s ease both;
+    }
 
-    <!-- Flash Messages - Notification stylée -->
+    .evenement-index-tuned .card-header {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .evenement-index-tuned .form-control,
+    .evenement-index-tuned .form-select {
+        border-radius: 10px;
+    }
+
+    .evenement-index-tuned .table thead th {
+        font-weight: 700;
+        letter-spacing: 0.2px;
+    }
+
+    .evenement-index-tuned .table tbody tr {
+        transition: background-color 0.2s ease;
+        animation: rowIn 0.35s ease both;
+    }
+
+    .evenement-index-tuned .table tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.04);
+    }
+
+    .evenement-index-tuned .w-60px img {
+        width: 56px;
+        height: 56px;
+        object-fit: cover;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .evenement-index-tuned .results-meta {
+        font-size: 0.85rem;
+        color: #6c757d;
+        animation: fadeInSoft 0.45s ease both;
+    }
+
+    .evenement-index-tuned .row.mb-3 {
+        animation: slideDownIn 0.45s ease both;
+    }
+
+    .evenement-index-tuned .row.g-4.mb-4 > div {
+        animation: riseIn 0.45s ease both;
+    }
+
+    .evenement-index-tuned .row.g-4.mb-4 > div:nth-child(2) {
+        animation-delay: 0.08s;
+    }
+
+    .evenement-index-tuned .row.g-4.mb-4 > div:nth-child(3) {
+        animation-delay: 0.16s;
+    }
+
+    .evenement-index-tuned .card-header .fa-search {
+        transition: transform 0.2s ease;
+    }
+
+    .evenement-index-tuned .card-header .btn:hover .fa-search {
+        transform: scale(1.15);
+    }
+
+    .evenement-index-tuned .toolbar-btn {
+        border-radius: 999px;
+        padding: 0.45rem 0.95rem;
+        font-weight: 600;
+    }
+
+    .evenement-index-tuned .table-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        align-items: center;
+    }
+
+    .evenement-index-tuned .table-actions .btn {
+        border-radius: 999px;
+        padding: 0.32rem 0.72rem;
+        font-size: 0.75rem;
+        line-height: 1.2;
+    }
+
+    .evenement-index-tuned .table-actions form {
+        display: inline-flex;
+    }
+
+    .evenement-index-tuned .filters-row .btn {
+        white-space: nowrap;
+    }
+
+    .evenement-index-tuned .btn-outline-secondary {
+        animation: pulseSoft 1.7s ease-in-out infinite;
+    }
+
+    .evenement-index-tuned .table tbody tr:nth-child(1) { animation-delay: 0.02s; }
+    .evenement-index-tuned .table tbody tr:nth-child(2) { animation-delay: 0.05s; }
+    .evenement-index-tuned .table tbody tr:nth-child(3) { animation-delay: 0.08s; }
+    .evenement-index-tuned .table tbody tr:nth-child(4) { animation-delay: 0.11s; }
+    .evenement-index-tuned .table tbody tr:nth-child(5) { animation-delay: 0.14s; }
+    .evenement-index-tuned .table tbody tr:nth-child(6) { animation-delay: 0.17s; }
+
+    @keyframes slideDownIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes riseIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes panelIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInSoft {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes rowIn {
+        from { opacity: 0; transform: translateX(8px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulseSoft {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(108, 117, 125, 0.12); }
+        50% { box-shadow: 0 0 0 6px rgba(108, 117, 125, 0.04); }
+    }
+
+    @media (max-width: 768px) {
+        .evenement-index-tuned .card-header .row > div {
+            width: 100%;
+        }
+    }
+</style>
+
+{% set totalEvents = evenements|length %}
+{% set withProgramme = 0 %}
+{% for evenement in evenements %}
+    {% if evenement.programme %}
+        {% set withProgramme = withProgramme + 1 %}
+    {% endif %}
+{% endfor %}
+{% set withoutProgramme = totalEvents - withProgramme %}
+
+<div class="evenement-index-tuned">
     {% for message in app.flashes('success') %}
-        <div id="successModal" class="notification-overlay">
-            <div class="notification-modal">
-                <div class="notification-icon">
-                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                    </svg>
-                </div>
-                <h4 class="notification-title">{{ message }}</h4>
-                <button type="button" class="btn btn-success mt-3 px-4" onclick="closeNotification()">OK</button>
-            </div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     {% endfor %}
     {% for message in app.flashes('error') %}
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i> {{ message }}
+            <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     {% endfor %}
-    
-    <style>
-    .notification-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        animation: fadeIn 0.3s ease;
-    }
-    
-    .notification-modal {
-        background: white;
-        padding: 40px 60px;
-        border-radius: 15px;
-        text-align: center;
-        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
-        animation: slideIn 0.4s ease;
-    }
-    
-    .notification-icon {
-        margin-bottom: 20px;
-    }
-    
-    .notification-title {
-        color: #333;
-        font-weight: 500;
-        margin: 0;
-    }
-    
-    /* Checkmark animation */
-    .checkmark {
-        width: 80px;
-        height: 80px;
-    }
-    
-    .checkmark-circle {
-        stroke: #4CAF50;
-        stroke-width: 2;
-        stroke-dasharray: 166;
-        stroke-dashoffset: 166;
-        animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
-    }
-    
-    .checkmark-check {
-        stroke: #4CAF50;
-        stroke-width: 3;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        stroke-dasharray: 48;
-        stroke-dashoffset: 48;
-        animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
-    }
-    
-    @keyframes stroke {
-        100% { stroke-dashoffset: 0; }
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    @keyframes slideIn {
-        from { transform: translateY(-50px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
-    
-    @keyframes fadeOut {
-        from { opacity: 1; }
-        to { opacity: 0; }
-    }
-    </style>
 
-    <!-- Table Area Start Here -->
-    <div class="card height-auto">
+    <div class="row mb-3">
+        <div class="col-12 d-sm-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-2 mb-sm-0">Evenements</h1>
+            <a href="{{ path('app_evenement_new') }}" class="btn btn-sm btn-primary mb-0 toolbar-btn">Creer un evenement</a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-lg-4">
+            <div class="text-center p-4 bg-primary bg-opacity-10 border border-primary rounded-3">
+                <h6>Total Evenements</h6>
+                <h2 class="mb-0 fs-1 text-primary">{{ totalEvents }}</h2>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="text-center p-4 bg-success bg-opacity-10 border border-success rounded-3">
+                <h6>Avec Programme</h6>
+                <h2 class="mb-0 fs-1 text-success">{{ withProgramme }}</h2>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="text-center p-4 bg-warning bg-opacity-15 border border-warning rounded-3">
+                <h6>Sans Programme</h6>
+                <h2 class="mb-0 fs-1 text-warning">{{ withoutProgramme }}</h2>
+            </div>
+        </div>
+    </div>
+
+        <div class="card bg-transparent border">
+            <div class="card-header bg-light border-bottom">
+            <div class="row g-3 align-items-center justify-content-between filters-row">
+                <div class="col-md-6">
+                    <div class="rounded position-relative">
+                        <input
+                            id="searchEvenement"
+                            class="form-control bg-body"
+                            type="search"
+                            placeholder="Rechercher par titre..."
+                            aria-label="Search"
+                        >
+                        <button type="button" class="btn bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y me-2" aria-label="Rechercher">
+                            <i class="fas fa-search fs-6 text-primary"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <select id="programmeFilter" class="form-select js-choice border-0 z-index-9" aria-label="Filtrer programme">
+                        <option value="all">Tous</option>
+                        <option value="with">Avec programme</option>
+                        <option value="without">Sans programme</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select id="sortEvenement" class="form-select js-choice border-0 z-index-9" aria-label="Trier">
+                        <option value="default">Defaut</option>
+                        <option value="title-asc">Titre A-Z</option>
+                        <option value="title-desc">Titre Z-A</option>
+                        <option value="date-asc">Date ASC</option>
+                        <option value="date-desc">Date DESC</option>
+                    </select>
+                </div>
+
+                <div class="col-md-1 text-md-end">
+                    <button type="button" id="resetFilters" class="btn btn-sm btn-outline-secondary toolbar-btn">Reset</button>
+                </div>
+            </div>
+
+            <div class="results-meta mt-2" id="searchResultCount">
+                {{ totalEvents }} resultat(s)
+            </div>
+        </div>
+
         <div class="card-body">
-            <div class="heading-layout1 mb-4 d-flex justify-content-between align-items-center">
-                <div class="item-title">
-                    <h3><i class="fas fa-calendar-alt text-primary me-2"></i> Tous les Événements</h3>
-                </div>
-                <div>
-                    <a href="{{ path('app_evenement_new') }}" class="btn-fill-lg bg-blue-dark btn-hover-yellow">
-                        <i class="fas fa-plus-circle me-1"></i> Nouvel Événement
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Zone de recherche dynamique -->
-            <div class="mb-4">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0">
-                        <i class="fas fa-search text-primary"></i>
-                    </span>
-                    <input type="text" 
-                           id="searchEvenement" 
-                           class="form-control border-start-0 ps-0" 
-                           placeholder="Rechercher un événement par nom..."
-                           onkeyup="filterEvenements()">
-                    <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <small class="text-muted mt-1 d-block">
-                    <i class="fas fa-info-circle me-1"></i> La recherche démarre automatiquement dès que vous tapez
-                </small>
-            </div>
-            
-            <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead class="bg-light">
+            <div class="table-responsive border-0 rounded-3">
+                <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                    <thead>
                         <tr>
-                            <th style="width: 80px;"><i class="fas fa-image me-1"></i> Image</th>
-                            <th><i class="fas fa-heading me-1"></i> Titre</th>
-                            <th><i class="fas fa-align-left me-1"></i> Description</th>
-                            <th class="text-center"><i class="fas fa-calendar me-1"></i> Date</th>
-                            <th class="text-center"><i class="fas fa-clock me-1"></i> Horaires</th>
-                            <th class="text-center"><i class="fas fa-clipboard-list me-1"></i> Programme</th>
-                            <th class="text-center" style="width: 150px;">Actions</th>
+                            <th scope="col" class="border-0 rounded-start">Evenement</th>
+                            <th scope="col" class="border-0">Description</th>
+                            <th scope="col" class="border-0">Date</th>
+                            <th scope="col" class="border-0">Horaires</th>
+                            <th scope="col" class="border-0">Programme</th>
+                            <th scope="col" class="border-0 rounded-end">Action</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="evenementTableBody">
                         {% for evenement in evenements %}
-                        <tr class="evenement-row" data-titre="{{ evenement.titre|lower }}">
-                            <td>
-                                {% if evenement.image %}
-                                    <img src="{{ asset('uploads/' ~ evenement.image) }}" alt="{{ evenement.titre }}" class="rounded" style="width: 60px; height: 40px; object-fit: cover;">
-                                {% else %}
-                                    <img src="{{ asset('assets/images/event/01.jpg') }}" alt="Default" class="rounded" style="width: 60px; height: 40px; object-fit: cover;">
-                                {% endif %}
-                            </td>
-                            <td>
-                                <strong class="text-dark">{{ evenement.titre }}</strong>
-                            </td>
-                            <td>
-                                <span class="text-muted">{{ evenement.description|slice(0, 80) }}{% if evenement.description|length > 80 %}...{% endif %}</span>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge bg-primary rounded-pill px-3 py-2">
-                                    <i class="fas fa-calendar-day me-1"></i>
-                                    {{ evenement.dateEvenement ? evenement.dateEvenement|date('d/m/Y') : '-' }}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge bg-success px-2 py-1">{{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '-' }}</span>
-                                <span class="text-muted">-</span>
-                                <span class="badge bg-danger px-2 py-1">{{ evenement.heureFin ? evenement.heureFin|date('H:i') : '-' }}</span>
-                                <div><small class="text-muted">{{ evenement.dureeFormatee }}</small></div>
-                            </td>
-                            <td class="text-center">
-                                {% if evenement.programme %}
-                                    <span class="badge bg-success px-3 py-2" title="Programme défini">
-                                        <i class="fas fa-check me-1"></i> Défini
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-warning text-dark px-3 py-2" title="Aucun programme">
-                                        <i class="fas fa-exclamation me-1"></i> Non défini
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group" role="group">
-                                    <a href="{{ path('app_evenement_show', {'id': evenement.id}) }}" 
-                                       class="btn btn-sm btn-outline-info" title="Voir les détails">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ path('app_evenement_edit', {'id': evenement.id}) }}" 
-                                       class="btn btn-sm btn-outline-warning" title="Modifier">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form method="post" action="{{ path('app_evenement_delete', {'id': evenement.id}) }}" 
-                                          style="display: inline-block;" 
-                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer l\'événement « {{ evenement.titre }} » ?');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evenement.id) }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="empty-state">
-                                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                                    <h5 class="text-muted">Aucun événement trouvé</h5>
-                                    <p class="text-muted mb-3">Commencez par créer votre premier événement</p>
-                                    <a href="{{ path('app_evenement_new') }}" class="btn btn-primary">
-                                        <i class="fas fa-plus-circle me-1"></i> Créer un événement
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
+                            <tr
+                                class="evenement-row"
+                                data-titre="{{ evenement.titre|lower }}"
+                                data-date="{{ evenement.dateEvenement ? evenement.dateEvenement|date('Y-m-d') : '' }}"
+                                data-programme="{{ evenement.programme ? '1' : '0' }}"
+                            >
+                                <td>
+                                    <div class="d-flex align-items-center position-relative">
+                                        <div class="w-60px">
+                                            {% if evenement.image %}
+                                                <img src="{{ asset('uploads/' ~ evenement.image) }}" class="rounded" alt="{{ evenement.titre }}">
+                                            {% else %}
+                                                <img src="{{ asset('assets/images/event/01.jpg') }}" class="rounded" alt="{{ evenement.titre }}">
+                                            {% endif %}
+                                        </div>
+                                        <h6 class="table-responsive-title mb-0 ms-2">{{ evenement.titre }}</h6>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted">{{ evenement.description|slice(0, 90) }}{% if evenement.description|length > 90 %}...{% endif %}</span>
+                                </td>
+                                <td>
+                                    <span class="badge text-bg-primary">{{ evenement.dateEvenement ? evenement.dateEvenement|date('d/m/Y') : '-' }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge text-bg-success">{{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '-' }}</span>
+                                    <span class="text-muted"> - </span>
+                                    <span class="badge text-bg-danger">{{ evenement.heureFin ? evenement.heureFin|date('H:i') : '-' }}</span>
+                                    <div><small class="text-muted">{{ evenement.dureeFormatee }}</small></div>
+                                </td>
+                                <td>
+                                    {% if evenement.programme %}
+                                        <span class="badge text-bg-success">Defini</span>
+                                    {% else %}
+                                        <span class="badge text-bg-warning">Non defini</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a href="{{ path('app_evenement_show', {'id': evenement.id}) }}" class="btn btn-sm btn-success-soft">Detail</a>
+                                        <a href="{{ path('app_evenement_edit', {'id': evenement.id}) }}" class="btn btn-sm btn-warning-soft">Modifier</a>
+                                        <form method="post" action="{{ path('app_evenement_delete', {'id': evenement.id}) }}" onsubmit="return confirm('Supprimer cet evenement ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evenement.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-danger-soft">Supprimer</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
                         {% endfor %}
+                        <tr id="noResultRow" style="display: none;">
+                            <td colspan="6">Aucun evenement trouve.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
-            
-            {% if evenements|length > 0 %}
-            <div class="mt-3">
-                <small id="searchResultCount" class="text-muted"><i class="fas fa-info-circle me-1"></i> Total : {{ evenements|length }} événement(s)</small>
+        </div>
+
+        <div class="card-footer bg-transparent pt-0">
+            <div class="d-sm-flex justify-content-sm-between align-items-sm-center">
+                <p class="mb-0 text-center text-sm-start" id="footerCount">
+                    Affichage de {{ totalEvents }} evenement(s)
+                </p>
             </div>
-            {% endif %}
         </div>
     </div>
-    <!-- Table Area End Here -->
 </div>
 
 <script>
-function closeNotification() {
-    const modal = document.getElementById('successModal');
-    if (modal) {
-        modal.style.animation = 'fadeOut 0.3s ease';
-        setTimeout(() => {
-            modal.remove();
-        }, 300);
+(function () {
+    var searchInput = document.getElementById('searchEvenement');
+    var programmeFilter = document.getElementById('programmeFilter');
+    var sortSelect = document.getElementById('sortEvenement');
+    var resetBtn = document.getElementById('resetFilters');
+    var tbody = document.getElementById('evenementTableBody');
+    var noResultRow = document.getElementById('noResultRow');
+    var countMeta = document.getElementById('searchResultCount');
+    var footerCount = document.getElementById('footerCount');
+
+    if (!tbody) return;
+
+    var rows = Array.prototype.slice.call(tbody.querySelectorAll('.evenement-row'));
+
+    function compareRows(a, b, mode) {
+        var titleA = (a.getAttribute('data-titre') || '').toLowerCase();
+        var titleB = (b.getAttribute('data-titre') || '').toLowerCase();
+        var dateA = a.getAttribute('data-date') || '9999-12-31';
+        var dateB = b.getAttribute('data-date') || '9999-12-31';
+
+        if (mode === 'title-asc') return titleA.localeCompare(titleB);
+        if (mode === 'title-desc') return titleB.localeCompare(titleA);
+        if (mode === 'date-asc') return dateA.localeCompare(dateB);
+        if (mode === 'date-desc') return dateB.localeCompare(dateA);
+        return 0;
     }
-}
 
-// Auto-close notification after 3 seconds
-setTimeout(() => {
-    closeNotification();
-}, 3000);
+    function applyFiltersAndSort() {
+        var searchValue = (searchInput && searchInput.value ? searchInput.value : '').toLowerCase().trim();
+        var programmeValue = programmeFilter ? programmeFilter.value : 'all';
+        var sortValue = sortSelect ? sortSelect.value : 'default';
+        var visibleCount = 0;
 
-function filterEvenements() {
-    const searchValue = document.getElementById('searchEvenement').value.toLowerCase();
-    const rows = document.querySelectorAll('.evenement-row');
-    let visibleCount = 0;
-    
-    rows.forEach(function(row) {
-        const titre = row.getAttribute('data-titre');
-        if (titre.includes(searchValue)) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
+        rows.sort(function (a, b) {
+            return compareRows(a, b, sortValue);
+        });
+        rows.forEach(function (row) { tbody.appendChild(row); });
+
+        rows.forEach(function (row) {
+            var title = (row.getAttribute('data-titre') || '').toLowerCase();
+            var hasProgramme = row.getAttribute('data-programme') === '1';
+
+            var matchesSearch = searchValue === '' || title.indexOf(searchValue) !== -1;
+            var matchesProgramme = programmeValue === 'all'
+                || (programmeValue === 'with' && hasProgramme)
+                || (programmeValue === 'without' && !hasProgramme);
+
+            var visible = matchesSearch && matchesProgramme;
+            row.style.display = visible ? '' : 'none';
+            if (visible) visibleCount++;
+        });
+
+        if (noResultRow) noResultRow.style.display = visibleCount === 0 ? '' : 'none';
+
+        if (countMeta) {
+            countMeta.textContent = visibleCount + ' resultat(s)';
         }
-    });
-    
-    // Mettre à jour le compteur
-    const totalInfo = document.getElementById('searchResultCount');
-    if (totalInfo) {
-        if (searchValue.length > 0) {
-            totalInfo.innerHTML = '<i class="fas fa-filter me-1"></i> ' + visibleCount + ' événement(s) trouvé(s)';
-            totalInfo.classList.remove('text-muted');
-            totalInfo.classList.add('text-primary');
-        } else {
-            totalInfo.innerHTML = '<i class="fas fa-info-circle me-1"></i> Total : {{ evenements|length }} événement(s)';
-            totalInfo.classList.remove('text-primary');
-            totalInfo.classList.add('text-muted');
+        if (footerCount) {
+            footerCount.textContent = 'Affichage de ' + visibleCount + ' evenement(s)';
         }
     }
-}
 
-function clearSearch() {
-    document.getElementById('searchEvenement').value = '';
-    filterEvenements();
-    document.getElementById('searchEvenement').focus();
-}
+    if (searchInput) searchInput.addEventListener('input', applyFiltersAndSort);
+    if (programmeFilter) programmeFilter.addEventListener('change', applyFiltersAndSort);
+    if (sortSelect) sortSelect.addEventListener('change', applyFiltersAndSort);
+
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function () {
+            if (searchInput) searchInput.value = '';
+            if (programmeFilter) programmeFilter.value = 'all';
+            if (sortSelect) sortSelect.value = 'default';
+            applyFiltersAndSort();
+            if (searchInput) searchInput.focus();
+        });
+    }
+
+    applyFiltersAndSort();
+})();
 </script>
 {% endblock %}

@@ -3,78 +3,253 @@
 {% block title %}Statistiques Quiz - Admin{% endblock %}
 
 {% block body %}
-<div class="container-fluid py-4">
-    <h1 class="h3 fw-bold mb-0 ecommerce-admin-header"><i class="bi bi-graph-up me-2 text-primary"></i>Statistiques Quiz</h1>
-    <p class="small mb-4" style="color: #4b5563 !important;">Tentatives et scores par quiz.</p>
+{% set totalQuizzes = quizStats|length %}
+{% set totalAverageScore = 0 %}
+{% set quizzesWithAttempts = 0 %}
+{% for row in quizStats %}
+    {% if row.attemptCount > 0 %}
+        {% set totalAverageScore = totalAverageScore + row.averageScore %}
+        {% set quizzesWithAttempts = quizzesWithAttempts + 1 %}
+    {% endif %}
+{% endfor %}
+{% set globalAverage = quizzesWithAttempts > 0 ? (totalAverageScore / quizzesWithAttempts) : 0 %}
 
-    <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-xl-4">
-            <div class="card ecommerce-admin-card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <h6 class="text-uppercase small fw-semibold mb-2" style="color: #6b7280 !important;">Total tentatives</h6>
-                    <h3 class="mb-0 fw-bold" style="color: #1f2937 !important;">{{ totalAttempts }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-4">
-            <div class="card ecommerce-admin-card border-0 shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <a href="{{ path('quiz_admin_export', { format: 'csv' }) }}" class="btn btn-outline-primary rounded-pill w-100">
-                        <i class="bi bi-download me-2"></i>Exporter (CSV)
-                    </a>
+<style>
+    .quiz-stats-page .icon-lg {
+        width: 48px;
+        height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+    }
+
+    .quiz-stats-page .card {
+        border-radius: 14px;
+    }
+</style>
+
+<div class="dashboard-content-one quiz-stats-page">
+    <div class="card height-auto mb-4">
+        <div class="card-body">
+            <div class="heading-layout1">
+                <div class="item-title">
+                    <h3><i class="fas fa-chart-line text-primary me-2"></i> Statistiques des Quiz</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="card ecommerce-admin-card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 py-3">
-                    <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">Tentatives (30 derniers jours)</h5>
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card card-body bg-primary bg-opacity-10 p-4 h-100 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0 fw-bold">{{ totalQuizzes }}</h2>
+                        <span class="mb-0 h6 fw-light">Total Quiz</span>
+                    </div>
+                    <div class="icon-lg rounded-circle bg-primary text-white">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card card-body bg-success bg-opacity-10 p-4 h-100 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0 fw-bold">{{ totalAttempts }}</h2>
+                        <span class="mb-0 h6 fw-light">Total Tentatives</span>
+                    </div>
+                    <div class="icon-lg rounded-circle bg-success text-white">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card card-body bg-warning bg-opacity-10 p-4 h-100 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0 fw-bold">{{ globalAverage|number_format(1) }}%</h2>
+                        <span class="mb-0 h6 fw-light">Score Moyen</span>
+                    </div>
+                    <div class="icon-lg rounded-circle bg-warning text-white">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card card-body bg-info bg-opacity-10 p-4 h-100 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{{ path('quiz_admin_export', { format: 'csv' }) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-download me-2"></i>Exporter CSV
+                        </a>
+                        <div class="small mt-2 text-muted">Rapport des quiz</div>
+                    </div>
+                    <div class="icon-lg rounded-circle bg-info text-white">
+                        <i class="fas fa-file-export"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow h-100">
+                <div class="card-header bg-success bg-opacity-10 border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-sort-amount-up text-success me-2"></i>
+                        Top 10 - Quiz avec le Plus de Tentatives
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <div id="chartAttempts" style="min-height: 280px;"></div>
+                    {% if quizStats|length > 0 %}
+                        <div id="chartTopAttempts" style="min-height: 350px;"></div>
+                    {% else %}
+                        <p class="text-muted text-center py-5">Aucune donnee disponible</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        <div class="col-lg-4">
-            <div class="card ecommerce-admin-card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 py-3">
-                    <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">Par quiz</h5>
+
+        <div class="col-lg-6">
+            <div class="card shadow h-100">
+                <div class="card-header bg-warning bg-opacity-10 border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-star text-warning me-2"></i>
+                        Top 10 - Quiz avec les Meilleurs Scores
+                    </h5>
                 </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        {% for row in quizStats %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
-                                <span class="fw-semibold text-truncate" style="max-width: 180px; color: #374151 !important;" title="{{ row.quiz.titre }}">{{ row.quiz.titre }}</span>
-                                <span class="badge bg-primary rounded-pill">{{ row.attemptCount }} tentatives · {{ row.averageScore|number_format(1) }}%</span>
-                            </li>
-                        {% else %}
-                            <li class="list-group-item border-0" style="color: #4b5563 !important;">Aucune tentative.</li>
-                        {% endfor %}
-                    </ul>
+                <div class="card-body">
+                    {% if quizStats|length > 0 %}
+                        <div id="chartTopScores" style="min-height: 350px;"></div>
+                    {% else %}
+                        <p class="text-muted text-center py-5">Aucune donnee disponible</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary bg-opacity-10 border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-area text-primary me-2"></i>
+                        Evolution des Tentatives (30 derniers jours)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="chartAttemptsTimeline" style="min-height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ path('quiz_admin_quiz_list') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Retour a la liste
+        </a>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof ApexCharts === 'undefined') return;
-    var labels = {{ chartLabels|json_encode|raw }};
-    var values = {{ chartValues|json_encode|raw }};
-    var options = {
-        series: [{ name: 'Tentatives', data: values }],
-        chart: { type: 'area', height: 280, toolbar: { show: false } },
+
+    var timelineLabels = {{ chartLabels|json_encode|raw }};
+    var timelineValues = {{ chartValues|json_encode|raw }};
+
+    var statsRaw = [
+        {% for row in quizStats %}
+            {
+                title: {{ row.quiz.titre|json_encode|raw }},
+                attempts: {{ row.attemptCount }},
+                score: {{ row.averageScore|default(0) }}
+            }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    var byAttempts = statsRaw.slice().sort(function(a, b) {
+        return (b.attempts || 0) - (a.attempts || 0);
+    }).slice(0, 10);
+
+    var byScores = statsRaw.slice().sort(function(a, b) {
+        return (b.score || 0) - (a.score || 0);
+    }).slice(0, 10);
+
+    if (byAttempts.length > 0) {
+        var optionsTopAttempts = {
+            series: [{ name: 'Tentatives', data: byAttempts.map(function(x) { return x.attempts; }) }],
+            chart: { type: 'bar', height: 350, toolbar: { show: true } },
+            colors: ['#28a745'],
+            plotOptions: { bar: { borderRadius: 6, horizontal: true } },
+            dataLabels: { enabled: false },
+            xaxis: {
+                categories: byAttempts.map(function(x) { return x.title.length > 28 ? x.title.substring(0, 28) + '...' : x.title; })
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val) { return val + ' tentatives'; }
+                }
+            }
+        };
+        new ApexCharts(document.querySelector('#chartTopAttempts'), optionsTopAttempts).render();
+    }
+
+    if (byScores.length > 0) {
+        var optionsTopScores = {
+            series: [{ name: 'Score moyen', data: byScores.map(function(x) { return Number(x.score || 0).toFixed(1); }) }],
+            chart: { type: 'line', height: 350, toolbar: { show: true }, zoom: { enabled: true } },
+            colors: ['#ffc107'],
+            stroke: { curve: 'smooth', width: 3 },
+            markers: {
+                size: 6,
+                colors: ['#ffc107'],
+                strokeColors: '#fff',
+                strokeWidth: 2
+            },
+            xaxis: {
+                categories: byScores.map(function(x) { return x.title.length > 28 ? x.title.substring(0, 28) + '...' : x.title; }),
+                labels: { rotate: -20 }
+            },
+            yaxis: {
+                min: 0,
+                max: 100,
+                title: { text: 'Score (%)' }
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val) { return val + '%'; }
+                }
+            }
+        };
+        new ApexCharts(document.querySelector('#chartTopScores'), optionsTopScores).render();
+    }
+
+    var optionsTimeline = {
+        series: [{ name: 'Tentatives', data: timelineValues }],
+        chart: { type: 'area', height: 400, toolbar: { show: true }, zoom: { enabled: true } },
         dataLabels: { enabled: false },
-        stroke: { curve: 'smooth', width: 2 },
-        xaxis: { categories: labels },
+        stroke: { curve: 'smooth', width: 3 },
+        xaxis: { categories: timelineLabels },
         colors: ['#0d6efd'],
-        fill: { type: 'gradient', opacity: 0.3 }
+        fill: { type: 'gradient', opacity: 0.3 },
+        tooltip: {
+            y: {
+                formatter: function(val) { return val + ' tentatives'; }
+            }
+        }
     };
-    new ApexCharts(document.querySelector('#chartAttempts'), options).render();
+    new ApexCharts(document.querySelector('#chartAttemptsTimeline'), optionsTimeline).render();
 });
 </script>
 {% endblock %}

@@ -164,10 +164,18 @@ class Programme
         }
 
         // Convertir les heures en minutes depuis minuit pour faciliter la comparaison
-        $pauseDebutMinutes = $this->pauseDebut->format('H') * 60 + (int)$this->pauseDebut->format('i');
-        $pauseFinMinutes = $this->pauseFin->format('H') * 60 + (int)$this->pauseFin->format('i');
-        $evenementDebutMinutes = $evenement->getHeureDebut()->format('H') * 60 + (int)$evenement->getHeureDebut()->format('i');
-        $evenementFinMinutes = $evenement->getHeureFin()->format('H') * 60 + (int)$evenement->getHeureFin()->format('i');
+        $pauseDebutMinutes = ((int) $this->pauseDebut->format('H') * 60) + (int) $this->pauseDebut->format('i');
+        $pauseFinMinutes = ((int) $this->pauseFin->format('H') * 60) + (int) $this->pauseFin->format('i');
+        $evenementDebutMinutes = ((int) $evenement->getHeureDebut()->format('H') * 60) + (int) $evenement->getHeureDebut()->format('i');
+        $evenementFinMinutes = ((int) $evenement->getHeureFin()->format('H') * 60) + (int) $evenement->getHeureFin()->format('i');
+
+        if ($evenementDebutMinutes >= $evenementFinMinutes) {
+            $context->buildViolation('L evenement associe a des horaires invalides (heure debut >= heure fin). Modifiez d abord l evenement.')
+                ->atPath('evenement')
+                ->addViolation();
+
+            return;
+        }
 
         // Vérifier que le début de la pause est après ou égal au début de l'événement
         if ($pauseDebutMinutes < $evenementDebutMinutes) {

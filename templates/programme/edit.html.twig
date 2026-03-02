@@ -169,6 +169,28 @@ document.addEventListener('DOMContentLoaded', function() {
     let eventHeureDebut = null;
     let eventHeureFin = null;
     
+    function setEvenementInfo(message, type = 'info') {
+        if (!evenementSelect) return;
+
+        let infoDiv = document.querySelector('.evenement-heures-info');
+        if (!infoDiv) {
+            infoDiv = document.createElement('div');
+            infoDiv.className = 'alert mt-2 evenement-heures-info';
+            evenementSelect.parentElement.appendChild(infoDiv);
+        }
+
+        infoDiv.classList.remove('alert-info', 'alert-warning', 'alert-danger');
+        infoDiv.classList.add(type === 'danger' ? 'alert-danger' : (type === 'warning' ? 'alert-warning' : 'alert-info'));
+        infoDiv.innerHTML = `<i class="fas fa-info-circle me-1"></i> ${message}`;
+    }
+
+    function clearEvenementInfo() {
+        const infoDiv = document.querySelector('.evenement-heures-info');
+        if (infoDiv) {
+            infoDiv.remove();
+        }
+    }
+    
     // Fonction pour convertir HH:mm en minutes depuis minuit
     function timeToMinutes(timeString) {
         if (!timeString) return null;
@@ -179,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fonction pour valider la pause
     function validatePause() {
         if (!pauseDebutInput || !pauseFinInput || !eventHeureDebut || !eventHeureFin) {
-            return;
+            return true;
         }
         
         const pauseDebut = pauseDebutInput.value;
@@ -261,6 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
             eventHeureDebut = null;
             eventHeureFin = null;
             clearErrors();
+            clearEvenementInfo();
             return;
         }
         
@@ -297,13 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     eventHeureFin = data.heureFin;
                     
                     // Afficher un message informatif
-                    let infoDiv = document.querySelector('.evenement-heures-info');
-                    if (!infoDiv) {
-                        infoDiv = document.createElement('div');
-                        infoDiv.className = 'alert alert-info mt-2 evenement-heures-info';
-                        evenementSelect.parentElement.appendChild(infoDiv);
-                    }
-                    infoDiv.innerHTML = `<i class="fas fa-info-circle me-1"></i> Horaires de l'événement : <strong>${eventHeureDebut}</strong> - <strong>${eventHeureFin}</strong>. La pause doit être dans cet intervalle.`;
+                    setEvenementInfo(`Horaires de l evenement : <strong>${eventHeureDebut}</strong> - <strong>${eventHeureFin}</strong>. La pause doit etre dans cet intervalle.`, 'info');
                     
                     // Valider la pause si elle est déjà remplie
                     validatePause();
@@ -311,12 +328,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     eventHeureDebut = null;
                     eventHeureFin = null;
                     clearErrors();
+                    setEvenementInfo(data.message || 'Cet evenement n a pas d horaires valides.', 'warning');
                 }
             })
             .catch(error => {
                 console.error('Erreur lors du chargement des heures:', error);
                 eventHeureDebut = null;
                 eventHeureFin = null;
+                clearErrors();
+                setEvenementInfo(error.message || 'Impossible de charger les horaires de l evenement.', 'danger');
             });
     }
     

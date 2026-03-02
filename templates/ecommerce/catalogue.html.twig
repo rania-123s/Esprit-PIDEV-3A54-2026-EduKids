@@ -1,215 +1,165 @@
 {% extends 'ecommerce/base_ecommerce.html.twig' %}
 
-{% block title %}Catalogue - E-commerce Éducatif{% endblock %}
+{% block title %}Catalogue - E-commerce Educatif{% endblock %}
 
 {% block ecommerce_content %}
-<div class="container-fluid px-3 px-xl-5 py-5 bg-light">
-    <!-- Hero Section -->
-    <div class="row mb-5">
-        <div class="col-12 text-center">
-            <h1 class="display-5 fw-bold mb-3" style="color: #1e3a5f;">Nos Produits Éducatifs</h1>
-            <p class="lead mx-auto" style="max-width: 600px; color: #374151 !important;">Découvrez notre sélection de ressources pédagogiques de qualité pour accompagner l'apprentissage à chaque étape.</p>
+<section class="bg-blue align-items-center d-flex" style="background:url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size:cover;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="text-white">Catalogue E-commerce</h1>
+                <div class="d-flex justify-content-center">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('home') }}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">E-commerce</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
         </div>
     </div>
+</section>
 
-    <div class="row g-4">
-        <!-- Sidebar Filters -->
-        <div class="col-lg-3">
-            <div class="card border-0 shadow-sm sticky-top rounded-3" style="top: 100px; z-index: 1020; border: 1px solid #e5e7eb !important;">
-                <div class="card-header bg-white py-3 border-0">
-                    <h5 class="offcanvas-title fw-bold mb-0" style="color: #1f2937 !important;"><i class="bi bi-funnel me-2 text-primary"></i>Filtrer</h5>
-                </div>
-                <div class="card-body">
-                    <form method="get" action="{{ path('ecommerce_catalogue') }}">
-                        <!-- Search -->
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold" style="color: #374151 !important;">Recherche</label>
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4 align-items-center g-3">
+            <div class="col-xl-9">
+                <form method="get" action="{{ path('ecommerce_catalogue') }}" class="border rounded p-3">
+                    <div class="row g-2">
+                        <div class="col-lg-4">
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                                <input type="text" name="q" id="ecommerce-search-query" class="form-control border-start-0 ps-0 bg-light" value="{{ searchQuery ?? '' }}" placeholder="Python, Math..." autocomplete="off">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                                <input
+                                    type="text"
+                                    name="q"
+                                    id="ecommerce-search-query"
+                                    class="form-control border-start-0 ps-0"
+                                    value="{{ searchQuery ?? '' }}"
+                                    placeholder="Produit..."
+                                    autocomplete="off"
+                                >
                                 <button type="button" id="ecommerce-voice-search-btn" class="btn btn-outline-secondary border-start-0" title="Recherche vocale" aria-label="Recherche vocale">
-                                    <i class="bi bi-mic-fill" id="ecommerce-voice-icon"></i>
+                                    <i class="bi bi-mic-fill"></i>
                                 </button>
                             </div>
-                            <small class="text-muted d-block mt-1" style="color: #6b7280 !important;"><i class="bi bi-mic me-1"></i> Cliquez sur le micro pour rechercher à la voix</small>
                         </div>
-
-                        <!-- Categories -->
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold" style="color: #374151 !important;">Catégorie</label>
-                            <select name="category" class="form-select bg-light">
-                                <option value="">Toutes les catégories</option>
+                        <div class="col-md-4 col-lg-2">
+                            <select name="category" class="form-select">
+                                <option value="">Categorie</option>
                                 {% for cat in categories %}
                                     <option value="{{ cat.id }}" {{ (filter_category_id ?? '') == cat.id ? 'selected' : '' }}>{{ cat.nom }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-
-                        <!-- Price Range -->
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold" style="color: #374151 !important;">Prix (€)</label>
-                            <div class="d-flex gap-2">
-                                <input type="number" name="prix_min" class="form-control bg-light" value="{{ filter_prix_min ?? '' }}" min="0" step="0.01" placeholder="Min">
-                                <span class="align-self-center text-muted">-</span>
-                                <input type="number" name="prix_max" class="form-control bg-light" value="{{ filter_prix_max ?? '' }}" min="0" step="0.01" placeholder="Max">
-                            </div>
+                        <div class="col-md-3 col-lg-2">
+                            <input type="number" name="prix_min" class="form-control" value="{{ filter_prix_min ?? '' }}" min="0" step="0.01" placeholder="Prix min">
                         </div>
-
-                        <!-- Sort -->
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold" style="color: #374151 !important;">Trier par</label>
-                            <select name="sort" class="form-select bg-light mb-2">
+                        <div class="col-md-3 col-lg-2">
+                            <input type="number" name="prix_max" class="form-control" value="{{ filter_prix_max ?? '' }}" min="0" step="0.01" placeholder="Prix max">
+                        </div>
+                        <div class="col-md-6 col-lg-1">
+                            <select name="sort" class="form-select">
                                 <option value="nom" {{ sort == 'nom' ? 'selected' : '' }}>Nom</option>
                                 <option value="prix" {{ sort == 'prix' ? 'selected' : '' }}>Prix</option>
                             </select>
-                            <select name="order" class="form-select bg-light">
-                                <option value="ASC" {{ order == 'ASC' ? 'selected' : '' }}>Croissant (A-Z / Low-High)</option>
-                                <option value="DESC" {{ order == 'DESC' ? 'selected' : '' }}>Décroissant (Z-A / High-Low)</option>
+                        </div>
+                        <div class="col-md-6 col-lg-1">
+                            <select name="order" class="form-select">
+                                <option value="ASC" {{ order == 'ASC' ? 'selected' : '' }}>ASC</option>
+                                <option value="DESC" {{ order == 'DESC' ? 'selected' : '' }}>DESC</option>
                             </select>
                         </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary fw-semibold">Appliquer les filtres</button>
-                            <a href="{{ path('ecommerce_catalogue') }}" class="btn btn-outline-secondary btn-sm">Réinitialiser</a>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-2">
+                        <a href="{{ path('ecommerce_catalogue') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+                        <button type="submit" class="btn btn-primary btn-sm px-4">Appliquer</button>
+                    </div>
+                </form>
             </div>
-        </div>
-
-        <!-- Product Grid -->
-        <div class="col-lg-9">
-            <!-- Toolbox -->
-            <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded-3 shadow-sm" style="border: 1px solid #e5e7eb;">
-                <span class="small" style="color: #4b5563 !important;">{{ produits|length }} produit(s) trouvé(s)</span>
+            <div class="col-xl-3 d-flex justify-content-xl-end align-items-center gap-2">
+                <p class="mb-0 text-end">{{ produits|length }} produit(s)</p>
                 <a href="{{ path('ecommerce_panier') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                    <i class="bi bi-cart3 me-1"></i> Voir mon panier
+                    <i class="bi bi-cart3 me-1"></i>Panier
                 </a>
             </div>
+        </div>
 
-            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-                {% for produit in produits %}
-                    {% set ratingInfo = ratingByProduit[produit.id] is defined ? ratingByProduit[produit.id] : { avg: 0, count: 0 } %}
-                    {% set produitReviews = reviewsByProduit[produit.id] is defined ? reviewsByProduit[produit.id] : [] %}
-                    <div class="col">
-                        <div class="card catalog-product-card h-100 border-0 shadow-sm hover-shadow transition-base rounded-3 overflow-hidden position-relative" style="border: 1px solid #e5e7eb !important;">
-                            <div class="position-relative">
-                                {% if produit.imageUrl %}
-                                    <img src="{{ produit.imageUrl }}" class="card-img-top rounded-top" alt="{{ produit.nom }}" style="height: 200px; object-fit: cover;">
-                                {% else %}
-                                    <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 200px;">
-                                        <i class="bi bi-image fs-1 opacity-25"></i>
-                                    </div>
-                                {% endif %}
-                                <div class="position-absolute top-0 end-0 p-2">
-                                    <span class="badge bg-white shadow-sm" style="color: #1f2937 !important;">{{ produit.category ? produit.category.nom : 'Divers' }}</span>
-                                </div>
+        <div class="row g-4">
+            {% for produit in produits %}
+                {% set ratingInfo = ratingByProduit[produit.id] is defined ? ratingByProduit[produit.id] : { avg: 0, count: 0 } %}
+                {% set produitImageUrl = productImageUrls[produit.id]|default(produit.imageUrl) %}
+                <div class="col-sm-6 col-xl-4">
+                    <div class="card shadow h-100 ecommerce-card">
+                        {% if produitImageUrl %}
+                            <img src="{{ produitImageUrl }}" class="card-img-top" alt="{{ produit.nom }}" style="height:220px; object-fit:cover;">
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center bg-light text-muted" style="height:220px;">
+                                <i class="bi bi-image fs-1"></i>
                             </div>
-                            <div class="card-body d-flex flex-column p-4">
-                                <h5 class="card-title fw-bold text-truncate mb-2" style="color: #1f2937 !important;">
-                                    <a href="{{ path('ecommerce_produit_show', { id: produit.id }) }}" class="text-decoration-none stretched-link" style="color: #1f2937 !important;">{{ produit.nom }}</a>
-                                </h5>
-                                <div class="d-flex align-items-center gap-1 mb-2 catalog-card-rating" data-avg="{{ ratingInfo.avg }}" data-count="{{ ratingInfo.count }}">
-                                    <span class="text-warning small catalog-stars">
-                                        {% for i in 1..5 %}
-                                            <i class="bi bi-star{{ (ratingInfo.count > 0 and i <= (ratingInfo.avg)|round) ? '-fill' : '' }}"></i>
-                                        {% endfor %}
-                                    </span>
-                                    <span class="small" style="color: #4b5563 !important;">
-                                        {% if ratingInfo.count > 0 %}{{ (ratingInfo.avg)|number_format(1, ',', ' ') }} ({{ ratingInfo.count }} avis){% else %}— (0 avis){% endif %}
-                                    </span>
-                                </div>
-                                <p class="card-text small flex-grow-1 mb-3" style="color: #4b5563 !important;">
-                                    {{ produit.description|slice(0, 80) }}{% if produit.description|length > 80 %}...{% endif %}
-                                </p>
-                                <div class="mt-auto d-flex justify-content-between align-items-center">
-                                    <span class="h5 fw-bold text-primary mb-0">{{ (produit.prix / 100)|number_format(2, ',', ' ') }} €</span>
-                                    <form method="post" action="{{ path('ecommerce_panier_ajouter', { id: produit.id }) }}" class="position-relative" style="z-index: 2;">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('panier_ajouter_' ~ produit.id) }}">
-                                        <input type="hidden" name="quantite" value="1">
-                                        <button type="submit" class="btn btn-sm btn-primary rounded-circle shadow-sm" style="width: 38px; height: 38px;" title="Ajouter au panier">
-                                            <i class="bi bi-cart-plus"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                            <div class="catalog-card-avis-hover position-absolute bottom-0 start-0 end-0 p-3 bg-white border-top shadow-lg rounded-top-3 overflow-hidden">
-                                <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="fw-bold small" style="color: #1f2937 !important;">Avis</span>
-                                    <span class="small catalog-hover-avg" style="color: #4b5563 !important;">
-                                        Moyenne : {% if ratingInfo.count > 0 %}{{ (ratingInfo.avg)|number_format(1, ',', ' ') }} <i class="bi bi-star-fill text-warning"></i> ({{ ratingInfo.count }}){% else %}—{% endif %}
-                                    </span>
-                                </div>
-                                <div class="catalog-hover-reviews small" style="max-height: 160px; overflow-y: auto;">
-                                    {% for review in produitReviews %}
-                                        <div class="border-bottom pb-2 mb-2" style="border-color: #e5e7eb !important;">
-                                            <span class="text-warning">{% for i in 1..5 %}<i class="bi bi-star{{ i <= review.rating ? '-fill' : '' }}"></i>{% endfor %}</span>
-                                            <span class="fw-semibold d-block" style="color: #374151 !important;">{{ review.user.firstName ?? review.user.email }}</span>
-                                            {% if review.comment %}<p class="mb-0 mt-1" style="color: #4b5563 !important;">{{ review.comment|slice(0, 80) }}{% if review.comment|length > 80 %}...{% endif %}</p>{% endif %}
-                                        </div>
+                        {% endif %}
+
+                        <div class="card-body pb-0">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="badge bg-purple bg-opacity-10 text-purple">{{ produit.category ? produit.category.nom : 'Divers' }}</span>
+                                <span class="small text-muted">
+                                    {% if ratingInfo.count > 0 %}
+                                        {{ ratingInfo.avg|number_format(1, ',', ' ') }}/5 ({{ ratingInfo.count }} avis)
                                     {% else %}
-                                        <p class="mb-0" style="color: #6b7280 !important;">Aucun avis pour ce produit.</p>
-                                    {% endfor %}
-                                </div>
-                                <a href="{{ path('ecommerce_produit_show', { id: produit.id }) }}#avis" class="btn btn-sm btn-outline-primary w-100 mt-2">Voir la fiche produit</a>
+                                        0 avis
+                                    {% endif %}
+                                </span>
                             </div>
+                            <h5 class="card-title mb-2">
+                                <a href="{{ path('ecommerce_produit_show', { id: produit.id }) }}">{{ produit.nom }}</a>
+                            </h5>
+                            <p class="mb-2 text-truncate-2">
+                                {{ produit.description|slice(0, 105) }}{% if produit.description|length > 105 %}...{% endif %}
+                            </p>
+                        </div>
+
+                        <div class="card-footer pt-0 pb-3">
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 fw-bold text-primary mb-0">{{ (produit.prix / 100)|number_format(2, ',', ' ') }} EUR</span>
+                                <form method="post" action="{{ path('ecommerce_panier_ajouter', { id: produit.id }) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('panier_ajouter_' ~ produit.id) }}">
+                                    <input type="hidden" name="quantite" value="1">
+                                    <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3">
+                                        <i class="bi bi-cart-plus me-1"></i>Ajouter
+                                    </button>
+                                </form>
+                            </div>
+                            <a href="{{ path('ecommerce_produit_show', { id: produit.id }) }}" class="btn btn-primary-soft w-100 mt-3">Voir details</a>
                         </div>
                     </div>
-                {% else %}
-                    <div class="col-12 py-5">
-                        <div class="text-center py-5">
-                            <div class="mb-4">
-                                <i class="bi bi-search fs-1" style="color: #9ca3af !important; opacity: .6;"></i>
-                            </div>
-                            <h4 style="color: #374151 !important;">Aucun produit trouvé</h4>
-                            <p class="small" style="color: #4b5563 !important;">Essayez de modifier vos filtres ou effectuez une nouvelle recherche.</p>
-                            <a href="{{ path('ecommerce_catalogue') }}" class="btn btn-primary mt-3 rounded-pill px-4">Voir tout le catalogue</a>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
+                </div>
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <p class="mb-0">Aucun produit trouve.</p>
+                </div>
+            {% endfor %}
         </div>
     </div>
-</div>
+</section>
 
 <style>
-.hover-shadow:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
-.transition-base { transition: all .3s ease-in-out; }
+.ecommerce-card { transition: transform .2s ease, box-shadow .2s ease; }
+.ecommerce-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important; }
 #ecommerce-voice-search-btn.recording { background: #dc3545; color: #fff; border-color: #dc3545; }
 #ecommerce-voice-search-btn.recording i { animation: ecommerce-pulse 1s ease-in-out infinite; }
 @keyframes ecommerce-pulse { 50% { opacity: 0.6; } }
-
-.catalog-product-card { position: relative; }
-.catalog-card-avis-hover {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(8px);
-    transition: opacity .25s ease, transform .25s ease, visibility .25s;
-    z-index: 10;
-    max-height: 0;
-    padding: 0 !important;
-    margin: 0 -1px -1px -1px;
-}
-.catalog-product-card:hover .catalog-card-avis-hover {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    max-height: 280px;
-    padding: 0.75rem 1rem !important;
-}
-.catalog-card-avis-hover .catalog-hover-reviews::-webkit-scrollbar { width: 4px; }
-.catalog-card-avis-hover .catalog-hover-reviews::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
 </style>
+
 <script>
-(function() {
+(function () {
     var input = document.getElementById('ecommerce-search-query');
     var btn = document.getElementById('ecommerce-voice-search-btn');
-    var icon = document.getElementById('ecommerce-voice-icon');
     if (!input || !btn) return;
 
     var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        btn.title = 'Recherche vocale non supportée par ce navigateur';
+        btn.title = 'Recherche vocale non supportee';
         btn.disabled = true;
         return;
     }
@@ -219,36 +169,26 @@
     recognition.interimResults = false;
     recognition.lang = 'fr-FR';
 
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function () {
         if (btn.classList.contains('recording')) {
             recognition.stop();
             return;
         }
         btn.classList.add('recording');
-        btn.title = 'Arrêter l\'écoute';
         recognition.start();
     });
 
-    recognition.onresult = function(e) {
+    recognition.onresult = function (e) {
         var transcript = (e.results[e.resultIndex][0].transcript || '').trim();
         if (transcript) {
             input.value = transcript;
             input.form && input.form.submit();
         }
         btn.classList.remove('recording');
-        btn.title = 'Recherche vocale';
     };
 
-    recognition.onend = function() {
-        btn.classList.remove('recording');
-        btn.title = 'Recherche vocale';
-    };
-
-    recognition.onerror = function(e) {
-        btn.classList.remove('recording');
-        btn.title = 'Recherche vocale';
-        if (e.error === 'not-allowed') alert('Autorisez le micro pour utiliser la recherche vocale.');
-    };
+    recognition.onend = function () { btn.classList.remove('recording'); };
+    recognition.onerror = function () { btn.classList.remove('recording'); };
 })();
 </script>
 {% endblock %}

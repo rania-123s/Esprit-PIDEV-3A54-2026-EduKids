@@ -7,10 +7,11 @@
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-lg-8">
+                {% set resolvedImageUrl = quizImageUrl|default(quiz.imageUrl) %}
                 <div class="card border-0 shadow rounded-4 overflow-hidden fade-in-up bg-white position-relative">
-                    {% if quiz.imageUrl %}
+                    {% if resolvedImageUrl %}
                         <div class="position-relative">
-                            <img src="{{ quiz.imageUrl }}" class="card-img-top" alt="{{ quiz.titre }}" style="height: 300px; object-fit: cover;">
+                            <img src="{{ resolvedImageUrl }}" class="card-img-top" alt="{{ quiz.titre }}" style="height: 300px; object-fit: cover;">
                             <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-overlay"></div>
                         </div>
                     {% else %}

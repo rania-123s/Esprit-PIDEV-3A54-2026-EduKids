@@ -4,7 +4,6 @@ namespace App\Form;
 
 use App\Entity\Evenement;
 use App\Entity\Programme;
-use App\Repository\ProgrammeRepository;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -15,50 +14,58 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ProgrammeType extends AbstractType
 {
-    private ProgrammeRepository $programmeRepository;
-
-    public function __construct(ProgrammeRepository $programmeRepository)
-    {
-        $this->programmeRepository = $programmeRepository;
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $currentProgramme = $options['data'] ?? null;
-        $currentEvenementId = $currentProgramme && $currentProgramme->getEvenement() 
-            ? $currentProgramme->getEvenement()->getId() 
+        $currentEvenementId = $currentProgramme && $currentProgramme->getEvenement()
+            ? $currentProgramme->getEvenement()->getId()
             : null;
 
         $builder
             ->add('evenement', EntityType::class, [
                 'class' => Evenement::class,
-                'choice_label' => function (Evenement $evenement) {
-                    return $evenement->getTitre() . ' (' . ($evenement->getDateEvenement() ? $evenement->getDateEvenement()->format('d/m/Y') : 'N/A') . ')';
+                'choice_label' => function (Evenement $evenement): string {
+                    $dateLabel = $evenement->getDateEvenement()
+                        ? $evenement->getDateEvenement()->format('d/m/Y')
+                        : 'N/A';
+
+                    $heuresLabel = 'horaires non definis';
+                    if ($evenement->getHeureDebut() && $evenement->getHeureFin()) {
+                        $heuresLabel = sprintf(
+                            '%s - %s',
+                            $evenement->getHeureDebut()->format('H:i'),
+                            $evenement->getHeureFin()->format('H:i')
+                        );
+                    }
+
+                    return sprintf('%s (%s, %s)', $evenement->getTitre(), $dateLabel, $heuresLabel);
                 },
                 'query_builder' => function (EntityRepository $er) use ($currentEvenementId) {
                     $qb = $er->createQueryBuilder('e')
-                        ->orderBy('e.dateEvenement', 'ASC');
-                    
-                    // En mode édition, inclure l'événement actuel + ceux sans programme
+                        ->orderBy('e.dateEvenement', 'ASC')
+                        ->addOrderBy('e.heureDebut', 'ASC');
+
+                    // In edit mode include current event, and include only valid events for all others.
                     if ($currentEvenementId) {
                         $qb->leftJoin('e.programme', 'p')
-                           ->where('p.id IS NULL OR e.id = :currentId')
-                           ->setParameter('currentId', $currentEvenementId);
+                            ->where('(p.id IS NULL AND e.heureDebut < e.heureFin) OR e.id = :currentId')
+                            ->setParameter('currentId', $currentEvenementId);
                     } else {
-                        // En mode création, n'afficher que les événements sans programme
+                        // In create mode keep only events without program and with a valid time range.
                         $qb->leftJoin('e.programme', 'p')
-                           ->where('p.id IS NULL');
+                            ->where('p.id IS NULL')
+                            ->andWhere('e.heureDebut < e.heureFin');
                     }
-                    
+
                     return $qb;
                 },
-                'placeholder' => 'Sélectionnez un événement',
-                'label' => 'Événement associé',
+                'placeholder' => 'Selectionnez un evenement',
+                'label' => 'Evenement associe',
                 'attr' => ['class' => 'form-select'],
                 'required' => true,
             ])
             ->add('pauseDebut', TimeType::class, [
-                'label' => 'Heure début de la pause',
+                'label' => 'Heure debut de la pause',
                 'widget' => 'single_text',
                 'attr' => ['class' => 'form-control'],
                 'required' => true,
@@ -70,15 +77,15 @@ class ProgrammeType extends AbstractType
                 'required' => true,
             ])
             ->add('activites', TextareaType::class, [
-                'label' => 'Activités prévues',
+                'label' => 'Activites prevues',
                 'attr' => [
                     'rows' => 4,
-                    'placeholder' => 'Décrivez les activités prévues pour cet événement...
+                    'placeholder' => 'Decrivez les activites prevues pour cet evenement...
 Exemple:
 - 09h00 : Accueil des participants
 - 09h30 : Atelier peinture
-- 10h30 : Jeux éducatifs
-- 11h30 : Activité sportive',
+- 10h30 : Jeux educatifs
+- 11h30 : Activite sportive',
                     'class' => 'form-control',
                 ],
                 'required' => true,
@@ -89,23 +96,23 @@ Exemple:
                     'rows' => 3,
                     'placeholder' => 'Listez les documents obligatoires pour participer...
 Exemple:
-- Autorisation parentale signée
-- Certificat médical
-- Fiche d\'inscription complète',
+- Autorisation parentale signee
+- Certificat medical
+- Fiche d inscription complete',
                     'class' => 'form-control',
                 ],
                 'required' => true,
             ])
             ->add('materielsRequis', TextareaType::class, [
-                'label' => 'Matériels requis',
+                'label' => 'Materiels requis',
                 'attr' => [
                     'rows' => 3,
-                    'placeholder' => 'Listez le matériel nécessaire pour l\'événement...
+                    'placeholder' => 'Listez le materiel necessaire pour l evenement...
 Exemple:
 - Tenue de sport
-- Gourde d\'eau
+- Gourde d eau
 - Chapeau/casquette
-- Crème solaire',
+- Creme solaire',
                     'class' => 'form-control',
                 ],
                 'required' => true,

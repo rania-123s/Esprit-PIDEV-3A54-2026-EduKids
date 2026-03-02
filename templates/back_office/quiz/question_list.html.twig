@@ -3,158 +3,350 @@
 {% block title %}Questions - {{ quiz.titre }}{% endblock %}
 
 {% block body %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="{{ path('quiz_admin_quiz_list') }}">Quiz</a></li>
-            <li class="breadcrumb-item active">{{ quiz.titre }}</li>
-        </ol>
-    </nav>
+<style>
+    .quiz-questions-page {
+        --ink: #0f172a;
+        --muted: #5b667a;
+        --line: #d7dfeb;
+        --surface: #ffffff;
+        --brand: #0ea5a3;
+        --brand-dark: #0b7f7d;
+        --hero-a: #0f766e;
+        --hero-b: #155e75;
+        --hero-c: #1d4ed8;
+        font-family: "Heebo", sans-serif;
+    }
 
-    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-        <div>
-            <h1 class="h3 fw-bold mb-1 ecommerce-admin-header">
-                <i class="bi bi-list-ol me-2 text-primary"></i> Questions
-            </h1>
-            <p class="small mb-0" style="color: #4b5563 !important;">{{ questions|length }} question(s). Ajoutez toutes les questions puis enregistrez le quiz.</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2 align-items-center">
-            <a href="{{ path('quiz_admin_quiz_edit', { id: quiz.id }) }}" class="btn btn-outline-secondary rounded-pill px-4">
-                <i class="bi bi-pencil me-2"></i> Modifier le quiz
-            </a>
-            <a href="{{ path('quiz_admin_question_new', { id: quiz.id }) }}" class="btn btn-primary shadow-sm rounded-pill px-4">
-                <i class="bi bi-plus-circle me-2"></i> Nouvelle question
-            </a>
+    .create-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        margin: 1.75rem 1rem 0;
+        padding: 3rem 1.25rem;
+        background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c));
+        color: #fff;
+        box-shadow: 0 24px 60px rgba(2, 44, 34, 0.24);
+    }
+
+    .create-hero::before,
+    .create-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .create-hero::before {
+        width: 240px;
+        height: 240px;
+        right: -70px;
+        top: -70px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.33), rgba(255, 255, 255, 0));
+    }
+
+    .create-hero::after {
+        width: 200px;
+        height: 200px;
+        left: -55px;
+        bottom: -80px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.45), rgba(245, 158, 11, 0));
+    }
+
+    .create-hero h1 {
+        margin: 0;
+        font-size: clamp(1.7rem, 4vw, 2.5rem);
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+
+    .create-hero p {
+        margin: 0.85rem 0 0;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .create-shell {
+        padding: 1.75rem 1rem 2.2rem;
+    }
+
+    .create-card {
+        background: linear-gradient(170deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.96));
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 24px;
+        box-shadow: 0 22px 55px rgba(15, 23, 42, 0.1);
+        backdrop-filter: blur(2px);
+    }
+
+    .create-card .card-body {
+        padding: clamp(1.1rem, 2.8vw, 2.2rem);
+    }
+
+    .info-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(14, 165, 163, 0.12);
+        color: #0d7e7b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 0.55rem;
+    }
+
+    .form-section {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 16px;
+        background: #fff;
+        padding: 1rem;
+    }
+
+    .form-section-title {
+        margin: 0 0 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-section-title i {
+        color: var(--brand-dark);
+    }
+
+    .ai-assistant-box {
+        border-style: dashed;
+        border-color: rgba(14, 165, 163, 0.36);
+        background: linear-gradient(135deg, rgba(14, 165, 163, 0.07), rgba(29, 78, 216, 0.05));
+    }
+
+    .table-modern thead th {
+        background: #f8fafc;
+        text-transform: uppercase;
+        font-size: 0.74rem;
+        letter-spacing: 0.25px;
+        color: #334155;
+        border-bottom: 0;
+    }
+
+    .table-modern tbody tr:hover {
+        background: rgba(14, 165, 163, 0.04);
+    }
+
+    .reveal-up {
+        animation: revealUp 0.45s ease both;
+    }
+
+    .reveal-up.delay-1 {
+        animation-delay: 0.08s;
+    }
+
+    @keyframes revealUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .create-hero {
+            margin: 1rem 0.75rem 0;
+            border-radius: 18px;
+            padding: 2.3rem 1rem;
+        }
+
+        .create-shell {
+            padding: 1rem 0.75rem 1.5rem;
+        }
+    }
+</style>
+
+<section class="quiz-questions-page">
+    <div class="create-hero reveal-up">
+        <div class="container">
+            <h1>Gestion des questions</h1>
+            <p>Quiz: {{ quiz.titre }}. Ajoutez toutes les questions puis enregistrez le quiz.</p>
         </div>
     </div>
 
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-success border-4" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    {% endfor %}
+    <div class="create-shell">
+        <div class="container">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ path('quiz_admin_quiz_list') }}">Quiz</a></li>
+                    <li class="breadcrumb-item active">{{ quiz.titre }}</li>
+                </ol>
+            </nav>
 
-    {# Save quiz CTA - after adding all questions #}
-    <div class="card ecommerce-admin-card border-0 shadow-sm mb-4 border-primary border-2">
-        <div class="card-body py-4 px-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                    <i class="bi bi-save fs-4"></i>
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-success border-4" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-                <div>
-                    <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">Enregistrer le quiz</h5>
-                    <p class="small mb-0" style="color: #6b7280 !important;">Une fois toutes les questions ajoutées ou modifiées, cliquez ici pour enregistrer le quiz.</p>
-                </div>
-            </div>
-            <form method="post" action="{{ path('quiz_admin_quiz_save', { id: quiz.id }) }}" class="d-inline">
-                <input type="hidden" name="_token" value="{{ csrf_token('save_quiz' ~ quiz.id) }}">
-                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">
-                    <i class="bi bi-check-lg me-2"></i> Enregistrer le quiz
-                </button>
-            </form>
-        </div>
-    </div>
+            {% endfor %}
 
-    {# AI generate questions #}
-    <div class="card ecommerce-admin-card border-0 shadow-sm mb-4">
-        <div class="card-header bg-light border-0 py-3">
-            <h6 class="mb-0 fw-bold" style="color: #1f2937 !important;"><i class="bi bi-magic me-2 text-primary"></i> Générer des questions avec l'IA</h6>
-        </div>
-        <div class="card-body">
-            <p class="small text-muted mb-3">Générez des suggestions de questions à partir du titre du quiz. Vous pourrez les créer manuellement en vous en inspirant.</p>
-            <div class="row g-2 align-items-end">
-                <div class="col-auto">
-                    <label class="form-label small mb-0">Nombre de questions</label>
-                    <select id="ai-question-count" class="form-select" style="width: auto;">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3" selected>3</option>
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <button type="button" id="btn-generate-questions" class="btn btn-outline-primary">
-                        <i class="bi bi-magic me-1"></i> Générer des suggestions
-                    </button>
-                </div>
-            </div>
-            <div id="ai-generated-questions" class="mt-3 d-none"></div>
-        </div>
-    </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-11 col-xl-10">
+                    <div class="card create-card reveal-up delay-1">
+                        <div class="card-body">
+                            <span class="info-kicker">
+                                <i class="bi bi-list-ol"></i>
+                                Questions du quiz
+                            </span>
 
-    {# Questions table #}
-    <div class="card ecommerce-admin-card border-0 shadow-sm">
-        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-            <h6 class="mb-0 fw-bold" style="color: #1f2937 !important;">Liste des questions</h6>
-            <span class="badge bg-primary rounded-pill">{{ questions|length }} question(s)</span>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-uppercase small" style="color: #1f2937 !important;">
-                    <tr>
-                        <th class="ps-4 py-3 border-0 rounded-start" style="width: 60px;">#</th>
-                        <th class="py-3 border-0">Énoncé</th>
-                        <th class="py-3 border-0" style="width: 100px;">Type</th>
-                        <th class="py-3 border-0">Bonne réponse</th>
-                        <th class="pe-4 py-3 border-0 rounded-end text-end" style="width: 120px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for question in questions %}
-                        <tr>
-                            <td class="ps-4 py-3 fw-semibold" style="color: #374151 !important;">{{ question.ordre }}</td>
-                            <td class="py-3">
-                                <div class="text-break" style="max-width: 320px;">{{ question.texte }}</div>
-                            </td>
-                            <td class="py-3">
-                                <span class="badge {{ question.type == 'qcm' ? 'bg-primary' : 'bg-secondary' }} bg-opacity-10 text-primary rounded-pill">{{ question.type == 'qcm' ? 'QCM' : 'Texte' }}</span>
-                            </td>
-                            <td class="py-3 small" style="color: #4b5563 !important;">
-                                {% if question.type == 'qcm' and question.correctOption %}
-                                    {{ question.correctOption.texte|slice(0, 35) }}{% if question.correctOption.texte|length > 35 %}...{% endif %}
-                                {% elseif question.type == 'texte' and question.bonneReponse %}
-                                    {{ question.bonneReponse|slice(0, 35) }}{% if question.bonneReponse|length > 35 %}...{% endif %}
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </td>
-                            <td class="pe-4 py-3 text-end">
-                                <div class="btn-group btn-group-sm">
-                                    <a href="{{ path('quiz_admin_question_edit', { id: quiz.id, questionId: question.id }) }}" class="btn btn-outline-secondary" title="Modifier"><i class="bi bi-pencil"></i></a>
-                                    <form method="post" action="{{ path('quiz_admin_question_delete', { id: quiz.id, questionId: question.id }) }}" class="d-inline" onsubmit="return confirm('Supprimer cette question ?');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_question' ~ question.id) }}">
-                                        <button type="submit" class="btn btn-outline-danger" title="Supprimer"><i class="bi bi-trash"></i></button>
-                                    </form>
+                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+                                <div>
+                                    <h2 class="h4 fw-bold mb-1 ecommerce-admin-header">
+                                        <i class="bi bi-list-ol me-2 text-primary"></i> Questions
+                                    </h2>
+                                    <p class="small mb-0" style="color: #4b5563 !important;">{{ questions|length }} question(s). Ajoutez toutes les questions puis enregistrez le quiz.</p>
                                 </div>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="5" class="text-center py-5" style="color: #4b5563 !important;">
-                                <div class="py-4">
-                                    <i class="bi bi-inbox display-6 opacity-25"></i>
-                                    <p class="mt-3 mb-2 fw-semibold">Aucune question pour l'instant</p>
-                                    <p class="small mb-0">Ajoutez des questions manuellement ou générez des suggestions avec l'IA ci-dessus.</p>
-                                    <a href="{{ path('quiz_admin_question_new', { id: quiz.id }) }}" class="btn btn-primary rounded-pill mt-3 px-4">
-                                        <i class="bi bi-plus-circle me-2"></i> Ajouter une question
+                                <div class="d-flex flex-wrap gap-2 align-items-center">
+                                    <a href="{{ path('quiz_admin_quiz_edit', { id: quiz.id }) }}" class="btn btn-outline-secondary rounded-pill px-4">
+                                        <i class="bi bi-pencil me-2"></i> Modifier le quiz
+                                    </a>
+                                    <a href="{{ path('quiz_admin_question_new', { id: quiz.id }) }}" class="btn btn-primary shadow-sm rounded-pill px-4">
+                                        <i class="bi bi-plus-circle me-2"></i> Nouvelle question
                                     </a>
                                 </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            </div>
+
+                            <div class="form-section mb-4">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                            <i class="bi bi-save fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">Enregistrer le quiz</h5>
+                                            <p class="small mb-0" style="color: #6b7280 !important;">Une fois toutes les questions ajoutees ou modifiees, cliquez ici pour enregistrer le quiz.</p>
+                                        </div>
+                                    </div>
+                                    <form method="post" action="{{ path('quiz_admin_quiz_save', { id: quiz.id }) }}" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('save_quiz' ~ quiz.id) }}">
+                                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">
+                                            <i class="bi bi-check-lg me-2"></i> Enregistrer le quiz
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="form-section ai-assistant-box mb-4">
+                                <h4 class="form-section-title">
+                                    <i class="bi bi-magic"></i>
+                                    Generer des questions avec l'IA
+                                </h4>
+                                <p class="small text-muted mb-3">Generez des suggestions de questions a partir du titre du quiz. Vous pourrez ensuite les creer manuellement.</p>
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-auto">
+                                        <label class="form-label small mb-0">Nombre de questions</label>
+                                        <select id="ai-question-count" class="form-select" style="width: auto;">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3" selected>3</option>
+                                            <option value="5">5</option>
+                                            <option value="10">10</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button" id="btn-generate-questions" class="btn btn-outline-primary">
+                                            <i class="bi bi-magic me-1"></i> Generer des suggestions
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="ai-generated-questions" class="mt-3 d-none"></div>
+                            </div>
+
+                            <div class="form-section">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <h4 class="form-section-title mb-0">
+                                        <i class="bi bi-ui-checks-grid"></i>
+                                        Liste des questions
+                                    </h4>
+                                    <span class="badge bg-primary rounded-pill">{{ questions|length }} question(s)</span>
+                                </div>
+
+                                <div class="table-responsive mt-3">
+                                    <table class="table table-hover align-middle mb-0 table-modern">
+                                        <thead>
+                                            <tr>
+                                                <th class="ps-3 py-3 rounded-start" style="width: 60px;">#</th>
+                                                <th class="py-3">Enonce</th>
+                                                <th class="py-3" style="width: 100px;">Type</th>
+                                                <th class="py-3">Bonne reponse</th>
+                                                <th class="pe-3 py-3 rounded-end text-end" style="width: 120px;">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for question in questions %}
+                                                <tr>
+                                                    <td class="ps-3 py-3 fw-semibold" style="color: #374151 !important;">{{ question.ordre }}</td>
+                                                    <td class="py-3">
+                                                        <div class="text-break" style="max-width: 320px;">{{ question.texte }}</div>
+                                                    </td>
+                                                    <td class="py-3">
+                                                        <span class="badge {{ question.type == 'qcm' ? 'bg-primary' : 'bg-secondary' }} bg-opacity-10 {{ question.type == 'qcm' ? 'text-primary' : 'text-secondary' }} rounded-pill">
+                                                            {{ question.type == 'qcm' ? 'QCM' : 'Texte' }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-3 small" style="color: #4b5563 !important;">
+                                                        {% if question.type == 'qcm' and question.correctOption %}
+                                                            {{ question.correctOption.texte|slice(0, 35) }}{% if question.correctOption.texte|length > 35 %}...{% endif %}
+                                                        {% elseif question.type == 'texte' and question.bonneReponse %}
+                                                            {{ question.bonneReponse|slice(0, 35) }}{% if question.bonneReponse|length > 35 %}...{% endif %}
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="pe-3 py-3 text-end">
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a href="{{ path('quiz_admin_question_edit', { id: quiz.id, questionId: question.id }) }}" class="btn btn-outline-secondary" title="Modifier"><i class="bi bi-pencil"></i></a>
+                                                            <form method="post" action="{{ path('quiz_admin_question_delete', { id: quiz.id, questionId: question.id }) }}" class="d-inline" onsubmit="return confirm('Supprimer cette question ?');">
+                                                                <input type="hidden" name="_token" value="{{ csrf_token('delete_question' ~ question.id) }}">
+                                                                <button type="submit" class="btn btn-outline-danger" title="Supprimer"><i class="bi bi-trash"></i></button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% else %}
+                                                <tr>
+                                                    <td colspan="5" class="text-center py-5" style="color: #4b5563 !important;">
+                                                        <div class="py-4">
+                                                            <i class="bi bi-inbox display-6 opacity-25"></i>
+                                                            <p class="mt-3 mb-2 fw-semibold">Aucune question pour l'instant</p>
+                                                            <p class="small mb-0">Ajoutez des questions manuellement ou generez des suggestions avec l'IA ci-dessus.</p>
+                                                            <a href="{{ path('quiz_admin_question_new', { id: quiz.id }) }}" class="btn btn-primary rounded-pill mt-3 px-4">
+                                                                <i class="bi bi-plus-circle me-2"></i> Ajouter une question
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {% if questions|length > 0 %}
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+                                        <span class="small" style="color: #6b7280 !important;">{{ questions|length }} question(s). Pensez a cliquer sur "Enregistrer le quiz".</span>
+                                        <a href="{{ path('quiz_admin_question_new', { id: quiz.id }) }}" class="btn btn-sm btn-outline-primary rounded-pill">Ajouter une question</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        {% if questions|length > 0 %}
-        <div class="card-footer bg-light border-0 py-3 d-flex justify-content-between align-items-center">
-            <span class="small" style="color: #6b7280 !important;">{{ questions|length }} question(s). Pensez à cliquer sur « Enregistrer le quiz » en haut de page.</span>
-            <a href="{{ path('quiz_admin_question_new', { id: quiz.id }) }}" class="btn btn-sm btn-outline-primary rounded-pill">Ajouter une question</a>
-        </div>
-        {% endif %}
     </div>
-</div>
+</section>
 
 <script>
 (function() {
@@ -167,7 +359,7 @@
     btn.addEventListener('click', function() {
         var count = parseInt(countSel.value, 10) || 3;
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Génération...';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Generation...';
         out.classList.add('d-none');
         out.innerHTML = '';
 
@@ -178,7 +370,7 @@
         })
         .then(function(r) {
             return r.text().then(function(text) {
-                try { return JSON.parse(text); } catch (e) { return { error: 'Réponse invalide', questions: [] }; }
+                try { return JSON.parse(text); } catch (e) { return { error: 'Reponse invalide', questions: [] }; }
             });
         })
         .then(function(data) {
@@ -189,27 +381,27 @@
                 return;
             }
             if (questions.length === 0) {
-                out.innerHTML = '<div class="alert alert-info mb-0">Aucune question générée. Vérifiez le titre du quiz.</div>';
+                out.innerHTML = '<div class="alert alert-info mb-0">Aucune question generee. Verifiez le titre du quiz.</div>';
                 out.classList.remove('d-none');
                 return;
             }
             var html = '';
             if (data && data.error) html += '<div class="alert alert-warning mb-2">' + data.error + '</div>';
-            html += '<div class="alert alert-info mb-3"><strong>Suggestions générées</strong> — Créez des questions en vous inspirant de ces idées :</div><ul class="list-group list-group-flush">';
+            html += '<div class="alert alert-info mb-3"><strong>Suggestions generees</strong> - Creez des questions en vous inspirant de ces idees :</div><ul class="list-group list-group-flush">';
             questions.forEach(function(q, i) {
-                html += '<li class="list-group-item"><strong>Q' + (i+1) + ':</strong> ' + (q.texte || '').substring(0, 120) + (q.texte && q.texte.length > 120 ? '...' : '') + '<br><small class="text-muted">Type: ' + (q.type || 'qcm') + ', Bonne réponse: ' + (q.bonneReponse || '') + '</small></li>';
+                html += '<li class="list-group-item"><strong>Q' + (i+1) + ':</strong> ' + (q.texte || '').substring(0, 120) + (q.texte && q.texte.length > 120 ? '...' : '') + '<br><small class="text-muted">Type: ' + (q.type || 'qcm') + ', Bonne reponse: ' + (q.bonneReponse || '') + '</small></li>';
             });
-            html += '</ul><p class="small text-muted mt-2 mb-0">Cliquez sur « Nouvelle question » pour les ajouter une par une.</p>';
+            html += '</ul><p class="small text-muted mt-2 mb-0">Cliquez sur "Nouvelle question" pour les ajouter une par une.</p>';
             out.innerHTML = html;
             out.classList.remove('d-none');
         })
-        .catch(function(err) {
-            out.innerHTML = '<div class="alert alert-danger mb-0">Erreur réseau ou serveur. Vérifiez votre connexion et réessayez.</div>';
+        .catch(function() {
+            out.innerHTML = '<div class="alert alert-danger mb-0">Erreur reseau ou serveur. Verifiez votre connexion et reessayez.</div>';
             out.classList.remove('d-none');
         })
         .finally(function() {
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-magic me-1"></i> Générer des suggestions';
+            btn.innerHTML = '<i class="bi bi-magic me-1"></i> Generer des suggestions';
         });
     });
 })();

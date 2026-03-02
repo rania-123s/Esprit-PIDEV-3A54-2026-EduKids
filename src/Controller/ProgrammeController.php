@@ -38,7 +38,7 @@ class ProgrammeController extends AbstractController
             $entityManager->persist($programme);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Le programme a été créé avec succès.');
+            $this->addFlash('success', 'Le programme a ete cree avec succes.');
 
             return $this->redirectToRoute('app_programme_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -66,7 +66,7 @@ class ProgrammeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            $this->addFlash('success', 'Le programme a été modifié avec succès.');
+            $this->addFlash('success', 'Le programme a ete modifie avec succes.');
 
             return $this->redirectToRoute('app_programme_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -80,11 +80,11 @@ class ProgrammeController extends AbstractController
     #[Route('/{id}', name: 'app_programme_delete', methods: ['POST'])]
     public function delete(Request $request, Programme $programme, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$programme->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $programme->getId(), $request->request->get('_token'))) {
             $entityManager->remove($programme);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Le programme a été supprimé avec succès.');
+            $this->addFlash('success', 'Le programme a ete supprime avec succes.');
         }
 
         return $this->redirectToRoute('app_programme_index', [], Response::HTTP_SEE_OTHER);
@@ -93,17 +93,17 @@ class ProgrammeController extends AbstractController
     #[Route('/api/evenement/{id}/heures', name: 'app_programme_api_evenement_heures', methods: ['GET'])]
     public function getEvenementHeures(Evenement $evenement): JsonResponse
     {
-        if (!$evenement->getHeureDebut() || !$evenement->getHeureFin()) {
+        if (!$this->hasValidEventHours($evenement)) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'L\'événement n\'a pas d\'heures définies.'
+                'message' => 'Cet evenement n a pas d horaires valides. Modifiez heure debut/fin dans l evenement.',
             ], 400);
         }
 
         return new JsonResponse([
             'success' => true,
-            'heureDebut' => $evenement->getHeureDebut()->format('H:i'),
-            'heureFin' => $evenement->getHeureFin()->format('H:i'),
+            'heureDebut' => $evenement->getHeureDebut()?->format('H:i'),
+            'heureFin' => $evenement->getHeureFin()?->format('H:i'),
         ]);
     }
 
@@ -115,66 +115,82 @@ class ProgrammeController extends AbstractController
         LoggerInterface $logger
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
-        
+
         $evenementId = $data['evenement_id'] ?? null;
         $pauseDebut = $data['pause_debut'] ?? null;
         $pauseFin = $data['pause_fin'] ?? null;
-        
+
         if (!$evenementId) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'L\'ID de l\'événement est requis.'
+                'message' => 'L ID de l evenement est requis.',
             ], 400);
         }
-        
+
         $evenement = $evenementRepository->find($evenementId);
         if (!$evenement) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'Événement non trouvé.'
+                'message' => 'Evenement non trouve.',
             ], 404);
         }
-        
-        if (!$evenement->getHeureDebut() || !$evenement->getHeureFin()) {
+
+        if (!$this->hasValidEventHours($evenement)) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'L\'événement doit avoir des heures de début et de fin définies.'
+                'message' => 'L evenement doit avoir un intervalle horaire valide (debut < fin).',
             ], 400);
         }
-        
+
         try {
             $result = $activityRecommendationService->recommendActivities(
-                $evenement->getTitre(),
-                $evenement->getDescription(),
-                $evenement->getHeureDebut()->format('H:i'),
-                $evenement->getHeureFin()->format('H:i'),
+                (string) $evenement->getTitre(),
+                (string) $evenement->getDescription(),
+                (string) $evenement->getHeureDebut()?->format('H:i'),
+                (string) $evenement->getHeureFin()?->format('H:i'),
                 $pauseDebut,
                 $pauseFin
             );
-            
-            // Améliorer le message d'erreur si nécessaire
+
             if (!$result['success']) {
-                // Ajouter des instructions supplémentaires
-                if (strpos($result['message'], 'Clé API Gemini') !== false || 
-                    strpos($result['message'], 'Impossible de générer') !== false) {
-                    $result['message'] .= ' Consultez le fichier DEBUG_GEMINI_API.md pour un guide de résolution.';
+                if (
+                    strpos($result['message'], 'Cle API Gemini') !== false
+                    || strpos($result['message'], 'Impossible de generer') !== false
+                ) {
+                    $result['message'] .= ' Consultez DEBUG_GEMINI_API.md pour le diagnostic.';
                 }
             }
-            
+
             $response = new JsonResponse($result);
             $response->setEncodingOptions(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
             return $response;
         } catch (\Exception $e) {
             $logger->error('Erreur dans ProgrammeController::recommendActivities: ' . $e->getMessage(), [
                 'exception' => $e,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return new JsonResponse([
                 'success' => false,
                 'activites' => null,
-                'message' => 'Erreur serveur lors de la génération des activités. Consultez var/log/dev.log pour plus de détails.'
+                'message' => 'Erreur serveur lors de la generation des activites. Consultez var/log/dev.log.',
             ], 500);
         }
+    }
+
+    private function hasValidEventHours(Evenement $evenement): bool
+    {
+        $heureDebut = $evenement->getHeureDebut();
+        $heureFin = $evenement->getHeureFin();
+
+        if (!$heureDebut || !$heureFin) {
+            return false;
+        }
+
+        $debutMinutes = ((int) $heureDebut->format('H') * 60) + (int) $heureDebut->format('i');
+        $finMinutes = ((int) $heureFin->format('H') * 60) + (int) $heureFin->format('i');
+
+        return $debutMinutes < $finMinutes;
     }
 }

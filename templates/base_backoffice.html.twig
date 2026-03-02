@@ -1,14 +1,27 @@
+{% set _swalFlashes = {
+	'success': app.flashes('success'),
+	'error': app.flashes('error'),
+	'danger': app.flashes('danger'),
+	'warning': app.flashes('warning'),
+	'info': app.flashes('info')
+} %}
+{% set _swalItems = [] %}
+{% for type, messages in _swalFlashes %}
+	{% for message in messages %}
+		{% set _swalItems = _swalItems|merge([{'type': type, 'message': message}]) %}
+	{% endfor %}
+{% endfor %}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-	<title>Eduport - Gestion des Événements</title>
+	<title>EduKids - Gestion des Événements</title>
 
 	<!-- Meta Tags -->
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="author" content="Webestica.com">
-	<meta name="description" content="Eduport- LMS, Education and Course Theme">
+	<meta name="description" content="EduKids - LMS, Education and Course Theme">
 
 	<!-- Dark mode -->
 	<script>
@@ -101,8 +114,11 @@
 
 	<!-- Navbar brand for xl START -->
 	<div class="d-flex align-items-center">
-		<a class="navbar-brand" href="{{ path('app_admin_page') }}">
-			<img class="navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="">
+		<a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" href="{{ path('app_admin_page') }}">
+			<img src="{{ asset('assets/images/logo.png') }}" alt="EduKids logo" style="width: 42px; height: 42px;">
+			<strong class="mb-0 fs-4 text-white" style="letter-spacing: 0.5px;">
+				<span style="color: #f97316;">Edu</span>Kids
+			</strong>
 		</a>
 	</div>
 	<!-- Navbar brand for xl END -->
@@ -295,9 +311,11 @@
 
 				<!-- Logo START -->
 				<div class="d-flex align-items-center d-xl-none">
-					<a class="navbar-brand" href="{{ path('app_admin_page') }}">
-						<img class="light-mode-item navbar-brand-item h-30px" src="{{ asset('assets/images/logo-mobile.svg') }}" alt="">
-						<img class="dark-mode-item navbar-brand-item h-30px" src="{{ asset('assets/images/logo-mobile-light.svg') }}" alt="">
+					<a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" href="{{ path('app_admin_page') }}">
+						<img src="{{ asset('assets/images/logo.png') }}" alt="EduKids logo" style="width: 34px; height: 34px;">
+						<strong class="mb-0 fs-5 text-body-emphasis" style="letter-spacing: 0.4px;">
+							<span style="color: #f97316;">Edu</span>Kids
+						</strong>
 					</a>
 				</div>
 				<!-- Logo END -->
@@ -422,7 +440,7 @@
 										</div>
 										<div>
 											<a class="h6 mt-2 mt-sm-0" href="#">Admin User</a>
-											<p class="small m-0">admin@eduport.com</p>
+											<p class="small m-0">admin@edukids.com</p>
 										</div>
 									</div>
 								</li>
@@ -492,9 +510,58 @@
 <script src="{{ asset('assets/vendor/purecounterjs/dist/purecounter_vanilla.js') }}"></script>
 <script src="{{ asset('assets/vendor/apexcharts/js/apexcharts.min.js') }}"></script>
 <script src="{{ asset('assets/vendor/overlay-scrollbar/js/overlayscrollbars.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- Template Functions -->
 <script src="{{ asset('assets/js/functions.js') }}"></script>
+
+<script>
+	(() => {
+		const flashQueue = {{ _swalItems|json_encode|raw }};
+		if (!Array.isArray(flashQueue) || flashQueue.length === 0 || typeof Swal === 'undefined') {
+			return;
+		}
+
+		const iconMap = {
+			success: 'success',
+			error: 'error',
+			danger: 'error',
+			warning: 'warning',
+			info: 'info'
+		};
+
+		let sequence = Promise.resolve();
+		flashQueue.forEach((flash) => {
+			const icon = iconMap[flash.type] || 'info';
+			const message = flash.message || '';
+
+			sequence = sequence.then(() => {
+				if (flash.type === 'success') {
+					return Swal.fire({
+						position: 'center',
+						icon,
+						title: 'Succes',
+						text: message,
+						confirmButtonText: 'OK',
+						confirmButtonColor: '#1d4ed8',
+						allowOutsideClick: true,
+						allowEscapeKey: true
+					});
+				}
+
+				return Swal.fire({
+					toast: true,
+					position: 'top-end',
+					icon,
+					title: message,
+					showConfirmButton: false,
+					timer: 4200,
+					timerProgressBar: true
+				});
+			});
+		});
+	})();
+</script>
 
 {% block javascripts %}{% endblock %}
 

@@ -3,15 +3,135 @@
 {% block title %}Gestion des Produits - Admin{% endblock %}
 
 {% block body %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 fw-bold mb-0 ecommerce-admin-header"><i class="bi bi-basket me-2 text-primary"></i>Gestion des Produits</h1>
-            <p class="small mb-0" style="color: #4b5563 !important;">Visualisez et gérez votre catalogue.</p>
+<style>
+    .ecom-produit-tuned .card {
+        border-radius: 14px;
+        overflow: hidden;
+        animation: panelIn 0.45s ease both;
+    }
+
+    .ecom-produit-tuned .card-header {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .ecom-produit-tuned .form-control,
+    .ecom-produit-tuned .form-select {
+        border-radius: 10px;
+    }
+
+    .ecom-produit-tuned .table thead th {
+        font-weight: 700;
+        letter-spacing: 0.2px;
+    }
+
+    .ecom-produit-tuned .table tbody tr {
+        transition: background-color 0.2s ease;
+        animation: rowIn 0.35s ease both;
+    }
+
+    .ecom-produit-tuned .table tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.04);
+    }
+
+    .ecom-produit-tuned .w-60px img {
+        width: 56px;
+        height: 56px;
+        object-fit: cover;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .ecom-produit-tuned .results-meta {
+        font-size: 0.85rem;
+        color: #6c757d;
+        animation: fadeInSoft 0.45s ease both;
+    }
+
+    .ecom-produit-tuned .row.mb-3 {
+        animation: slideDownIn 0.45s ease both;
+    }
+
+    .ecom-produit-tuned .row.g-4.mb-4 > div {
+        animation: riseIn 0.45s ease both;
+    }
+
+    .ecom-produit-tuned .row.g-4.mb-4 > div:nth-child(2) {
+        animation-delay: 0.08s;
+    }
+
+    .ecom-produit-tuned .row.g-4.mb-4 > div:nth-child(3) {
+        animation-delay: 0.16s;
+    }
+
+    .ecom-produit-tuned .card-header .fa-search {
+        transition: transform 0.2s ease;
+    }
+
+    .ecom-produit-tuned .card-header .btn:hover .fa-search {
+        transform: scale(1.15);
+    }
+
+    .ecom-produit-tuned .btn-outline-secondary {
+        animation: pulseSoft 1.7s ease-in-out infinite;
+    }
+
+    .ecom-produit-tuned .table tbody tr:nth-child(1) { animation-delay: 0.02s; }
+    .ecom-produit-tuned .table tbody tr:nth-child(2) { animation-delay: 0.05s; }
+    .ecom-produit-tuned .table tbody tr:nth-child(3) { animation-delay: 0.08s; }
+    .ecom-produit-tuned .table tbody tr:nth-child(4) { animation-delay: 0.11s; }
+    .ecom-produit-tuned .table tbody tr:nth-child(5) { animation-delay: 0.14s; }
+
+    @keyframes slideDownIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes riseIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes panelIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInSoft {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes rowIn {
+        from { opacity: 0; transform: translateX(8px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulseSoft {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(108, 117, 125, 0.12); }
+        50% { box-shadow: 0 0 0 6px rgba(108, 117, 125, 0.04); }
+    }
+
+    @media (max-width: 768px) {
+        .ecom-produit-tuned .card-header .row > div {
+            width: 100%;
+        }
+    }
+</style>
+
+{% set totalProduits = produits|length %}
+{% set produitsWithImage = 0 %}
+{% for produit in produits %}
+    {% if produit.imageUrl %}
+        {% set produitsWithImage = produitsWithImage + 1 %}
+    {% endif %}
+{% endfor %}
+
+<div class="ecom-produit-tuned">
+    <div class="row mb-3">
+        <div class="col-12 d-sm-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-2 mb-sm-0 ecommerce-admin-header">Produits</h1>
+            <a href="{{ path('ecommerce_admin_produit_new') }}" class="btn btn-sm btn-primary mb-0">Nouveau produit</a>
         </div>
-        <a href="{{ path('ecommerce_admin_produit_new') }}" class="btn btn-primary shadow-sm rounded-pill px-4">
-            <i class="bi bi-plus-circle me-2"></i> Nouveau Produit
-        </a>
     </div>
 
     {% for message in app.flashes('success') %}
@@ -21,108 +141,141 @@
         </div>
     {% endfor %}
 
-    <div class="card ecommerce-admin-card border-0 shadow-sm mb-4">
-        <div class="card-body bg-light rounded-3 p-3">
-            <form method="get" action="{{ path('ecommerce_admin_produit_index') }}" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold small text-uppercase" style="color: #374151 !important;">Recherche</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" name="q" class="form-control border-start-0" value="{{ searchQuery ?? '' }}" placeholder="Nom, description...">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label fw-semibold small text-uppercase" style="color: #374151 !important;">Catégorie</label>
-                    <select name="category" class="form-select">
-                        <option value="">Toutes les catégories</option>
-                        {% for cat in categories %}
-                            <option value="{{ cat.id }}" {{ (filterCategoryId ?? '') == cat.id ? 'selected' : '' }}>{{ cat.nom }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                     <label class="form-label fw-semibold small text-uppercase" style="color: #374151 !important;">Tri</label>
-                     <div class="input-group">
-                        <select name="sort" class="form-select">
-                            <option value="nom" {{ sort == 'nom' ? 'selected' : '' }}>Nom</option>
-                            <option value="prix" {{ sort == 'prix' ? 'selected' : '' }}>Prix</option>
-                        </select>
-                        <select name="order" class="form-select" style="max-width: 80px;">
-                            <option value="ASC" {{ order == 'ASC' ? 'selected' : '' }}>A-Z</option>
-                            <option value="DESC" {{ order == 'DESC' ? 'selected' : '' }}>Z-A</option>
-                        </select>
-                     </div>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-pill"><i class="bi bi-funnel me-1"></i> Filtrer</button>
-                </div>
-            </form>
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-lg-4">
+            <div class="text-center p-4 bg-primary bg-opacity-10 border border-primary rounded-3">
+                <h6>Total Produits</h6>
+                <h2 class="mb-0 fs-1 text-primary">{{ totalProduits }}</h2>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="text-center p-4 bg-success bg-opacity-10 border border-success rounded-3">
+                <h6>Produits avec image</h6>
+                <h2 class="mb-0 fs-1 text-success">{{ produitsWithImage }}</h2>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="text-center p-4 bg-warning bg-opacity-15 border border-warning rounded-3">
+                <h6>Categories disponibles</h6>
+                <h2 class="mb-0 fs-1 text-warning">{{ categories|length }}</h2>
+            </div>
         </div>
     </div>
 
-    <div class="card ecommerce-admin-card border-0 shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-uppercase small" style="color: #1f2937 !important;">
-                    <tr>
-                        <th class="ps-4 py-3 border-0 rounded-start">Produit</th>
-                        <th class="py-3 border-0">Catégorie</th>
-                        <th class="py-3 border-0">Prix</th>
-                        <th class="pe-4 py-3 border-0 rounded-end text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="border-top-0">
-                    {% for produit in produits %}
-                        <tr>
-                            <td class="ps-4 py-3">
-                                <div class="d-flex align-items-center">
-                                    {% if produit.imageUrl %}
-                                        <img src="{{ produit.imageUrl }}" class="rounded-3 shadow-sm me-3 bg-white" alt="" width="48" height="48" style="object-fit: cover;">
-                                    {% else %}
-                                        <div class="rounded-3 bg-light d-flex align-items-center justify-content-center me-3 text-muted" style="width: 48px; height: 48px;">
-                                            <i class="bi bi-image fs-5"></i>
-                                        </div>
-                                    {% endif %}
-                                    <div>
-                                        <div class="fw-bold text-dark">{{ produit.nom }}</div>
-                                        <div class="small text-truncate" style="max-width: 250px; color: #4b5563 !important;">{{ produit.description|striptags }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="py-3">
-                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">{{ produit.category ? produit.category.nom : 'Non classé' }}</span>
-                            </td>
-                            <td class="py-3 fw-bold text-dark">
-                                {{ (produit.prix / 100)|number_format(2, ',', ' ') }} €
-                            </td>
-                            <td class="pe-4 py-3 text-end">
-                                <div class="btn-group">
-                                    <a href="{{ path('ecommerce_admin_produit_edit', { id: produit.id }) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form method="post" action="{{ path('ecommerce_admin_produit_delete', { id: produit.id }) }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ produit.id) }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger border-start-0" title="Supprimer">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center py-5" style="color: #4b5563 !important;">
-                                <div class="mb-3"><i class="bi bi-inbox fs-1" style="opacity: .4;"></i></div>
-                                <p class="mb-0">Aucun produit trouvé.</p>
-                                <a href="{{ path('ecommerce_admin_produit_new') }}" class="btn btn-primary rounded-pill mt-2">Créer un produit</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="card bg-transparent border">
+        <div class="card-header bg-light border-bottom">
+            <form method="get" action="{{ path('ecommerce_admin_produit_index') }}">
+                <div class="row g-3 align-items-center justify-content-between">
+                    <div class="col-md-4">
+                        <div class="rounded position-relative">
+                            <input class="form-control bg-body" type="search" name="q" placeholder="Recherche nom ou description..." aria-label="Search" value="{{ searchQuery ?? '' }}">
+                            <button type="submit" class="btn bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y me-2" aria-label="Rechercher">
+                                <i class="fas fa-search fs-6 text-primary"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="category" class="form-select js-choice border-0 z-index-9">
+                            <option value="">Toutes les categories</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {{ (filterCategoryId ?? '') == cat.id ? 'selected' : '' }}>{{ cat.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="sort" class="form-select js-choice border-0 z-index-9">
+                            <option value="nom" {{ sort == 'nom' ? 'selected' : '' }}>Nom</option>
+                            <option value="prix" {{ sort == 'prix' ? 'selected' : '' }}>Prix</option>
+                            <option value="category" {{ sort == 'category' ? 'selected' : '' }}>Categorie</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="order" class="form-select js-choice border-0 z-index-9">
+                            <option value="ASC" {{ order == 'ASC' ? 'selected' : '' }}>ASC</option>
+                            <option value="DESC" {{ order == 'DESC' ? 'selected' : '' }}>DESC</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 text-md-end">
+                        {% if searchQuery or filterCategoryId or sort != 'nom' or order != 'ASC' %}
+                            <a href="{{ path('ecommerce_admin_produit_index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                        {% else %}
+                            <button type="submit" class="btn btn-sm btn-primary">OK</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+
+            <div class="results-meta mt-2">
+                {{ totalProduits }} resultat(s)
+                {% if searchQuery %}
+                    | recherche: "{{ searchQuery }}"
+                {% endif %}
+                {% if filterCategoryId %}
+                    | categorie: {{ filterCategoryId }}
+                {% endif %}
+                {% if sort %}
+                    | tri: {{ sort }} {{ order }}
+                {% endif %}
+            </div>
         </div>
-        <div class="card-footer bg-white py-3 border-0">
-             <small style="color: #4b5563 !important;">{{ produits|length }} produit(s) affiché(s)</small>
+
+        <div class="card-body">
+            <div class="table-responsive border-0 rounded-3">
+                <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="border-0 rounded-start">Produit</th>
+                            <th scope="col" class="border-0">Categorie</th>
+                            <th scope="col" class="border-0">Prix</th>
+                            <th scope="col" class="border-0 rounded-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produit in produits %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center position-relative">
+                                        <div class="w-60px">
+                                            {% if produit.imageUrl %}
+                                                <img src="{{ produit.imageUrl }}" class="rounded" alt="">
+                                            {% else %}
+                                                <div class="rounded bg-light d-flex align-items-center justify-content-center text-muted" style="width: 56px; height: 56px; border: 1px solid rgba(0, 0, 0, 0.08);">
+                                                    <i class="bi bi-image fs-5"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="ms-2">
+                                            <h6 class="table-responsive-title mb-0">{{ produit.nom }}</h6>
+                                            <div class="small text-truncate" style="max-width: 250px; color: #4b5563 !important;">{{ produit.description|striptags }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="badge text-bg-primary">{{ produit.category ? produit.category.nom : 'Non classe' }}</span></td>
+                                <td class="fw-bold text-dark">{{ (produit.prix / 100)|number_format(2, ',', ' ') }} EUR</td>
+                                <td>
+                                    <a href="{{ path('ecommerce_admin_produit_edit', { id: produit.id }) }}" class="btn btn-sm btn-warning-soft me-1 mb-1 mb-md-0">Modifier</a>
+                                    <form method="post" action="{{ path('ecommerce_admin_produit_delete', { id: produit.id }) }}" style="display:inline;" onsubmit="return confirm('Supprimer ce produit ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ produit.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger-soft mb-0">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4">Aucun produit trouve.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer bg-transparent pt-0">
+            <div class="d-sm-flex justify-content-sm-between align-items-sm-center">
+                <p class="mb-0 text-center text-sm-start">
+                    Affichage de {{ totalProduits }} produit(s)
+                </p>
+            </div>
         </div>
     </div>
 </div>

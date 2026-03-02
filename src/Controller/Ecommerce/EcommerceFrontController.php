@@ -16,13 +16,16 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route('/ecommerce')]
 class EcommerceFrontController extends AbstractController
 {
     private const SESSION_PANIER = 'ecommerce_panier';
+    private const POLLINATIONS_IMAGE_BASE = 'https://gen.pollinations.ai/image';
 
     public function __construct(
         private ProduitRepository $produitRepository,
@@ -30,6 +33,8 @@ class EcommerceFrontController extends AbstractController
         private ReviewRepository $reviewRepository,
         private LigneCommandeRepository $ligneCommandeRepository,
         private EntityManagerInterface $em,
+        private HttpClientInterface $httpClient,
+        private string $pollinationsApiKey = '',
     ) {
     }
 
@@ -92,12 +97,17 @@ class EcommerceFrontController extends AbstractController
         }
 
         $produits = $this->produitRepository->findByFilters($categoryId, $prixMin, $prixMax, $q, $sort, $order);
+        $productImageUrls = [];
+        foreach ($produits as $produit) {
+            $productImageUrls[$produit->getId()] = $this->normalizeImageUrlForPublic($produit->getImageUrl());
+        }
         $categories = $this->categoryProduitRepository->searchAndSort(null, 'nom', 'ASC');
         $ratingByProduit = $this->reviewRepository->getAverageAndCountByProduits($produits);
         $reviewsByProduit = $this->reviewRepository->findApprovedByProduitIdsGrouped($produits, 5);
 
         return $this->render('ecommerce/catalogue.html.twig', [
             'produits' => $produits,
+            'productImageUrls' => $productImageUrls,
             'categories' => $categories,
             'ratingByProduit' => $ratingByProduit,
             'reviewsByProduit' => $reviewsByProduit,
@@ -108,6 +118,82 @@ class EcommerceFrontController extends AbstractController
             'sort' => $sort,
             'order' => $order,
         ]);
+    }
+
+    #[Route('/generated-image', name: 'ecommerce_front_generated_image', methods: ['GET'])]
+    public function generatedImage(Request $request): Response
+    {
+        if ($this->pollinationsApiKey === '') {
+            return new Response('Image generation not configured.', 503);
+        }
+        $prompt = trim((string) $request->query->get('prompt', ''));
+        if ($prompt === '') {
+            return new Response('Missing prompt.', 400);
+        }
+
+        $imagePrompt = $prompt . ', educational product, clean illustration, professional';
+        $encodedPrompt = rawurlencode($imagePrompt);
+        $url = self::POLLINATIONS_IMAGE_BASE . '/' . $encodedPrompt . '?model=flux';
+        $response = $this->httpClient->request('GET', $url, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->pollinationsApiKey,
+            ],
+            'timeout' => 60,
+        ]);
+
+        $statusCode = $response->getStatusCode();
+        if ($statusCode < 200 || $statusCode >= 300) {
+            return new Response('Image generation failed.', $statusCode);
+        }
+
+        $headers = $response->getHeaders(false);
+        $contentType = $headers['content-type'][0] ?? 'image/png';
+        return new StreamedResponse(function () use ($response): void {
+            foreach ($this->httpClient->stream($response) as $chunk) {
+                echo $chunk->getContent();
+                if (ob_get_level()) {
+                    ob_flush();
+                }
+                flush();
+            }
+        }, 200, ['Content-Type' => $contentType]);
+    }
+
+    private function normalizeImageUrlForPublic(?string $imageUrl): ?string
+    {
+        if ($imageUrl === null || $imageUrl === '') {
+            return $imageUrl;
+        }
+
+        $parts = parse_url($imageUrl);
+        if ($parts === false) {
+            return $imageUrl;
+        }
+
+        if (($parts['path'] ?? '') !== '/admin/ecommerce/produits/generated-image') {
+            return $imageUrl;
+        }
+
+        $parts['path'] = '/ecommerce/generated-image';
+        return $this->buildUrlFromParts($parts);
+    }
+
+    /**
+     * @param array<string, mixed> $parts
+     */
+    private function buildUrlFromParts(array $parts): string
+    {
+        $scheme = isset($parts['scheme']) ? $parts['scheme'] . '://' : '';
+        $user = $parts['user'] ?? '';
+        $pass = isset($parts['pass']) ? ':' . $parts['pass'] : '';
+        $auth = $user !== '' ? $user . $pass . '@' : '';
+        $host = $parts['host'] ?? '';
+        $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+        $path = $parts['path'] ?? '';
+        $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+        $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
+
+        return $scheme . $auth . $host . $port . $path . $query . $fragment;
     }
 
     #[Route('/produit/{id}', name: 'ecommerce_produit_show', requirements: ['id' => '\d+'], methods: ['GET'])]
@@ -134,6 +220,7 @@ class EcommerceFrontController extends AbstractController
 
         return $this->render('ecommerce/produit_show.html.twig', [
             'produit' => $produit,
+            'produitImageUrl' => $this->normalizeImageUrlForPublic($produit->getImageUrl()),
             'reviews' => $reviews,
             'avgRating' => $avgRating,
             'reviewCount' => $reviewCount,
@@ -309,6 +396,7 @@ class EcommerceFrontController extends AbstractController
             $total += $sousTotal;
             $items[] = [
                 'produit' => $produit,
+                'image_url' => $this->normalizeImageUrlForPublic($produit->getImageUrl()),
                 'quantite' => $quantite,
                 'sous_total' => $sousTotal,
             ];

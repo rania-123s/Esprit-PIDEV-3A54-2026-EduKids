@@ -3,126 +3,365 @@
 {% block title %}{{ produit.id ? 'Modifier' : 'Nouveau' }} produit - Admin E-commerce{% endblock %}
 
 {% block body %}
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-0 fw-bold ecommerce-admin-header">
-                        <i class="bi bi-basket text-primary me-2"></i> Produits
-                    </h2>
-                    <p class="small mt-1" style="color: #4b5563 !important;">{{ produit.id ? 'Modifier le produit' : 'Créer un nouveau produit' }}</p>
-                </div>
-                <a href="{{ path('ecommerce_admin_produit_index') }}" class="btn btn-outline-secondary btn-lg rounded-pill">
-                    <i class="bi bi-arrow-left me-2"></i> Retour à la liste
-                </a>
-            </div>
+<style>
+    .ecom-create-page {
+        --ink: #0f172a;
+        --muted: #5b667a;
+        --line: #d7dfeb;
+        --brand: #0ea5a3;
+        --brand-dark: #0b7f7d;
+        --hero-a: #0f766e;
+        --hero-b: #155e75;
+        --hero-c: #1d4ed8;
+        font-family: "Heebo", sans-serif;
+    }
+
+    .create-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        margin: 1.75rem 1rem 0;
+        padding: 3.25rem 1.25rem;
+        background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c));
+        color: #fff;
+        box-shadow: 0 24px 60px rgba(2, 44, 34, 0.24);
+    }
+
+    .create-hero::before,
+    .create-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .create-hero::before {
+        width: 240px;
+        height: 240px;
+        right: -70px;
+        top: -70px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.33), rgba(255, 255, 255, 0));
+    }
+
+    .create-hero::after {
+        width: 200px;
+        height: 200px;
+        left: -55px;
+        bottom: -80px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.45), rgba(245, 158, 11, 0));
+    }
+
+    .create-hero h1 {
+        margin: 0;
+        font-size: clamp(1.75rem, 4vw, 2.7rem);
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+
+    .create-hero p {
+        margin: 0.85rem 0 0;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .create-shell {
+        padding: 1.75rem 1rem 2.2rem;
+    }
+
+    .create-card {
+        background: linear-gradient(170deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.96));
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 24px;
+        box-shadow: 0 22px 55px rgba(15, 23, 42, 0.1);
+        backdrop-filter: blur(2px);
+    }
+
+    .create-card .card-body {
+        padding: clamp(1.1rem, 2.8vw, 2.5rem);
+    }
+
+    .info-header {
+        text-align: center;
+        margin-bottom: 1.35rem;
+    }
+
+    .info-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(14, 165, 163, 0.12);
+        color: #0d7e7b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 0.55rem;
+    }
+
+    .create-heading {
+        color: var(--ink);
+        font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+        letter-spacing: 0.2px;
+    }
+
+    .info-subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+    }
+
+    .field-label {
+        color: var(--ink);
+        font-size: 0.94rem;
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+    }
+
+    .form-section {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 16px;
+        background: #fff;
+        padding: 1rem;
+    }
+
+    .form-section-title {
+        margin: 0 0 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-section-title i {
+        color: var(--brand-dark);
+    }
+
+    .modern-input {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 0.82rem 0.95rem;
+        font-size: 0.96rem;
+        color: var(--ink);
+        background: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .modern-input:focus {
+        border-color: rgba(14, 165, 163, 0.65);
+        box-shadow: 0 0 0 4px rgba(14, 165, 163, 0.14);
+        transform: translateY(-1px);
+    }
+
+    .modern-input.is-invalid {
+        border-color: #dc3545;
+        box-shadow: none;
+    }
+
+    .form-note {
+        margin-top: 0.4rem;
+        color: var(--muted);
+        font-size: 0.83rem;
+    }
+
+    .ai-assistant-box {
+        border-style: dashed;
+        border-color: rgba(14, 165, 163, 0.45);
+        background: linear-gradient(180deg, rgba(14, 165, 163, 0.06), rgba(14, 165, 163, 0.02));
+    }
+
+    .create-actions {
+        padding-top: 0.5rem;
+    }
+
+    .btn-create-modern {
+        border: 0;
+        border-radius: 13px;
+        padding: 0.9rem 1.4rem;
+        background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+        color: #fff;
+        font-weight: 700;
+        letter-spacing: 0.15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        box-shadow: 0 14px 28px rgba(11, 127, 125, 0.34);
+    }
+
+    .btn-create-modern:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.02);
+        box-shadow: 0 16px 30px rgba(11, 127, 125, 0.4);
+        color: #fff;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 1rem;
+        color: var(--brand-dark);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        color: #095957;
+        text-decoration: underline;
+    }
+
+    .reveal-up {
+        animation: revealUp 0.45s ease both;
+    }
+
+    .reveal-up.delay-1 {
+        animation-delay: 0.08s;
+    }
+
+    @keyframes revealUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .create-hero {
+            margin: 1rem 0.75rem 0;
+            border-radius: 18px;
+            padding: 2.3rem 1rem;
+        }
+
+        .create-shell {
+            padding: 1rem 0.75rem 1.5rem;
+        }
+    }
+</style>
+
+<section class="ecom-create-page">
+    <div class="create-hero reveal-up">
+        <div class="container">
+            <h1>{{ produit.id ? 'Modifier un produit' : 'Creer un nouveau produit' }}</h1>
+            <p>Renseignez les champs essentiels pour publier rapidement ce produit.</p>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-8 m-auto">
-            <div class="card ecommerce-admin-card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white border-bottom-0 p-4">
-                    <div class="d-flex align-items-center">
-                        {% if produit.imageUrl %}
-                            <img src="{{ produit.imageUrl }}" alt="" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
-                        {% else %}
-                            <div class="avatar-img rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
-                                <i class="bi bi-basket text-primary" style="font-size: 1.5rem;"></i>
+    <div class="create-shell">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xl-9">
+                    <div class="card create-card reveal-up delay-1">
+                        <div class="card-body">
+                            <div class="info-header">
+                                <span class="info-kicker">
+                                    <i class="bi bi-basket"></i>
+                                    Dossier produit
+                                </span>
+                                <h3 class="create-heading">{{ produit.id ? 'Edition du produit' : 'Informations du produit' }}</h3>
+                                <p class="info-subtitle">Completez les informations commerciales et le visuel.</p>
                             </div>
-                        {% endif %}
-                        <div>
-                            <h5 class="mb-0 fw-bold">{{ produit.id ? produit.nom : 'New product' }}</h5>
-                            <p class="mb-0 small" style="color: #4b5563 !important;">{{ produit.id and produit.category ? produit.category.nom : 'Remplissez les champs ci-dessous' }}</p>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="card-body p-4">
-                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
 
-                    <div class="mb-4">
-                        <h6 class="fw-bold text-uppercase small mb-3" style="color: #374151 !important;">
-                            <i class="bi bi-info-circle me-2"></i> Informations de base
-                        </h6>
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Nom du produit</label>
-                                {{ form_widget(form.nom, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Ex: Pack Mathématiques Débutant'}}) }}
-                                {{ form_errors(form.nom) }}
-                                <div class="form-text text-muted small mt-1"><i class="bi bi-info-circle me-1"></i> Contrôle de saisie : obligatoire, entre 3 et 255 caractères.</div>
-                            </div>
-                            <div class="col-12">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <label class="form-label fw-semibold mb-0">Description</label>
-                                    <button type="button" id="btn-generate-description" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-magic me-1"></i> Générer avec l'IA
-                                    </button>
+                            <div class="row g-3 g-md-4">
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-info-circle"></i>
+                                            Informations de base
+                                        </h4>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <label class="field-label">Nom du produit</label>
+                                                {{ form_widget(form.nom, {'attr': {'class': 'modern-input form-control form-control-lg', 'placeholder': 'Ex: Pack Mathematiques debutant'}}) }}
+                                                {{ form_errors(form.nom) }}
+                                                <div class="form-note">Controle: obligatoire, entre 3 et 255 caracteres.</div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <label class="field-label mb-0">Description</label>
+                                                    <button type="button" id="btn-generate-description" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-magic me-1"></i> Generer avec IA
+                                                    </button>
+                                                </div>
+                                                {{ form_widget(form.description, {'attr': {'class': 'modern-input form-control form-control-lg', 'rows': 4, 'placeholder': 'Decrivez le produit...'}}) }}
+                                                {{ form_errors(form.description) }}
+                                                <div class="form-note">Controle: optionnel, maximum 5000 caracteres.</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                {{ form_widget(form.description, {'attr': {'class': 'form-control form-control-lg', 'rows': 4, 'placeholder': 'Décrivez le produit...'}}) }}
-                                {{ form_errors(form.description) }}
-                                <div class="form-text text-muted small mt-1"><i class="bi bi-info-circle me-1"></i> Contrôle de saisie : optionnel, maximum 5000 caractères.</div>
+
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-tag"></i>
+                                            Prix et categorie
+                                        </h4>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="field-label">Prix (en centimes)</label>
+                                                {{ form_widget(form.prix, {'attr': {'class': 'modern-input form-control form-control-lg', 'placeholder': 'Ex: 1999 pour 19,99 EUR'}}) }}
+                                                {{ form_errors(form.prix) }}
+                                                <div class="form-note">Controle: nombre positif ou zero.</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="field-label">Categorie</label>
+                                                {{ form_widget(form.category, {'attr': {'class': 'modern-input form-select form-select-lg'}}) }}
+                                                {{ form_errors(form.category) }}
+                                                <div class="form-note">Controle: selection obligatoire.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-section ai-assistant-box">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-image"></i>
+                                            Visuel
+                                        </h4>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <label class="field-label mb-0">Image (URL)</label>
+                                            <button type="button" id="btn-generate-image" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-image me-1"></i> Generer une image IA
+                                            </button>
+                                        </div>
+                                        {{ form_widget(form.imageUrl, {'attr': {'class': 'modern-input form-control form-control-lg', 'placeholder': 'https://...'}}) }}
+                                        {{ form_errors(form.imageUrl) }}
+                                        <div class="form-note">Controle: optionnel, URL image (max 500 caracteres).</div>
+                                    </div>
+                                </div>
                             </div>
+
+                            <div class="create-actions mt-4 text-center">
+                                <button type="submit" class="btn btn-create-modern w-100">
+                                    <i class="bi bi-save me-2"></i> Enregistrer le produit
+                                </button>
+                            </div>
+
+                            {{ form_end(form) }}
                         </div>
                     </div>
 
-                    <hr class="my-4">
-
-                    <div class="mb-4">
-                        <h6 class="fw-bold text-uppercase small mb-3" style="color: #374151 !important;">
-                            <i class="bi bi-tag me-2"></i> Prix et Catégorie
-                        </h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Prix (en centimes)</label>
-                                {{ form_widget(form.prix, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Ex: 1999 pour 19,99€'}}) }}
-                                {{ form_errors(form.prix) }}
-                                <div class="form-text text-muted small mt-1"><i class="bi bi-info-circle me-1"></i> Contrôle de saisie : obligatoire, nombre positif ou zéro (ex: 1000 = 10,00 €).</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Catégorie</label>
-                                {{ form_widget(form.category, {'attr': {'class': 'form-select form-select-lg'}}) }}
-                                {{ form_errors(form.category) }}
-                                <div class="form-text text-muted small mt-1"><i class="bi bi-info-circle me-1"></i> Contrôle de saisie : une catégorie doit être sélectionnée.</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="mb-4">
-                        <h6 class="fw-bold text-uppercase small mb-3" style="color: #374151 !important;">
-                            <i class="bi bi-image me-2"></i> Visuel
-                        </h6>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label fw-semibold mb-0">Image (URL)</label>
-                            <button type="button" id="btn-generate-image" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-image me-1"></i> Générer une image IA
-                            </button>
-                        </div>
-                        {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'https://...'}}) }}
-                        {{ form_errors(form.imageUrl) }}
-                        <div class="form-text text-muted small mt-1"><i class="bi bi-info-circle me-1"></i> Contrôle de saisie : optionnel, URL de l'image (max 500 caractères).</div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="d-flex gap-2 mt-4 justify-content-end">
-                        <a href="{{ path('ecommerce_admin_produit_index') }}" class="btn btn-lg btn-outline-secondary fw-semibold rounded-pill">
-                            Annuler
+                    <div class="text-center">
+                        <a href="{{ path('ecommerce_admin_produit_index') }}" class="back-link">
+                            <span aria-hidden="true">&larr;</span>
+                            Retour a la liste des produits
                         </a>
-                        <button type="submit" class="btn btn-lg btn-primary fw-semibold px-5 rounded-pill">
-                            <i class="bi bi-save me-2"></i> Enregistrer
-                        </button>
                     </div>
-
-                    {{ form_end(form) }}
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -130,74 +369,67 @@ document.addEventListener('DOMContentLoaded', function() {
     var descInput = document.getElementById('{{ form.description.vars.id }}');
     var imageInput = document.getElementById('{{ form.imageUrl.vars.id }}');
 
-    // Client-side Validation
     var form = document.querySelector('form[name="{{ form.vars.name }}"]');
     if (form) {
         form.addEventListener('submit', function(e) {
             var isValid = true;
             var errorMessages = [];
-            
-            // Clear previous errors
-            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-            document.querySelectorAll('.form-error-message').forEach(el => el.remove());
 
-            // Validate Name
+            document.querySelectorAll('.is-invalid').forEach(function(el) { el.classList.remove('is-invalid'); });
+            document.querySelectorAll('.form-error-message').forEach(function(el) { el.remove(); });
+
             if (nomInput && (nomInput.value.trim().length < 3)) {
                 isValid = false;
-                errorMessages.push("Le nom du produit doit contenir au moins 3 caractères.");
+                errorMessages.push("Le nom du produit doit contenir au moins 3 caracteres.");
                 nomInput.classList.add('is-invalid');
             }
 
-            // Validate Price
             var prixInput = document.getElementById('{{ form.prix.vars.id }}');
             if (prixInput) {
                 var prixVal = prixInput.value;
                 if (prixVal === '' || isNaN(prixVal) || parseFloat(prixVal) < 0) {
                     isValid = false;
-                    errorMessages.push("Le prix doit être un nombre positif (en centimes).");
+                    errorMessages.push("Le prix doit etre un nombre positif (en centimes).");
                     prixInput.classList.add('is-invalid');
                 }
             }
-            
-            // Validate Category
+
             var categoryInput = document.getElementById('{{ form.category.vars.id }}');
             if (categoryInput && categoryInput.value === '') {
                 isValid = false;
-                errorMessages.push("Veuillez sélectionner une catégorie.");
+                errorMessages.push("Veuillez selectionner une categorie.");
                 categoryInput.classList.add('is-invalid');
             }
 
             if (!isValid) {
                 e.preventDefault();
-                // Create Alert
                 var alertHtml = '<div class="alert alert-danger alert-dismissible fade show form-error-message" role="alert">' +
                                 '<i class="bi bi-exclamation-triangle-fill me-2"></i>' +
                                 '<strong>Veuillez corriger les erreurs suivantes :</strong><br>' +
                                 '<ul class="mb-0 mt-1"><li>' + errorMessages.join('</li><li>') + '</li></ul>' +
                                 '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
                                 '</div>';
-                
+
                 var container = form.closest('.card-body');
                 var existingAlert = container.querySelector('.alert.alert-danger');
                 if (existingAlert) existingAlert.remove();
-                
+
                 container.insertAdjacentHTML('afterbegin', alertHtml);
                 container.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     }
 
-    // Generate description
     var btnDesc = document.getElementById('btn-generate-description');
     if (btnDesc && nomInput && descInput) {
         btnDesc.addEventListener('click', function() {
             var title = (nomInput.value || '').trim();
             if (!title) {
-                alert('Veuillez d\'abord saisir le nom du produit.');
+                alert('Veuillez d abord saisir le nom du produit.');
                 return;
             }
             btnDesc.disabled = true;
-            btnDesc.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Génération...';
+            btnDesc.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Generation...';
             fetch('{{ path('ecommerce_admin_produit_generate_description') }}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
@@ -210,25 +442,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 if (data.error) alert(data.error);
             })
-            .catch(function() { alert('Erreur lors de la génération.'); })
+            .catch(function() { alert('Erreur lors de la generation.'); })
             .finally(function() {
                 btnDesc.disabled = false;
-                btnDesc.innerHTML = '<i class="bi bi-magic me-1"></i> Générer avec l\'IA';
+                btnDesc.innerHTML = '<i class="bi bi-magic me-1"></i> Generer avec IA';
             });
         });
     }
 
-    // Generate image URL (Pollinations.ai)
     var btnImage = document.getElementById('btn-generate-image');
     if (btnImage && nomInput && imageInput) {
         btnImage.addEventListener('click', function() {
             var prompt = (nomInput.value || '').trim();
             if (!prompt) {
-                alert('Veuillez d\'abord saisir le nom du produit.');
+                alert('Veuillez d abord saisir le nom du produit.');
                 return;
             }
             btnImage.disabled = true;
-            btnImage.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Génération...';
+            btnImage.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Generation...';
             fetch('{{ path('ecommerce_admin_produit_generate_image_url') }}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
@@ -241,10 +472,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 if (data.error) alert(data.error);
             })
-            .catch(function() { alert('Erreur lors de la génération de l\'image.'); })
+            .catch(function() { alert('Erreur lors de la generation de l image.'); })
             .finally(function() {
                 btnImage.disabled = false;
-                btnImage.innerHTML = '<i class="bi bi-image me-1"></i> Générer une image IA';
+                btnImage.innerHTML = '<i class="bi bi-image me-1"></i> Generer une image IA';
             });
         });
     }

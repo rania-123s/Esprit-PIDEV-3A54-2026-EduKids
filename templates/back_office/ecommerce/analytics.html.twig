@@ -3,80 +3,163 @@
 {% block title %}Tableau de bord - Admin E-commerce{% endblock %}
 
 {% block body %}
-<div class="container-fluid py-4">
-    <h1 class="h3 fw-bold mb-0 ecommerce-admin-header"><i class="bi bi-graph-up me-2 text-primary"></i>Tableau de bord</h1>
-    <p class="small mb-4" style="color: #4b5563 !important;">KPIs, ventes et top produits.</p>
+<style>
+    .ecom-analytics-tuned .card {
+        border-radius: 14px;
+        overflow: hidden;
+        animation: panelIn 0.45s ease both;
+    }
 
-    {# KPIs #}
-    <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-xl-3">
-            <div class="card ecommerce-admin-card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <h6 class="text-uppercase small fw-semibold mb-2" style="color: #6b7280 !important;">Commandes ce mois</h6>
-                    <h3 class="mb-0 fw-bold" style="color: #1f2937 !important;">{{ ordersThisMonth }}</h3>
-                    <small class="text-muted">Mois dernier : {{ ordersLastMonth }}</small>
+    .ecom-analytics-tuned .card-header {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .ecom-analytics-tuned .table thead th {
+        font-weight: 700;
+        letter-spacing: 0.2px;
+    }
+
+    .ecom-analytics-tuned .row.mb-3 {
+        animation: slideDownIn 0.45s ease both;
+    }
+
+    .ecom-analytics-tuned .row.g-4.mb-4 > div {
+        animation: riseIn 0.45s ease both;
+    }
+
+    .ecom-analytics-tuned .row.g-4.mb-4 > div:nth-child(2) {
+        animation-delay: 0.08s;
+    }
+
+    .ecom-analytics-tuned .row.g-4.mb-4 > div:nth-child(3) {
+        animation-delay: 0.16s;
+    }
+
+    .ecom-analytics-tuned .row.g-4.mb-4 > div:nth-child(4) {
+        animation-delay: 0.24s;
+    }
+
+    @keyframes slideDownIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes riseIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes panelIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+{% set statusesTotal = 0 %}
+{% for row in ordersByStatus %}
+    {% set statusesTotal = statusesTotal + row.count %}
+{% endfor %}
+
+<div class="ecom-analytics-tuned">
+    <div class="row mb-3">
+        <div class="col-12 d-sm-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-2 mb-sm-0 ecommerce-admin-header">Tableau de bord</h1>
+            <a href="{{ path('ecommerce_admin_export') }}" class="btn btn-sm btn-primary mb-0">Exporter commandes</a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="text-center p-4 bg-primary bg-opacity-10 border border-primary rounded-3">
+                <h6>Commandes ce mois</h6>
+                <h2 class="mb-0 fs-1 text-primary">{{ ordersThisMonth }}</h2>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="text-center p-4 bg-success bg-opacity-10 border border-success rounded-3">
+                <h6>CA ce mois</h6>
+                <h2 class="mb-0 fs-1 text-success">{{ (revenueThisMonth / 100)|number_format(2, ',', ' ') }} EUR</h2>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="text-center p-4 bg-warning bg-opacity-15 border border-warning rounded-3">
+                <h6>Commandes mois dernier</h6>
+                <h2 class="mb-0 fs-1 text-warning">{{ ordersLastMonth }}</h2>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="text-center p-4 bg-info bg-opacity-10 border border-info rounded-3">
+                <h6>CA mois dernier</h6>
+                <h2 class="mb-0 fs-1 text-info">{{ (revenueLastMonth / 100)|number_format(2, ',', ' ') }} EUR</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-transparent border mb-4">
+        <div class="card-header bg-light border-bottom">
+            <div class="row g-3 align-items-center justify-content-between">
+                <div class="col-md-9">
+                    <div class="small text-muted">
+                        {{ statusesTotal }} commande(s) cumulee(s) par statut
+                    </div>
+                </div>
+                <div class="col-md-3 text-md-end">
+                    <a href="{{ path('ecommerce_admin_export') }}" class="btn btn-sm btn-outline-secondary">Export CSV</a>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card ecommerce-admin-card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <h6 class="text-uppercase small fw-semibold mb-2" style="color: #6b7280 !important;">Chiffre d'affaires ce mois</h6>
-                    <h3 class="mb-0 fw-bold text-primary">{{ (revenueThisMonth / 100)|number_format(2, ',', ' ') }} €</h3>
-                    <small class="text-muted">Mois dernier : {{ (revenueLastMonth / 100)|number_format(2, ',', ' ') }} €</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card ecommerce-admin-card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <h6 class="text-uppercase small fw-semibold mb-2" style="color: #6b7280 !important;">Commandes par statut</h6>
-                    <ul class="list-unstyled mb-0 small">
+        <div class="card-body">
+            <div class="table-responsive border-0 rounded-3">
+                <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="border-0 rounded-start">Statut</th>
+                            <th scope="col" class="border-0 rounded-end">Nombre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         {% for row in ordersByStatus %}
-                            <li class="d-flex justify-content-between"><span style="color: #4b5563 !important;">{{ row.statut }}</span><strong>{{ row.count }}</strong></li>
+                            <tr>
+                                <td>{{ row.statut }}</td>
+                                <td class="fw-bold">{{ row.count }}</td>
+                            </tr>
                         {% else %}
-                            <li style="color: #4b5563 !important;">Aucune</li>
+                            <tr>
+                                <td colspan="2">Aucune commande.</td>
+                            </tr>
                         {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card ecommerce-admin-card border-0 shadow-sm h-100">
-                <div class="card-body d-flex flex-column justify-content-center">
-                    <a href="{{ path('ecommerce_admin_export') }}" class="btn btn-outline-primary rounded-pill"><i class="bi bi-download me-2"></i>Exporter les commandes (CSV)</a>
-                </div>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <div class="row g-4">
-        {# Chart - Sales last 30 days #}
         <div class="col-lg-8">
-            <div class="card ecommerce-admin-card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 py-3">
-                    <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">Ventes (30 derniers jours)</h5>
+            <div class="card bg-transparent border">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 fw-bold">Ventes (30 derniers jours)</h5>
                 </div>
                 <div class="card-body">
-                    <div id="chartSales" style="min-height: 280px;"></div>
+                    <div id="chartSales" style="min-height: 320px;"></div>
                 </div>
             </div>
         </div>
-        {# Top products #}
         <div class="col-lg-4">
-            <div class="card ecommerce-admin-card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 py-3">
-                    <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">Top 10 produits</h5>
+            <div class="card bg-transparent border">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 fw-bold">Top 10 produits</h5>
                 </div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush">
                         {% for row in topProduits %}
                             <li class="list-group-item d-flex justify-content-between align-items-center border-0">
-                                <span class="fw-semibold text-truncate" style="max-width: 180px; color: #374151 !important;" title="{{ row.produit ? row.produit.nom : 'Produit #' ~ row.produit.id }}">{{ row.produit ? row.produit.nom : 'N/A' }}</span>
+                                <span class="fw-semibold text-truncate" style="max-width: 180px;" title="{{ row.produit ? row.produit.nom : 'N/A' }}">{{ row.produit ? row.produit.nom : 'N/A' }}</span>
                                 <span class="badge bg-primary rounded-pill">{{ row.qty }} vendus</span>
                             </li>
                         {% else %}
-                            <li class="list-group-item border-0" style="color: #4b5563 !important;">Aucune vente.</li>
+                            <li class="list-group-item border-0 text-muted">Aucune vente.</li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -91,12 +174,12 @@ document.addEventListener('DOMContentLoaded', function() {
     var salesLabels = {{ salesLabels|json_encode|raw }};
     var salesValues = {{ salesValues|json_encode|raw }};
     var options = {
-        series: [{ name: 'CA (€)', data: salesValues.map(function(v) { return Math.round(v / 100 * 100) / 100; }) }],
-        chart: { type: 'area', height: 280, toolbar: { show: false } },
+        series: [{ name: 'CA (EUR)', data: salesValues.map(function(v) { return Math.round(v / 100 * 100) / 100; }) }],
+        chart: { type: 'area', height: 320, toolbar: { show: false } },
         dataLabels: { enabled: false },
         stroke: { curve: 'smooth', width: 2 },
         xaxis: { categories: salesLabels },
-        yaxis: { labels: { formatter: function(v) { return v + ' €'; } } },
+        yaxis: { labels: { formatter: function(v) { return v + ' EUR'; } } },
         colors: ['#0d6efd'],
         fill: { type: 'gradient', opacity: 0.3 }
     };

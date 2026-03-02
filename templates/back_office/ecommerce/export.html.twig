@@ -3,40 +3,315 @@
 {% block title %}Exporter les commandes - Admin E-commerce{% endblock %}
 
 {% block body %}
-<div class="container-fluid py-4">
-    <h1 class="h3 fw-bold mb-0 ecommerce-admin-header"><i class="bi bi-download me-2 text-primary"></i>Exporter les commandes</h1>
-    <p class="small mb-4" style="color: #4b5563 !important;">Filtrez par période et statut, puis téléchargez au format CSV.</p>
+<style>
+    .ecom-create-page {
+        --ink: #0f172a;
+        --muted: #5b667a;
+        --line: #d7dfeb;
+        --brand: #0ea5a3;
+        --brand-dark: #0b7f7d;
+        --hero-a: #0f766e;
+        --hero-b: #155e75;
+        --hero-c: #1d4ed8;
+        font-family: "Heebo", sans-serif;
+    }
 
-    <div class="card ecommerce-admin-card border-0 shadow-sm" style="max-width: 560px;">
-        <div class="card-body p-4">
-            <form method="get" action="{{ path('ecommerce_admin_export') }}" class="row g-3">
-                <input type="hidden" name="format" value="csv">
-                <div class="col-12">
-                    <label class="form-label fw-semibold" style="color: #374151 !important;">Date de début</label>
-                    <input type="date" name="date_from" class="form-control" value="{{ date_from ?? '' }}">
-                </div>
-                <div class="col-12">
-                    <label class="form-label fw-semibold" style="color: #374151 !important;">Date de fin</label>
-                    <input type="date" name="date_to" class="form-control" value="{{ date_to ?? '' }}">
-                </div>
-                <div class="col-12">
-                    <label class="form-label fw-semibold" style="color: #374151 !important;">Statut</label>
-                    <select name="status" class="form-select">
-                        <option value="">Tous les statuts</option>
-                        <option value="en_attente" {{ status == 'en_attente' ? 'selected' : '' }}>En attente</option>
-                        <option value="paye" {{ status == 'paye' ? 'selected' : '' }}>Payé</option>
-                        <option value="confirme" {{ status == 'confirme' ? 'selected' : '' }}>Confirmé</option>
-                        <option value="livre" {{ status == 'livre' ? 'selected' : '' }}>Livré</option>
-                        <option value="annule" {{ status == 'annule' ? 'selected' : '' }}>Annulé</option>
-                        <option value="rejete" {{ status == 'rejete' ? 'selected' : '' }}>Rejeté</option>
-                    </select>
-                </div>
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Télécharger le CSV</button>
-                    <a href="{{ path('ecommerce_admin_analytics') }}" class="btn btn-outline-secondary rounded-pill ms-2">Retour</a>
-                </div>
-            </form>
+    .create-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        margin: 1.75rem 1rem 0;
+        padding: 3.25rem 1.25rem;
+        background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c));
+        color: #fff;
+        box-shadow: 0 24px 60px rgba(2, 44, 34, 0.24);
+    }
+
+    .create-hero::before,
+    .create-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .create-hero::before {
+        width: 240px;
+        height: 240px;
+        right: -70px;
+        top: -70px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.33), rgba(255, 255, 255, 0));
+    }
+
+    .create-hero::after {
+        width: 200px;
+        height: 200px;
+        left: -55px;
+        bottom: -80px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.45), rgba(245, 158, 11, 0));
+    }
+
+    .create-hero h1 {
+        margin: 0;
+        font-size: clamp(1.75rem, 4vw, 2.7rem);
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+
+    .create-hero p {
+        margin: 0.85rem 0 0;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .create-shell {
+        padding: 1.75rem 1rem 2.2rem;
+    }
+
+    .create-card {
+        background: linear-gradient(170deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.96));
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 24px;
+        box-shadow: 0 22px 55px rgba(15, 23, 42, 0.1);
+        backdrop-filter: blur(2px);
+    }
+
+    .create-card .card-body {
+        padding: clamp(1.1rem, 2.8vw, 2.5rem);
+    }
+
+    .info-header {
+        text-align: center;
+        margin-bottom: 1.35rem;
+    }
+
+    .info-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(14, 165, 163, 0.12);
+        color: #0d7e7b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 0.55rem;
+    }
+
+    .create-heading {
+        color: var(--ink);
+        font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+        letter-spacing: 0.2px;
+    }
+
+    .info-subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+    }
+
+    .field-label {
+        color: var(--ink);
+        font-size: 0.94rem;
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+    }
+
+    .form-section {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 16px;
+        background: #fff;
+        padding: 1rem;
+    }
+
+    .form-section-title {
+        margin: 0 0 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-section-title i {
+        color: var(--brand-dark);
+    }
+
+    .modern-input {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 0.82rem 0.95rem;
+        font-size: 0.96rem;
+        color: var(--ink);
+        background: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .modern-input:focus {
+        border-color: rgba(14, 165, 163, 0.65);
+        box-shadow: 0 0 0 4px rgba(14, 165, 163, 0.14);
+        transform: translateY(-1px);
+    }
+
+    .form-note {
+        margin-top: 0.4rem;
+        color: var(--muted);
+        font-size: 0.83rem;
+    }
+
+    .create-actions {
+        padding-top: 0.5rem;
+    }
+
+    .btn-create-modern {
+        border: 0;
+        border-radius: 13px;
+        padding: 0.9rem 1.4rem;
+        background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+        color: #fff;
+        font-weight: 700;
+        letter-spacing: 0.15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        box-shadow: 0 14px 28px rgba(11, 127, 125, 0.34);
+    }
+
+    .btn-create-modern:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.02);
+        box-shadow: 0 16px 30px rgba(11, 127, 125, 0.4);
+        color: #fff;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 1rem;
+        color: var(--brand-dark);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        color: #095957;
+        text-decoration: underline;
+    }
+
+    .reveal-up {
+        animation: revealUp 0.45s ease both;
+    }
+
+    .reveal-up.delay-1 {
+        animation-delay: 0.08s;
+    }
+
+    @keyframes revealUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .create-hero {
+            margin: 1rem 0.75rem 0;
+            border-radius: 18px;
+            padding: 2.3rem 1rem;
+        }
+
+        .create-shell {
+            padding: 1rem 0.75rem 1.5rem;
+        }
+    }
+</style>
+
+<section class="ecom-create-page">
+    <div class="create-hero reveal-up">
+        <div class="container">
+            <h1>Exporter les commandes</h1>
+            <p>Filtrez par periode et statut, puis telechargez le rapport CSV.</p>
         </div>
     </div>
-</div>
+
+    <div class="create-shell">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-9 col-xl-8">
+                    <div class="card create-card reveal-up delay-1">
+                        <div class="card-body">
+                            <div class="info-header">
+                                <span class="info-kicker">
+                                    <i class="bi bi-file-earmark-spreadsheet"></i>
+                                    Export commandes
+                                </span>
+                                <h3 class="create-heading">Parametres d export</h3>
+                                <p class="info-subtitle">Choisissez la plage de dates et le statut avant de lancer le telechargement.</p>
+                            </div>
+
+                            <form method="get" action="{{ path('ecommerce_admin_export') }}" class="needs-validation" novalidate>
+                                <input type="hidden" name="format" value="csv">
+
+                                <div class="row g-3 g-md-4">
+                                    <div class="col-12">
+                                        <div class="form-section">
+                                            <h4 class="form-section-title">
+                                                <i class="bi bi-funnel"></i>
+                                                Filtres
+                                            </h4>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="field-label">Date de debut</label>
+                                                    <input type="date" name="date_from" class="modern-input form-control" value="{{ date_from ?? '' }}">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="field-label">Date de fin</label>
+                                                    <input type="date" name="date_to" class="modern-input form-control" value="{{ date_to ?? '' }}">
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="field-label">Statut</label>
+                                                    <select name="status" class="modern-input form-select">
+                                                        <option value="">Tous les statuts</option>
+                                                        <option value="en_attente" {{ status == 'en_attente' ? 'selected' : '' }}>En attente</option>
+                                                        <option value="paye" {{ status == 'paye' ? 'selected' : '' }}>Paye</option>
+                                                        <option value="confirme" {{ status == 'confirme' ? 'selected' : '' }}>Confirme</option>
+                                                        <option value="livre" {{ status == 'livre' ? 'selected' : '' }}>Livre</option>
+                                                        <option value="annule" {{ status == 'annule' ? 'selected' : '' }}>Annule</option>
+                                                        <option value="rejete" {{ status == 'rejete' ? 'selected' : '' }}>Rejete</option>
+                                                    </select>
+                                                    <div class="form-note">Laissez vide pour exporter toutes les commandes.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="create-actions mt-4 text-center">
+                                    <button type="submit" class="btn btn-create-modern w-100">
+                                        <i class="bi bi-download me-2"></i> Telecharger le CSV
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="{{ path('ecommerce_admin_analytics') }}" class="back-link">
+                            <span aria-hidden="true">&larr;</span>
+                            Retour au tableau de bord
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

@@ -1,26 +1,188 @@
 {% extends 'base_frontoffice.html.twig' %}
 
 {% block body %}
+<style>
+	.home-page {
+		--home-ink: #12213a;
+		--home-accent: #ff8a2b;
+		--home-accent-deep: #e86a07;
+		--home-soft: #ffffff;
+		--home-line: #dbe6f3;
+		background:
+			radial-gradient(circle at 12% 10%, rgba(255, 138, 43, 0.18) 0%, rgba(255, 138, 43, 0) 38%),
+			radial-gradient(circle at 92% 14%, rgba(34, 170, 190, 0.16) 0%, rgba(34, 170, 190, 0) 34%),
+			linear-gradient(170deg, #f5f9ff 0%, #eef7f2 100%);
+		color: var(--home-ink);
+	}
+
+	.home-page .home-hero-card {
+		position: relative;
+		overflow: hidden;
+		border: 0;
+		box-shadow: 0 28px 60px rgba(10, 34, 62, 0.35);
+		background:
+			linear-gradient(135deg, rgba(10, 33, 60, 0.9) 0%, rgba(17, 58, 95, 0.9) 58%, rgba(22, 77, 113, 0.86) 100%),
+			url('{{ asset('assets/images/pattern/05.png') }}') center center / cover no-repeat;
+	}
+
+	.home-page .home-hero-card::after {
+		content: "";
+		position: absolute;
+		inset: auto -70px -95px auto;
+		width: 230px;
+		height: 230px;
+		border-radius: 50%;
+		background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
+	}
+
+	.home-page .home-hero-card .card-body {
+		position: relative;
+		z-index: 2;
+	}
+
+	.home-page .home-hero-card .badge {
+		backdrop-filter: blur(2px);
+	}
+
+	.home-page .home-hero-section .btn-warning {
+		background: linear-gradient(135deg, var(--home-accent) 0%, #ffb347 100%);
+		border-color: transparent;
+		box-shadow: 0 12px 28px rgba(255, 138, 43, 0.35);
+	}
+
+	.home-page .home-hero-section .btn-warning:hover {
+		background: linear-gradient(135deg, var(--home-accent-deep) 0%, #f59d31 100%);
+		transform: translateY(-1px);
+	}
+
+	.home-page .home-hero-section .btn-outline-white {
+		background: rgba(255, 255, 255, 0.1);
+		border-color: rgba(255, 255, 255, 0.75);
+	}
+
+	.home-page .home-stats-section .col-sm-6 > div {
+		background: var(--home-soft) !important;
+		border: 1px solid var(--home-line);
+		border-radius: 1rem !important;
+		box-shadow: 0 12px 26px rgba(15, 36, 62, 0.08);
+		transition: transform 0.28s ease, box-shadow 0.28s ease;
+	}
+
+	.home-page .home-stats-section .col-sm-6 > div:hover {
+		transform: translateY(-4px);
+		box-shadow: 0 18px 34px rgba(15, 36, 62, 0.14);
+	}
+
+	.home-page .home-events-section .card {
+		border: 1px solid #e5edf8;
+		border-radius: 1rem;
+		overflow: hidden;
+		box-shadow: 0 14px 32px rgba(13, 35, 61, 0.08) !important;
+		transition: transform 0.28s ease, box-shadow 0.28s ease;
+	}
+
+	.home-page .home-events-section .card:hover {
+		transform: translateY(-6px);
+		box-shadow: 0 24px 44px rgba(13, 35, 61, 0.16) !important;
+	}
+
+	.home-page .home-events-section .card-img-top {
+		height: 180px;
+		object-fit: cover;
+	}
+
+	.home-page .home-events-section .card-title a {
+		color: var(--home-ink);
+		transition: color 0.2s ease;
+	}
+
+	.home-page .home-events-section .card-title a:hover {
+		color: var(--home-accent-deep);
+	}
+
+	.home-page .home-events-section .btn-primary-soft {
+		background: linear-gradient(135deg, #fef1e4 0%, #ffe7c7 100%);
+		border: 1px solid #ffd4a0;
+		color: #8f4a00;
+	}
+
+	.home-page .home-events-section .btn-primary-soft:hover {
+		background: linear-gradient(135deg, #ffe4bd 0%, #ffd295 100%);
+		color: #703a00;
+	}
+
+	.home-page .home-cta-card {
+		border: 0;
+		box-shadow: 0 24px 50px rgba(15, 41, 70, 0.28);
+		background:
+			linear-gradient(140deg, rgba(22, 93, 150, 0.95) 0%, rgba(14, 133, 177, 0.92) 52%, rgba(22, 167, 146, 0.92) 100%),
+			url('{{ asset('assets/images/pattern/05.png') }}') center center / cover no-repeat;
+	}
+
+	@keyframes homeFadeUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.home-page .home-hero-section .col-12,
+	.home-page .home-stats-section .col-sm-6,
+	.home-page .home-events-section .col-sm-6,
+	.home-page .home-cta-section .col-12 {
+		animation: homeFadeUp 0.7s ease both;
+	}
+
+	.home-page .home-stats-section .col-sm-6:nth-child(2),
+	.home-page .home-events-section .col-sm-6:nth-child(2) {
+		animation-delay: 0.08s;
+	}
+
+	.home-page .home-stats-section .col-sm-6:nth-child(3),
+	.home-page .home-events-section .col-sm-6:nth-child(3) {
+		animation-delay: 0.16s;
+	}
+
+	.home-page .home-stats-section .col-sm-6:nth-child(4),
+	.home-page .home-events-section .col-sm-6:nth-child(4) {
+		animation-delay: 0.24s;
+	}
+
+	@media (max-width: 991.98px) {
+		.home-page .home-hero-card,
+		.home-page .home-cta-card {
+			border-radius: 1.2rem !important;
+		}
+
+		.home-page .home-events-section .card-img-top {
+			height: 200px;
+		}
+	}
+</style>
+<div class="home-page">
 <!-- =======================
 Main Banner START -->
-<section class="pt-0">
-	<div class="container">
-		<div class="row">
-			<div class="col-12">
-				<!-- Card START -->
-				<div class="card bg-dark rounded-3 p-4 p-sm-5 mt-4" style="background:url({{ asset('assets/images/pattern/05.png') }}) no-repeat center center; background-size:cover;">
-					<div class="card-body">
-						<div class="row align-items-center">
+<section class="home-hero-section pt-0">
+		<div class="container">
+			<div class="row">
+				<div class="col-12">
+					<!-- Card START -->
+					<div class="card bg-dark rounded-3 p-4 p-sm-5 mt-4 home-hero-card">
+						<div class="card-body">
+							<div class="row align-items-center">
 							<!-- Left content START -->
 							<div class="col-lg-7">
 								<!-- Badge -->
 								<span class="badge bg-primary bg-opacity-10 text-primary mb-3"><i class="bi bi-calendar-event me-2"></i>Events Platform</span>
 								<!-- Title -->
-								<h1 class="text-white display-5 mb-3">Discover Amazing <span class="text-warning">Events</span></h1>
-								<p class="text-white">Find and attend the best events in your area. From conferences to workshops, we have something for everyone.</p>
+								<h1 class="text-white display-5 mb-3">Discover Our <span class="text-warning">Platform</span></h1>
+								<p class="text-white">Explore our all-in-one platform for events, courses, quizzes, and e-commerce, designed to support every learner and family.</p>
 								<!-- Button -->
 								<div class="d-sm-flex align-items-center mt-4">
-									<a href="#events" class="btn btn-warning me-2 mb-2 mb-sm-0">Explore Events</a>
 									<a href="#" class="btn btn-outline-white mb-0">Learn More</a>
 								</div>
 							</div>
@@ -44,9 +206,9 @@ Main Banner END -->
 
 <!-- =======================
 Counter boxes START -->
-<section class="pt-0 pt-md-5">
-	<div class="container">
-		<div class="row g-4">
+<section class="home-stats-section pt-0 pt-md-5">
+		<div class="container">
+			<div class="row g-4">
 			<!-- Counter item -->
 			<div class="col-sm-6 col-xl-3">
 				<div class="d-flex justify-content-center align-items-center p-4 bg-warning bg-opacity-15 rounded-3">
@@ -108,123 +270,15 @@ Counter boxes START -->
 <!-- =======================
 Counter boxes END -->
 
-<!-- =======================
-Upcoming Events START -->
-<section id="events">
-	<div class="container">
-		<!-- Title -->
-		<div class="row mb-4">
-			<div class="col-lg-8 mx-auto text-center">
-				<h2 class="fs-1"><span class="text-warning">Upcoming</span> Events</h2>
-				<p class="mb-0">Discover our latest events and join us for amazing experiences.</p>
-			</div>
-		</div>
-
-		<!-- Events grid -->
-		<div class="row g-4">
-			<!-- Event item -->
-			<div class="col-sm-6 col-lg-4 col-xl-3">
-				<div class="card shadow h-100">
-					<img src="{{ asset('assets/images/event/01.jpg') }}" class="card-img-top" alt="event image">
-					<div class="card-body pb-0">
-						<div class="d-flex justify-content-between mb-2">
-							<span class="badge bg-purple bg-opacity-10 text-purple"><i class="bi bi-calendar-event me-2"></i>Feb 15, 2026</span>
-						</div>
-						<h5 class="card-title"><a href="#">Annual Science Fair</a></h5>
-						<p class="text-truncate-2">Join us for an exciting science fair showcasing innovative projects.</p>
-					</div>
-					<div class="card-footer pt-0 bg-transparent">
-						<hr>
-						<div class="d-flex justify-content-between">
-							<span class="small"><i class="bi bi-geo-alt me-1"></i>Main Hall</span>
-							<span class="small"><i class="bi bi-people me-1"></i>200+ participants</span>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Event item -->
-			<div class="col-sm-6 col-lg-4 col-xl-3">
-				<div class="card shadow h-100">
-					<img src="{{ asset('assets/images/event/02.jpg') }}" class="card-img-top" alt="event image">
-					<div class="card-body pb-0">
-						<div class="d-flex justify-content-between mb-2">
-							<span class="badge bg-success bg-opacity-10 text-success"><i class="bi bi-calendar-event me-2"></i>Feb 20, 2026</span>
-						</div>
-						<h5 class="card-title"><a href="#">Tech Innovation Summit</a></h5>
-						<p class="text-truncate-2">Explore the latest trends in technology and innovation.</p>
-					</div>
-					<div class="card-footer pt-0 bg-transparent">
-						<hr>
-						<div class="d-flex justify-content-between">
-							<span class="small"><i class="bi bi-geo-alt me-1"></i>Conference Room A</span>
-							<span class="small"><i class="bi bi-people me-1"></i>150+ participants</span>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Event item -->
-			<div class="col-sm-6 col-lg-4 col-xl-3">
-				<div class="card shadow h-100">
-					<img src="{{ asset('assets/images/event/03.jpg') }}" class="card-img-top" alt="event image">
-					<div class="card-body pb-0">
-						<div class="d-flex justify-content-between mb-2">
-							<span class="badge bg-warning bg-opacity-10 text-warning"><i class="bi bi-calendar-event me-2"></i>Mar 5, 2026</span>
-						</div>
-						<h5 class="card-title"><a href="#">Art & Culture Exhibition</a></h5>
-						<p class="text-truncate-2">Experience beautiful artworks from talented artists.</p>
-					</div>
-					<div class="card-footer pt-0 bg-transparent">
-						<hr>
-						<div class="d-flex justify-content-between">
-							<span class="small"><i class="bi bi-geo-alt me-1"></i>Art Gallery</span>
-							<span class="small"><i class="bi bi-people me-1"></i>100+ participants</span>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Event item -->
-			<div class="col-sm-6 col-lg-4 col-xl-3">
-				<div class="card shadow h-100">
-					<img src="{{ asset('assets/images/event/04.jpg') }}" class="card-img-top" alt="event image">
-					<div class="card-body pb-0">
-						<div class="d-flex justify-content-between mb-2">
-							<span class="badge bg-info bg-opacity-10 text-info"><i class="bi bi-calendar-event me-2"></i>Mar 15, 2026</span>
-						</div>
-						<h5 class="card-title"><a href="#">Sports Championship</a></h5>
-						<p class="text-truncate-2">Compete in various sports activities and win exciting prizes.</p>
-					</div>
-					<div class="card-footer pt-0 bg-transparent">
-						<hr>
-						<div class="d-flex justify-content-between">
-							<span class="small"><i class="bi bi-geo-alt me-1"></i>Sports Complex</span>
-							<span class="small"><i class="bi bi-people me-1"></i>300+ participants</span>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Button -->
-		<div class="text-center mt-5">
-			<a href="#" class="btn btn-primary-soft mb-0">View All Events<i class="bi bi-arrow-right ms-2"></i></a>
-		</div>
-	</div>
-</section>
-<!-- =======================
-Upcoming Events END -->
-
-<!-- =======================
-CTA START -->
-<section class="pt-0 pt-md-5">
-	<div class="container">
-		<div class="row">
-			<div class="col-12">
-				<div class="card bg-primary rounded-3 p-4 p-sm-5" style="background:url({{ asset('assets/images/pattern/05.png') }}) no-repeat center center; background-size:cover;">
-					<div class="card-body">
-						<div class="row align-items-center">
+	<!-- =======================
+	CTA START -->
+<section class="home-cta-section pt-0 pt-md-5">
+		<div class="container">
+			<div class="row">
+				<div class="col-12">
+					<div class="card bg-primary rounded-3 p-4 p-sm-5 home-cta-card">
+						<div class="card-body">
+							<div class="row align-items-center">
 							<div class="col-lg-8">
 								<h3 class="text-white mb-2">Ready to host your own event?</h3>
 								<p class="text-white mb-0">Join our platform and start organizing amazing events today!</p>
@@ -241,4 +295,5 @@ CTA START -->
 </section>
 <!-- =======================
 CTA END -->
+</div>
 {% endblock %}

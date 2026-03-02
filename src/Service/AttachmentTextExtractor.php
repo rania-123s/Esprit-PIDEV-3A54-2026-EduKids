@@ -283,19 +283,43 @@ class AttachmentTextExtractor
 
     private function getBinary(string $envVar, string $default, array $aliases = []): string
     {
+        $candidates = [];
+
         $fromEnv = trim((string) ($_SERVER[$envVar] ?? $_ENV[$envVar] ?? ''));
         if ($fromEnv !== '') {
-            return $fromEnv;
+            $candidates[] = $fromEnv;
         }
 
         foreach ($aliases as $alias) {
             $fromAlias = trim((string) ($_SERVER[$alias] ?? $_ENV[$alias] ?? ''));
             if ($fromAlias !== '') {
-                return $fromAlias;
+                $candidates[] = $fromAlias;
             }
         }
 
+        $candidates[] = $default;
+
+        foreach ($candidates as $candidate) {
+            $normalized = trim((string) $candidate, " \t\n\r\0\x0B\"'");
+            if ($normalized === '') {
+                continue;
+            }
+
+            if ($this->looksLikePath($normalized) && !is_file($normalized)) {
+                continue;
+            }
+
+            return $normalized;
+        }
+
         return $default;
+    }
+
+    private function looksLikePath(string $candidate): bool
+    {
+        return str_contains($candidate, DIRECTORY_SEPARATOR)
+            || str_contains($candidate, '/')
+            || preg_match('/^[a-zA-Z]:\\\\/', $candidate) === 1;
     }
 
     private function normalizeText(string $text): string

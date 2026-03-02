@@ -50,8 +50,8 @@
                                     <tr>
                                         <td class="ps-4 py-3">
                                             <div class="d-flex align-items-center">
-                                                {% if item.produit.imageUrl %}
-                                                    <img src="{{ item.produit.imageUrl }}" class="rounded me-3" alt="{{ item.produit.nom }}" style="width: 48px; height: 48px; object-fit: cover;">
+                                                {% if item.image_url %}
+                                                    <img src="{{ item.image_url }}" class="rounded me-3" alt="{{ item.produit.nom }}" style="width: 48px; height: 48px; object-fit: cover;">
                                                 {% else %}
                                                     <div class="rounded me-3 d-flex align-items-center justify-content-center bg-light text-muted" style="width: 48px; height: 48px;">
                                                         <i class="bi bi-image"></i>

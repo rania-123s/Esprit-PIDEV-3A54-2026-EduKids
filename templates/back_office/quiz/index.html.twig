@@ -3,25 +3,80 @@
 {% block title %}Quiz & Questions - Admin{% endblock %}
 
 {% block body %}
-<div class="container-fluid p-4">
-    <h1 class="h3 mb-1 ecommerce-admin-header">Quiz & Questions</h1>
-    <p class="text-body mb-4" style="color: #4b5563 !important;">Créez des quiz, ajoutez des questions et publiez-les pour les utilisateurs.</p>
-    <div class="row g-4">
+<style>
+    .quiz-index-tuned .hero {
+        animation: slideDownIn 0.45s ease both;
+    }
+
+    .quiz-index-tuned .action-grid > div {
+        animation: riseIn 0.45s ease both;
+    }
+
+    .quiz-index-tuned .action-grid > div:nth-child(2) {
+        animation-delay: 0.08s;
+    }
+
+    .quiz-index-tuned .panel-card {
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+        animation: panelIn 0.45s ease both;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .quiz-index-tuned .panel-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
+    }
+
+    .quiz-index-tuned .panel-card .card-body {
+        padding: 1.1rem;
+    }
+
+    .quiz-index-tuned .btn-pill {
+        border-radius: 999px;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    @keyframes slideDownIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes riseIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes panelIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="container-fluid p-4 quiz-index-tuned">
+    <div class="hero">
+        <h1 class="h3 mb-1 ecommerce-admin-header">Quiz & Questions</h1>
+        <p class="text-body mb-4" style="color: #4b5563 !important;">Cr&eacute;ez des quiz, ajoutez des questions et publiez-les pour les utilisateurs.</p>
+    </div>
+    <div class="row g-4 action-grid">
         <div class="col-md-4 col-lg-3">
-            <div class="card ecommerce-admin-card h-100">
+            <div class="card ecommerce-admin-card h-100 panel-card">
                 <div class="card-body">
                     <h5 class="card-title"><i class="bi bi-collection me-2 text-primary"></i>Quiz</h5>
-                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Gérer les quiz (CRUD, recherche, tri).</p>
-                    <a href="{{ path('quiz_admin_quiz_list') }}" class="btn btn-primary rounded-pill px-4">Gérer les quiz</a>
+                    <p class="card-text small mb-3" style="color: #4b5563 !important;">G&eacute;rer les quiz (CRUD, recherche, tri).</p>
+                    <a href="{{ path('quiz_admin_quiz_list') }}" class="btn btn-primary rounded-pill px-4 btn-pill">G&eacute;rer les quiz</a>
                 </div>
             </div>
         </div>
         <div class="col-md-4 col-lg-3">
-            <div class="card ecommerce-admin-card h-100">
+            <div class="card ecommerce-admin-card h-100 panel-card">
                 <div class="card-body">
                     <h5 class="card-title"><i class="bi bi-graph-up me-2 text-primary"></i>Statistiques</h5>
                     <p class="card-text small mb-3" style="color: #4b5563 !important;">Tentatives, scores moyens et export.</p>
-                    <a href="{{ path('quiz_admin_statistics') }}" class="btn btn-primary rounded-pill px-4">Tableau de bord</a>
+                    <a href="{{ path('quiz_admin_statistics') }}" class="btn btn-primary rounded-pill px-4 btn-pill">Tableau de bord</a>
                 </div>
             </div>
         </div>

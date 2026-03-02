@@ -1,17 +1,131 @@
 {% extends 'back_office/ecommerce_base.html.twig' %}
 
-{% block title %}Gestion des Catégories - Admin{% endblock %}
+{% block title %}Gestion des Categories - Admin{% endblock %}
 
 {% block body %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 fw-bold mb-0 ecommerce-admin-header"><i class="bi bi-tags me-2 text-primary"></i>Gestion des Catégories</h1>
-            <p class="small mb-0" style="color: #4b5563 !important;">Organisez vos produits par catégorie.</p>
+<style>
+    .ecom-category-tuned .card {
+        border-radius: 14px;
+        overflow: hidden;
+        animation: panelIn 0.45s ease both;
+    }
+
+    .ecom-category-tuned .card-header {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .ecom-category-tuned .form-control,
+    .ecom-category-tuned .form-select {
+        border-radius: 10px;
+    }
+
+    .ecom-category-tuned .table thead th {
+        font-weight: 700;
+        letter-spacing: 0.2px;
+    }
+
+    .ecom-category-tuned .table tbody tr {
+        transition: background-color 0.2s ease;
+        animation: rowIn 0.35s ease both;
+    }
+
+    .ecom-category-tuned .table tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.04);
+    }
+
+    .ecom-category-tuned .results-meta {
+        font-size: 0.85rem;
+        color: #6c757d;
+        animation: fadeInSoft 0.45s ease both;
+    }
+
+    .ecom-category-tuned .row.mb-3 {
+        animation: slideDownIn 0.45s ease both;
+    }
+
+    .ecom-category-tuned .row.g-4.mb-4 > div {
+        animation: riseIn 0.45s ease both;
+    }
+
+    .ecom-category-tuned .row.g-4.mb-4 > div:nth-child(2) {
+        animation-delay: 0.08s;
+    }
+
+    .ecom-category-tuned .row.g-4.mb-4 > div:nth-child(3) {
+        animation-delay: 0.16s;
+    }
+
+    .ecom-category-tuned .card-header .fa-search {
+        transition: transform 0.2s ease;
+    }
+
+    .ecom-category-tuned .card-header .btn:hover .fa-search {
+        transform: scale(1.15);
+    }
+
+    .ecom-category-tuned .btn-outline-secondary {
+        animation: pulseSoft 1.7s ease-in-out infinite;
+    }
+
+    .ecom-category-tuned .table tbody tr:nth-child(1) { animation-delay: 0.02s; }
+    .ecom-category-tuned .table tbody tr:nth-child(2) { animation-delay: 0.05s; }
+    .ecom-category-tuned .table tbody tr:nth-child(3) { animation-delay: 0.08s; }
+    .ecom-category-tuned .table tbody tr:nth-child(4) { animation-delay: 0.11s; }
+    .ecom-category-tuned .table tbody tr:nth-child(5) { animation-delay: 0.14s; }
+
+    @keyframes slideDownIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes riseIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes panelIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInSoft {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes rowIn {
+        from { opacity: 0; transform: translateX(8px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulseSoft {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(108, 117, 125, 0.12); }
+        50% { box-shadow: 0 0 0 6px rgba(108, 117, 125, 0.04); }
+    }
+
+    @media (max-width: 768px) {
+        .ecom-category-tuned .card-header .row > div {
+            width: 100%;
+        }
+    }
+</style>
+
+{% set totalCategories = categories|length %}
+{% set categoriesWithDescription = 0 %}
+{% for category in categories %}
+    {% if category.description is not empty %}
+        {% set categoriesWithDescription = categoriesWithDescription + 1 %}
+    {% endif %}
+{% endfor %}
+{% set categoriesWithoutDescription = totalCategories - categoriesWithDescription %}
+
+<div class="ecom-category-tuned">
+    <div class="row mb-3">
+        <div class="col-12 d-sm-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-2 mb-sm-0 ecommerce-admin-header">Categories</h1>
+            <a href="{{ path('ecommerce_admin_category_new') }}" class="btn btn-sm btn-primary mb-0">Nouvelle categorie</a>
         </div>
-        <a href="{{ path('ecommerce_admin_category_new') }}" class="btn btn-primary shadow-sm rounded-pill px-4">
-            <i class="bi bi-plus-circle me-2"></i> Nouvelle Catégorie
-        </a>
     </div>
 
     {% for message in app.flashes('success') %}
@@ -21,69 +135,112 @@
         </div>
     {% endfor %}
 
-    <div class="card ecommerce-admin-card border-0 shadow-sm mb-4">
-        <div class="card-body bg-light rounded-3 p-3">
-             <form method="get" action="{{ path('ecommerce_admin_category_index') }}" class="row g-3 align-items-end">
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold small text-uppercase" style="color: #374151 !important;">Recherche</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" name="q" class="form-control border-start-0" value="{{ searchQuery ?? '' }}" placeholder="Nom, description...">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-pill"><i class="bi bi-funnel me-1"></i> Filtrer</button>
-                </div>
-            </form>
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-lg-4">
+            <div class="text-center p-4 bg-primary bg-opacity-10 border border-primary rounded-3">
+                <h6>Total Categories</h6>
+                <h2 class="mb-0 fs-1 text-primary">{{ totalCategories }}</h2>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="text-center p-4 bg-success bg-opacity-10 border border-success rounded-3">
+                <h6>Avec Description</h6>
+                <h2 class="mb-0 fs-1 text-success">{{ categoriesWithDescription }}</h2>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="text-center p-4 bg-warning bg-opacity-15 border border-warning rounded-3">
+                <h6>Sans Description</h6>
+                <h2 class="mb-0 fs-1 text-warning">{{ categoriesWithoutDescription }}</h2>
+            </div>
         </div>
     </div>
 
-    <div class="card ecommerce-admin-card border-0 shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-uppercase small" style="color: #1f2937 !important;">
-                    <tr>
-                        <th class="ps-4 py-3 border-0 rounded-start">Nom</th>
-                        <th class="py-3 border-0">Description</th>
-                        <th class="pe-4 py-3 border-0 rounded-end text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="border-top-0">
-                    {% for category in categories %}
-                        <tr>
-                            <td class="ps-4 py-3 fw-bold text-dark">
-                                {{ category.nom }}
-                            </td>
-                            <td class="py-3" style="color: #4b5563 !important;">
-                                {{ category.description|slice(0, 100) }}{% if category.description|length > 100 %}...{% endif %}
-                            </td>
-                            <td class="pe-4 py-3 text-end">
-                                <div class="btn-group">
-                                    <a href="{{ path('ecommerce_admin_category_edit', { id: category.id }) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form method="post" action="{{ path('ecommerce_admin_category_delete', { id: category.id }) }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_category' ~ category.id) }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger border-start-0" title="Supprimer">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="3" class="text-center py-5" style="color: #4b5563 !important;">
-                                <i class="bi bi-tags fs-1 d-block mb-3" style="opacity: .4;"></i>
-                                Aucun résultat trouvé.
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="card bg-transparent border">
+        <div class="card-header bg-light border-bottom">
+            <form method="get" action="{{ path('ecommerce_admin_category_index') }}">
+                <div class="row g-3 align-items-center justify-content-between">
+                    <div class="col-md-6">
+                        <div class="rounded position-relative">
+                            <input class="form-control bg-body" type="search" name="q" placeholder="Recherche nom ou description..." aria-label="Search" value="{{ searchQuery ?? '' }}">
+                            <button type="submit" class="btn bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y me-2" aria-label="Rechercher">
+                                <i class="fas fa-search fs-6 text-primary"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="sort" class="form-select js-choice border-0 z-index-9">
+                            <option value="nom" {{ sort == 'nom' ? 'selected' : '' }}>Nom</option>
+                            <option value="description" {{ sort == 'description' ? 'selected' : '' }}>Description</option>
+                            <option value="id" {{ sort == 'id' ? 'selected' : '' }}>ID</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="order" class="form-select js-choice border-0 z-index-9">
+                            <option value="ASC" {{ order == 'ASC' ? 'selected' : '' }}>A-Z</option>
+                            <option value="DESC" {{ order == 'DESC' ? 'selected' : '' }}>Z-A</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 text-md-end">
+                        {% if searchQuery or sort != 'nom' or order != 'ASC' %}
+                            <a href="{{ path('ecommerce_admin_category_index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                        {% else %}
+                            <button type="submit" class="btn btn-sm btn-primary">OK</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+
+            <div class="results-meta mt-2">
+                {{ totalCategories }} resultat(s)
+                {% if searchQuery %}
+                    | recherche: "{{ searchQuery }}"
+                {% endif %}
+                {% if sort %}
+                    | tri: {{ sort }} {{ order }}
+                {% endif %}
+            </div>
         </div>
-         <div class="card-footer bg-white py-3 border-0">
-             <small style="color: #4b5563 !important;">{{ categories|length }} catégorie(s) affichée(s)</small>
+
+        <div class="card-body">
+            <div class="table-responsive border-0 rounded-3">
+                <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="border-0 rounded-start">Nom</th>
+                            <th scope="col" class="border-0">Description</th>
+                            <th scope="col" class="border-0 rounded-end text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in categories %}
+                            <tr>
+                                <td class="fw-bold text-dark">{{ category.nom }}</td>
+                                <td>{{ category.description|slice(0, 100) }}{% if category.description|length > 100 %}...{% endif %}</td>
+                                <td class="text-end">
+                                    <a href="{{ path('ecommerce_admin_category_edit', { id: category.id }) }}" class="btn btn-sm btn-warning-soft me-1 mb-1 mb-md-0">Modifier</a>
+                                    <form method="post" action="{{ path('ecommerce_admin_category_delete', { id: category.id }) }}" style="display:inline;" onsubmit="return confirm('Supprimer cette categorie ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_category' ~ category.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger-soft mb-0">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="3">Aucune categorie trouvee.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer bg-transparent pt-0">
+            <div class="d-sm-flex justify-content-sm-between align-items-sm-center">
+                <p class="mb-0 text-center text-sm-start">
+                    Affichage de {{ totalCategories }} categorie(s)
+                </p>
+            </div>
         </div>
     </div>
 </div>

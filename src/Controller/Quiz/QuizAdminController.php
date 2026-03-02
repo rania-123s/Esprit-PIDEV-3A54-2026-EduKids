@@ -43,7 +43,7 @@ class QuizAdminController extends AbstractController
     #[Route('', name: 'quiz_admin_index', methods: ['GET'])]
     public function index(): Response
     {
-        return $this->render('back_office/quiz/index.html.twig');
+        return $this->redirectToRoute('quiz_admin_quiz_list');
     }
 
     #[Route('/list', name: 'quiz_admin_quiz_list', methods: ['GET'])]
@@ -60,6 +60,14 @@ class QuizAdminController extends AbstractController
         $sort = $request->query->get('sort', 'titre');
         $order = $request->query->get('order', 'ASC');
         $quizzes = $this->quizRepository->searchAndSort($q, $publishedFilter, $sort, $order);
+        $totalCount = \count($quizzes);
+        $publishedCount = 0;
+        foreach ($quizzes as $quiz) {
+            if ($quiz->isPublished()) {
+                $publishedCount++;
+            }
+        }
+        $draftCount = $totalCount - $publishedCount;
 
         return $this->render('back_office/quiz/quiz_list.html.twig', [
             'quizzes' => $quizzes,
@@ -67,6 +75,9 @@ class QuizAdminController extends AbstractController
             'filterPublished' => $publishedFilter,
             'sort' => $sort,
             'order' => $order,
+            'totalCount' => $totalCount,
+            'publishedCount' => $publishedCount,
+            'draftCount' => $draftCount,
         ]);
     }
 
@@ -114,7 +125,7 @@ class QuizAdminController extends AbstractController
         if ($prompt === '') {
             return new JsonResponse(['error' => 'Indiquez un titre (prompt).'], 400);
         }
-        $proxyUrl = $this->generateUrl('quiz_admin_generated_image', ['prompt' => $prompt], true);
+        $proxyUrl = $this->generateUrl('quiz_front_generated_image', ['prompt' => $prompt], true);
         return new JsonResponse(['url' => $proxyUrl]);
     }
 

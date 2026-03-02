@@ -1,1080 +1,368 @@
 {% extends 'base_frontoffice.html.twig' %}
 
-{% block title %}Nos Événements{% endblock %}
+{% block title %}Evenements - EduKids{% endblock %}
 
 {% block body %}
-<!-- =======================
-Main Banner START -->
-<section class="pt-0">
-	<div class="container">
-		<div class="row">
-			<div class="col-12">
-				<!-- Card START -->
-				<div class="card bg-dark rounded-3 p-4 p-sm-5 mt-4" style="background:url({{ asset('assets/images/pattern/05.png') }}) no-repeat center center; background-size:cover;">
-					<div class="card-body">
-						<div class="row align-items-center">
-							<!-- Left content START -->
-							<div class="col-lg-7">
-								<!-- Badge -->
-								<span class="badge bg-primary bg-opacity-10 text-primary mb-3"><i class="bi bi-calendar-event me-2"></i>Plateforme d'Événements</span>
-								<!-- Title -->
-								<h1 class="text-white display-5 mb-3">Découvrez nos <span class="text-warning">Événements</span></h1>
-								<p class="text-white">Explorez tous nos événements et participez à des expériences uniques. Conférences, ateliers, formations et bien plus encore !</p>
-								<!-- Button -->
-								<div class="d-sm-flex align-items-center mt-4">
-									<a href="#events" class="btn btn-warning me-2 mb-2 mb-sm-0">
-										<i class="bi bi-calendar-check me-2"></i>Voir les événements
-									</a>
-									<span class="badge bg-white text-dark px-3 py-2 mb-0">
-										<i class="bi bi-collection me-1"></i> {{ evenements|length }} événement(s) disponible(s)
-									</span>
-								</div>
-							</div>
-							<!-- Left content END -->
-
-							<!-- Right content START -->
-							<div class="col-lg-5 text-center mt-4 mt-lg-0">
-								<img src="{{ asset('assets/images/element/14.svg') }}" class="h-300px" alt="">
-							</div>
-							<!-- Right content END -->
-						</div>
-					</div>
-				</div>
-				<!-- Card END -->
-			</div>
-		</div>
-	</div>
+<section class="bg-blue align-items-center d-flex" style="background:url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size:cover;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="text-white">Nos Evenements</h1>
+                <div class="d-flex justify-content-center">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('home') }}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Evenements</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
-<!-- =======================
-Main Banner END -->
 
-<!-- =======================
-Counter boxes START -->
-<section class="pt-0 pt-md-5">
-	<div class="container">
-		<div class="row g-4">
-			<!-- Counter item - Événements -->
-			<div class="col-sm-6 col-xl-3">
-				<div class="d-flex justify-content-center align-items-center p-4 bg-warning bg-opacity-15 rounded-3">
-					<span class="display-6 lh-1 text-warning mb-0"><i class="bi bi-calendar-event"></i></span>
-					<div class="ms-4">
-						<div class="d-flex">
-							<h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="{{ evenements|length }}">{{ evenements|length }}</h5>
-						</div>
-						<p class="mb-0 h6 fw-light">Événements</p>
-					</div>
-				</div>
-			</div>
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4 align-items-center g-3">
+            <div class="col-xl-8">
+                <form id="eventSearchForm" class="border rounded p-3" onsubmit="return false;">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-7">
+                            <div class="input-group input-borderless">
+                                <input id="event-search-input" class="form-control me-1" type="search" placeholder="Rechercher un evenement..." autocomplete="off">
+                                <button type="button" class="btn btn-primary mb-0 rounded z-index-1" id="event-search-btn">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <select id="event-sort-select" class="form-select">
+                                <option value="date_desc">Plus recent</option>
+                                <option value="date_asc">Plus ancien</option>
+                                <option value="likes_desc">Plus populaire</option>
+                                <option value="title_asc">Titre A-Z</option>
+                                <option value="title_desc">Titre Z-A</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-xl-4 d-flex justify-content-xl-end align-items-center">
+                <p id="event-count" class="mb-0 text-end">{{ evenements|length }} evenement(s)</p>
+            </div>
+        </div>
 
-			<!-- Counter item - Programmes -->
-			<div class="col-sm-6 col-xl-3">
-				<div class="d-flex justify-content-center align-items-center p-4 bg-success bg-opacity-10 rounded-3">
-					<span class="display-6 lh-1 text-success mb-0"><i class="fas fa-clipboard-list"></i></span>
-					<div class="ms-4">
-						<div class="d-flex">
-							{% set totalProgrammes = 0 %}
-							{% for e in evenements %}
-								{% if e.programme %}
-									{% set totalProgrammes = totalProgrammes + 1 %}
-								{% endif %}
-							{% endfor %}
-							<h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="{{ totalProgrammes }}">{{ totalProgrammes }}</h5>
-						</div>
-						<p class="mb-0 h6 fw-light">Programmes</p>
-					</div>
-				</div>
-			</div>
+        <div id="events-grid" class="row g-4">
+            {% for evenement in evenements %}
+                {% set isFavorite = (userFavorites|default({}))[evenement.id]|default(false) %}
+                {% set userReaction = (userReactions|default({}))[evenement.id]|default(null) %}
+                <div
+                    class="col-sm-6 col-xl-4 event-item"
+                    data-title="{{ evenement.titre|lower }}"
+                    data-description="{{ evenement.description|striptags|lower }}"
+                    data-date="{{ evenement.dateEvenement ? evenement.dateEvenement|date('Y-m-d') : '9999-12-31' }}"
+                    data-likes="{{ evenement.likesCount }}"
+                >
+                    <div class="card shadow h-100">
+                        {% if evenement.image %}
+                            <img src="{{ asset('uploads/' ~ evenement.image) }}" class="card-img-top" alt="{{ evenement.titre }}" style="height:220px; object-fit:cover;">
+                        {% else %}
+                            <img src="{{ asset('assets/images/event/01.jpg') }}" class="card-img-top" alt="{{ evenement.titre }}" style="height:220px; object-fit:cover;">
+                        {% endif %}
 
-			<!-- Counter item - Likes -->
-			<div class="col-sm-6 col-xl-3">
-				<div class="d-flex justify-content-center align-items-center p-4 bg-primary bg-opacity-10 rounded-3">
-					<span class="display-6 lh-1 text-primary mb-0"><i class="fas fa-thumbs-up"></i></span>
-					<div class="ms-4">
-						<div class="d-flex">
-							{% set totalLikes = 0 %}
-							{% for e in evenements %}
-								{% set totalLikes = totalLikes + e.likesCount %}
-							{% endfor %}
-							<h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="{{ totalLikes }}">{{ totalLikes }}</h5>
-						</div>
-						<p class="mb-0 h6 fw-light">J'aime</p>
-					</div>
-				</div>
-			</div>
+                        <div class="card-body pb-0">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-primary bg-opacity-10 text-primary">
+                                    {{ evenement.dateEvenement ? evenement.dateEvenement|date('d/m/Y') : 'Date a definir' }}
+                                </span>
+                                <span class="badge bg-success bg-opacity-10 text-success">
+                                    {{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '--:--' }} - {{ evenement.heureFin ? evenement.heureFin|date('H:i') : '--:--' }}
+                                </span>
+                            </div>
 
-			<!-- Counter item - Favoris -->
-			<div class="col-sm-6 col-xl-3">
-				<div class="d-flex justify-content-center align-items-center p-4 bg-danger bg-opacity-10 rounded-3">
-					<span class="display-6 lh-1 text-danger mb-0"><i class="fas fa-heart"></i></span>
-					<div class="ms-4">
-						<div class="d-flex">
-							{% set totalFavoris = 0 %}
-							{% for e in evenements %}
-								{% set totalFavoris = totalFavoris + e.favoritesCount %}
-							{% endfor %}
-							<h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="{{ totalFavoris }}">{{ totalFavoris }}</h5>
-						</div>
-						<p class="mb-0 h6 fw-light">Favoris</p>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                            <div class="d-flex align-items-start justify-content-between gap-2">
+                                <h5 class="card-title mb-2">
+                                    <a href="{{ path('app_front_evenement_show', {'id': evenement.id}) }}">{{ evenement.titre }}</a>
+                                </h5>
+                                <button
+                                    type="button"
+                                    class="favorite-btn-card favorite-btn-{{ evenement.id }} {{ isFavorite ? 'active-favorite' : '' }}"
+                                    onclick="toggleFavorite({{ evenement.id }}, event)"
+                                    title="Favori"
+                                >
+                                    <i class="{{ isFavorite ? 'fas' : 'far' }} fa-heart"></i>
+                                </button>
+                            </div>
+
+                            <p class="mb-2 text-truncate-2">
+                                {{ evenement.description|striptags|slice(0, 105) }}{% if evenement.description|length > 105 %}...{% endif %}
+                            </p>
+
+                            <div class="mb-2">
+                                {% if evenement.programme %}
+                                    <span class="badge bg-success bg-opacity-10 text-success">Programme disponible</span>
+                                {% else %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning">Programme a venir</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="card-footer pt-0 pb-3">
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="reaction-btn-mini like-btn-{{ evenement.id }} {{ userReaction == 'like' ? 'active-like' : '' }}" onclick="reactToEvent({{ evenement.id }}, 'like', event)" title="Like">
+                                        <span class="reaction-circle-mini like-circle-mini"><i class="fas fa-thumbs-up"></i></span>
+                                        <span class="reaction-count-mini likes-count-{{ evenement.id }}">{{ evenement.likesCount }}</span>
+                                    </button>
+                                    <button type="button" class="reaction-btn-mini dislike-btn-{{ evenement.id }} {{ userReaction == 'dislike' ? 'active-dislike' : '' }}" onclick="reactToEvent({{ evenement.id }}, 'dislike', event)" title="Dislike">
+                                        <span class="reaction-circle-mini dislike-circle-mini"><i class="fas fa-thumbs-down"></i></span>
+                                        <span class="reaction-count-mini dislikes-count-{{ evenement.id }}">{{ evenement.dislikesCount }}</span>
+                                    </button>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-success"
+                                        {% if app.user %}
+                                            onclick="loadReservationModal({{ evenement.id }})"
+                                            {% if evenement.nbPlacesDisponibles is not null and not evenement.hasPlacesDisponibles() %}disabled title="Plus de places disponibles"{% endif %}
+                                        {% else %}
+                                            onclick="window.location.href='{{ path('app_login') }}'"
+                                            title="Connectez-vous pour participer"
+                                        {% endif %}
+                                    >
+                                        Participer
+                                    </button>
+                                    <a href="{{ path('app_front_evenement_show', {'id': evenement.id}) }}" class="btn btn-sm btn-primary">Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <p class="mb-0">Aucun evenement trouve.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div id="events-no-results" class="text-center py-5 d-none">
+            <p class="mb-0">Aucun resultat pour cette recherche.</p>
+        </div>
+    </div>
 </section>
-<!-- =======================
-Counter boxes END -->
-
-<!-- =======================
-Events List START -->
-<section id="events">
-	<div class="container">
-		<!-- Title -->
-		<div class="row mb-4">
-			<div class="col-lg-8 mx-auto text-center">
-				<h2 class="fs-1"><i class="bi bi-calendar-heart text-primary me-2"></i><span class="text-warning">Nos</span> Événements</h2>
-				<p class="mb-0">Découvrez tous les événements disponibles et leurs programmes associés.</p>
-			</div>
-		</div>
-
-		<!-- Onglets Vue Liste / Calendrier -->
-		<div class="row mb-4">
-			<div class="col-12">
-				<div class="d-flex justify-content-center">
-					<div class="btn-group view-toggle" role="group">
-						<button type="button" class="btn btn-view active" id="btn-list-view" onclick="switchView('list')">
-							<i class="bi bi-grid-3x3-gap me-2"></i>Liste
-						</button>
-						<button type="button" class="btn btn-view" id="btn-calendar-view" onclick="switchView('calendar')">
-							<i class="bi bi-calendar3 me-2"></i>Calendrier
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Recherche avec design moderne (visible en mode liste) -->
-		<div class="row mb-4" id="search-section">
-			<div class="col-12">
-				<div class="search-container">
-					<div class="search-box">
-						<div class="search-icon-wrapper">
-							<i class="bi bi-search"></i>
-						</div>
-						<input type="text" 
-							   id="search-input" 
-							   class="search-input" 
-							   placeholder="Rechercher un événement..."
-							   oninput="searchEvents(this.value)"
-							   autocomplete="off">
-						<button type="button" class="search-clear-btn" onclick="clearSearch()" title="Effacer">
-							<i class="bi bi-x-circle-fill"></i>
-						</button>
-					</div>
-					<div class="search-hint">
-						<span class="search-hint-icon"><i class="bi bi-lightning-charge-fill"></i></span>
-						<span>Recherche instantanée par titre ou description</span>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Tri et filtres (visible en mode liste) -->
-		<div class="row mb-4" id="sort-section">
-			<div class="col-12">
-				<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 bg-light rounded-3 p-3">
-					<div class="d-flex align-items-center gap-2">
-						<i class="bi bi-funnel text-primary"></i>
-						<span class="fw-semibold">Trier par :</span>
-					</div>
-					<div class="d-flex flex-wrap gap-2">
-						<button type="button" onclick="sortEvents('date_desc')" 
-						   class="btn btn-sm btn-outline-primary sort-btn" data-sort="date_desc">
-							<i class="bi bi-calendar-minus me-1"></i>Plus récent
-						</button>
-						<button type="button" onclick="sortEvents('date_asc')" 
-						   class="btn btn-sm btn-outline-primary sort-btn" data-sort="date_asc">
-							<i class="bi bi-calendar-plus me-1"></i>Plus ancien
-						</button>
-						<button type="button" onclick="sortEvents('likes')" 
-						   class="btn btn-sm btn-outline-success sort-btn" data-sort="likes">
-							<i class="bi bi-hand-thumbs-up me-1"></i>Plus populaire
-						</button>
-						<button type="button" onclick="sortEvents('title_asc')" 
-						   class="btn btn-sm btn-outline-secondary sort-btn" data-sort="title_asc">
-							<i class="bi bi-sort-alpha-down me-1"></i>A → Z
-						</button>
-						<button type="button" onclick="sortEvents('title_desc')" 
-						   class="btn btn-sm btn-outline-secondary sort-btn" data-sort="title_desc">
-							<i class="bi bi-sort-alpha-up me-1"></i>Z → A
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Calendrier (caché par défaut) -->
-		<div class="row mb-4" id="calendar-section" style="display: none;">
-			<div class="col-12">
-				<div class="card shadow-sm">
-					<div class="card-body p-4">
-						<div id="calendar"></div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Events Grid (visible par défaut) -->
-		<div class="row g-4" id="events-grid">
-			{% if evenements|length > 0 %}
-				{% for evenement in evenements %}
-				<div class="col-sm-6 col-lg-4 col-xl-4 event-card" 
-					 data-date="{{ evenement.dateEvenement ? evenement.dateEvenement|date('Y-m-d') : '9999-12-31' }}"
-					 data-likes="{{ evenement.likesCount }}"
-					 data-title="{{ evenement.titre|lower }}">
-					<div class="card shadow h-100 overflow-hidden">
-						<!-- Image avec overlay -->
-						<div class="position-relative">
-							{% if evenement.image %}
-								<img src="{{ asset('uploads/' ~ evenement.image) }}" class="card-img-top" alt="{{ evenement.titre }}" style="height: 200px; object-fit: cover;">
-							{% else %}
-								<img src="{{ asset('assets/images/event/' ~ (loop.index % 18 == 0 ? '18' : '%02d'|format(loop.index % 18)) ~ '.jpg') }}" class="card-img-top" alt="{{ evenement.titre }}" style="height: 200px; object-fit: cover;">
-							{% endif %}
-							<div class="position-absolute top-0 start-0 m-3">
-								<span class="badge bg-dark bg-opacity-75 text-white">
-									<i class="bi bi-calendar3 me-1"></i>
-									{{ evenement.dateEvenement ? evenement.dateEvenement|date('d M Y') : 'À définir' }}
-								</span>
-							</div>
-							<div class="position-absolute top-0 end-0 m-3">
-								<span class="badge bg-success bg-opacity-90 text-white">
-									<i class="fas fa-clock me-1"></i>
-									{{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '-' }} - {{ evenement.heureFin ? evenement.heureFin|date('H:i') : '-' }}
-								</span>
-							</div>
-						</div>
-						
-						<div class="card-body">
-							<!-- Titre avec bouton favori -->
-							<div class="d-flex align-items-start mb-2">
-								<!-- Bouton Favori à gauche -->
-								<button type="button" 
-										class="favorite-btn-card favorite-btn-{{ evenement.id }} {{ (userFavorites[evenement.id] ?? false) ? 'active-favorite' : '' }} me-2 flex-shrink-0"
-										onclick="toggleFavorite({{ evenement.id }}, event)"
-										title="Ajouter aux favoris">
-									<i class="{{ (userFavorites[evenement.id] ?? false) ? 'fas' : 'far' }} fa-heart"></i>
-								</button>
-								<div>
-									<h5 class="card-title mb-1">
-										<a href="{{ path('app_front_evenement_show', {'id': evenement.id}) }}" class="text-decoration-none text-dark stretched-link">
-											{{ evenement.titre }}
-										</a>
-									</h5>
-								</div>
-							</div>
-							
-							<!-- Description -->
-							<p class="text-muted small mb-3">
-								{{ evenement.description|slice(0, 120) }}{% if evenement.description|length > 120 %}...{% endif %}
-							</p>
-							
-							<!-- Programme badge -->
-							<div class="d-flex flex-wrap gap-1 mb-2">
-								{% if evenement.programme %}
-								<span class="badge bg-success bg-opacity-10 text-success">
-									<i class="fas fa-clipboard-check me-1"></i>Programme disponible
-								</span>
-								{% else %}
-								<span class="badge bg-warning bg-opacity-10 text-warning">
-									<i class="fas fa-clock me-1"></i>Programme à venir
-								</span>
-								{% endif %}
-							</div>
-						</div>
-						
-						<div class="card-footer bg-white border-top">
-							<div class="d-flex justify-content-between align-items-center">
-								<!-- Boutons Like / Dislike / Favori -->
-								<div class="d-flex align-items-center gap-2">
-									<button type="button" 
-											class="reaction-btn-mini like-btn-{{ evenement.id }} {{ (userReactions[evenement.id] ?? null) == 'like' ? 'active-like' : '' }}"
-											onclick="reactToEvent({{ evenement.id }}, 'like', event)"
-											title="J'aime">
-										<div class="reaction-circle-mini like-circle-mini">
-											<i class="fas fa-thumbs-up"></i>
-										</div>
-										<span class="reaction-count-mini likes-count-{{ evenement.id }}">{{ evenement.likesCount }}</span>
-									</button>
-									<button type="button" 
-											class="reaction-btn-mini dislike-btn-{{ evenement.id }} {{ (userReactions[evenement.id] ?? null) == 'dislike' ? 'active-dislike' : '' }}"
-											onclick="reactToEvent({{ evenement.id }}, 'dislike', event)"
-											title="Je n'aime pas">
-										<div class="reaction-circle-mini dislike-circle-mini">
-											<i class="fas fa-thumbs-down"></i>
-										</div>
-										<span class="reaction-count-mini dislikes-count-{{ evenement.id }}">{{ evenement.dislikesCount }}</span>
-									</button>
-								</div>
-								<div class="d-flex gap-2">
-									<button type="button" 
-											class="btn btn-sm btn-success" 
-											{% if app.user %}
-												onclick="loadReservationModal({{ evenement.id }})"
-												{% if evenement.nbPlacesDisponibles is not null and not evenement.hasPlacesDisponibles() %}disabled title="Plus de places disponibles"{% endif %}
-											{% else %}
-												onclick="window.location.href='{{ path('app_login') }}'"
-												title="Connectez-vous pour participer"
-											{% endif %}>
-										<i class="fas fa-calendar-check me-1"></i>Participer
-									</button>
-									<a href="{{ path('app_front_evenement_show', {'id': evenement.id}) }}" class="btn btn-sm btn-primary">
-										Voir détails <i class="bi bi-arrow-right ms-1"></i>
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				{% endfor %}
-			{% else %}
-				<div class="col-12">
-					<div class="card shadow-sm">
-						<div class="card-body text-center py-5">
-							<i class="bi bi-calendar-x fa-4x text-muted mb-3" style="font-size: 4rem;"></i>
-							<h4 class="text-muted">Aucun événement disponible</h4>
-							<p class="text-muted mb-0">
-								Il n'y a pas encore d'événements. Revenez bientôt !
-							</p>
-						</div>
-					</div>
-				</div>
-			{% endif %}
-		</div>
-	</div>
-</section>
-<!-- =======================
-Events List END -->
-
-<!-- =======================
-CTA START -->
-<section class="pt-5 mt-5">
-	<div class="container">
-		<div class="row">
-			<div class="col-12">
-				<div class="card bg-primary rounded-3 p-4 p-sm-5" style="background:url({{ asset('assets/images/pattern/05.png') }}) no-repeat center center; background-size:cover;">
-					<div class="card-body">
-						<div class="row align-items-center">
-							<div class="col-lg-8">
-								<h3 class="text-white mb-2">
-									<i class="bi bi-info-circle me-2"></i>Besoin de plus d'informations ?
-								</h3>
-								<p class="text-white mb-0">Contactez-nous pour en savoir plus sur nos événements et comment y participer.</p>
-							</div>
-							<div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-								<a href="{{ path('app_home_page') }}" class="btn btn-warning mb-0">
-									<i class="bi bi-house me-1"></i>Accueil
-								</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</section>
-<!-- =======================
-CTA END -->
 
 <style>
-/* ========== VIEW TOGGLE BUTTONS ========== */
-.view-toggle {
-	background: #f8f9fa;
-	border-radius: 12px;
-	padding: 5px;
-	box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+.event-item { transition: opacity .2s ease; }
+.favorite-btn-card {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 1.15rem;
+    line-height: 1;
+    padding: 0.15rem 0.25rem;
 }
-.btn-view {
-	padding: 10px 25px;
-	border: none;
-	background: transparent;
-	color: #666;
-	font-weight: 500;
-	border-radius: 8px;
-	transition: all 0.3s ease;
-}
-.btn-view:hover {
-	color: #f7c32e;
-	background: rgba(247, 195, 46, 0.1);
-}
-.btn-view.active {
-	background: linear-gradient(135deg, #f7c32e 0%, #f5a623 100%);
-	color: white;
-	box-shadow: 0 4px 12px rgba(247, 195, 46, 0.35);
-}
-
-/* ========== FULLCALENDAR CUSTOM STYLES ========== */
-#calendar {
-	max-width: 100%;
-}
-.fc {
-	font-family: inherit;
-}
-.fc .fc-toolbar-title {
-	font-size: 1.4rem;
-	font-weight: 600;
-	color: #333;
-}
-.fc .fc-button-primary {
-	background: linear-gradient(135deg, #f7c32e 0%, #f5a623 100%);
-	border: none;
-	box-shadow: 0 2px 8px rgba(247, 195, 46, 0.3);
-}
-.fc .fc-button-primary:hover {
-	background: linear-gradient(135deg, #f5a623 0%, #e09800 100%);
-}
-.fc .fc-button-primary:disabled {
-	background: #ddd;
-}
-.fc .fc-button-primary:not(:disabled).fc-button-active {
-	background: linear-gradient(135deg, #e09800 0%, #cc8800 100%);
-}
-.fc .fc-daygrid-day.fc-day-today {
-	background: rgba(247, 195, 46, 0.15);
-}
-.fc-event {
-	cursor: pointer;
-	border: none;
-	padding: 2px 6px;
-	border-radius: 4px;
-	font-size: 12px;
-}
-.fc-event:hover {
-	opacity: 0.9;
-}
-.fc-event-past {
-	background: #95a5a6 !important;
-}
-.fc-event-today {
-	background: #27ae60 !important;
-}
-.fc-event-future {
-	background: #3498db !important;
-}
-
-/* ========== SEARCH BOX DESIGN ========== */
-.search-container {
-	background: #fff;
-	border-radius: 16px;
-	padding: 20px 25px;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-	border: 1px solid #eee;
-}
-.search-box {
-	display: flex;
-	align-items: center;
-	background: #f8f9fa;
-	border-radius: 12px;
-	padding: 6px 15px;
-	border: 2px solid #e9ecef;
-	transition: all 0.3s ease;
-}
-.search-box:focus-within {
-	border-color: #f7c32e;
-	background: #fff;
-	box-shadow: 0 0 0 4px rgba(247, 195, 46, 0.15);
-}
-.search-icon-wrapper {
-	width: 42px;
-	height: 42px;
-	background: linear-gradient(135deg, #f7c32e 0%, #f5a623 100%);
-	border-radius: 10px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin-right: 12px;
-	flex-shrink: 0;
-}
-.search-icon-wrapper i {
-	color: white;
-	font-size: 16px;
-}
-.search-input {
-	flex: 1;
-	border: none;
-	outline: none;
-	font-size: 15px;
-	padding: 10px 0;
-	background: transparent;
-	color: #333;
-	font-weight: 500;
-}
-.search-input::placeholder {
-	color: #999;
-	font-weight: 400;
-}
-.search-clear-btn {
-	background: none;
-	border: none;
-	color: #ccc;
-	font-size: 18px;
-	cursor: pointer;
-	padding: 8px;
-	margin-left: 8px;
-	transition: all 0.2s ease;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 50%;
-}
-.search-clear-btn:hover {
-	color: #dc3545;
-	background: #fee;
-}
-.search-hint {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	margin-top: 12px;
-	color: #6c757d;
-	font-size: 13px;
-}
-.search-hint-icon {
-	color: #f7c32e;
-}
-@keyframes pulse {
-	0%, 100% { opacity: 1; }
-	50% { opacity: 0.5; }
-}
-
-/* No Results Card */
-.no-results-card {
-	background: #fff;
-	border-radius: 16px;
-	padding: 50px 30px;
-	text-align: center;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-	border: 1px solid #eee;
-}
-.no-results-icon {
-	width: 70px;
-	height: 70px;
-	background: linear-gradient(135deg, #f7c32e 0%, #f5a623 100%);
-	border-radius: 14px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin: 0 auto 20px;
-	animation: bounceIn 0.5s ease;
-}
-.no-results-icon i {
-	color: white;
-	font-size: 28px;
-}
-.no-results-card h4 {
-	color: #333;
-	margin-bottom: 8px;
-	font-weight: 600;
-}
-.no-results-card p {
-	color: #666;
-	margin-bottom: 20px;
-}
-.no-results-card .search-term {
-	color: #f5a623;
-	font-weight: 600;
-}
-@keyframes bounceIn {
-	0% { transform: scale(0); opacity: 0; }
-	50% { transform: scale(1.1); }
-	100% { transform: scale(1); opacity: 1; }
-}
-
-/* ========== REACTION BUTTONS ========== */
+.favorite-btn-card:hover,
+.favorite-btn-card.active-favorite { color: #e91e63; }
 .reaction-btn-mini {
-	background: none;
-	border: none;
-	cursor: pointer;
-	padding: 0;
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	transition: transform 0.2s ease;
-	position: relative;
-	z-index: 10;
-}
-.reaction-btn-mini:hover {
-	transform: scale(1.1);
+    background: none;
+    border: none;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
 }
 .reaction-circle-mini {
-	width: 32px;
-	height: 32px;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border: 2px solid;
-	transition: all 0.3s ease;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
 }
-.like-circle-mini {
-	border-color: #c3e6cb;
-	background-color: #f8fff9;
-	color: #28a745;
-}
-.like-circle-mini i {
-	font-size: 14px;
-}
-.reaction-btn-mini:hover .like-circle-mini,
-.reaction-btn-mini.active-like .like-circle-mini {
-	background-color: #28a745;
-	color: white;
-	border-color: #28a745;
-	box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
-}
-.dislike-circle-mini {
-	border-color: #f5c6cb;
-	background-color: #fff8f8;
-	color: #dc3545;
-}
-.dislike-circle-mini i {
-	font-size: 14px;
-}
-.reaction-btn-mini:hover .dislike-circle-mini,
-.reaction-btn-mini.active-dislike .dislike-circle-mini {
-	background-color: #dc3545;
-	color: white;
-	border-color: #dc3545;
-	box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
-}
-.favorite-circle-mini {
-	border-color: #f8d7da;
-	background-color: #fff5f5;
-	color: #e91e63;
-}
-.favorite-circle-mini i {
-	font-size: 14px;
-}
-.reaction-btn-mini:hover .favorite-circle-mini,
-.reaction-btn-mini.active-favorite .favorite-circle-mini {
-	background-color: #e91e63;
-	color: white;
-	border-color: #e91e63;
-	box-shadow: 0 2px 8px rgba(233, 30, 99, 0.4);
-}
-.reaction-count-mini {
-	font-size: 12px;
-	font-weight: 600;
-	color: #666;
-}
-/* Style pour le bouton favori dans le card-body */
-.favorite-btn-card {
-	background: none;
-	border: none;
-	cursor: pointer;
-	padding: 0;
-	width: 28px;
-	height: 28px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: #999;
-	font-size: 20px;
-	transition: all 0.3s ease;
-	position: relative;
-	z-index: 10;
-}
-.favorite-btn-card:hover {
-	color: #e91e63;
-	transform: scale(1.2);
-}
-.favorite-btn-card.active-favorite {
-	color: #e91e63;
-}
-.favorite-btn-card.active-favorite i {
-	animation: heartBeat 0.3s ease;
-}
-@keyframes heartBeat {
-	0% { transform: scale(1); }
-	50% { transform: scale(1.3); }
-	100% { transform: scale(1); }
-}
-/* Empêcher le stretched-link d'affecter les boutons */
-.card-footer {
-	position: relative;
-	z-index: 5;
-}
-.card-footer .reaction-btn-mini,
-.card-footer .btn {
-	position: relative;
-	z-index: 10;
-}
+.like-circle-mini { border-color: #28a745; color: #28a745; }
+.dislike-circle-mini { border-color: #dc3545; color: #dc3545; }
+.reaction-btn-mini.active-like .like-circle-mini { background: #28a745; color: #fff; }
+.reaction-btn-mini.active-dislike .dislike-circle-mini { background: #dc3545; color: #fff; }
+.reaction-count-mini { font-size: 0.8rem; font-weight: 600; color: #4b5563; }
 </style>
 
-<!-- FullCalendar CDN -->
-<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
-
 <script>
-// ========== CALENDRIER ==========
-let calendar = null;
+(function () {
+    var searchInput = document.getElementById('event-search-input');
+    var searchBtn = document.getElementById('event-search-btn');
+    var sortSelect = document.getElementById('event-sort-select');
+    var countNode = document.getElementById('event-count');
+    var noResults = document.getElementById('events-no-results');
+    var grid = document.getElementById('events-grid');
 
-// Données des événements pour le calendrier
-const eventsData = [
-	{% for evenement in evenements %}
-	{
-		id: {{ evenement.id }},
-		title: "{{ evenement.titre|e('js') }}",
-		start: "{{ evenement.dateEvenement ? evenement.dateEvenement|date('Y-m-d') : '' }}{{ evenement.heureDebut ? 'T' ~ evenement.heureDebut|date('H:i:s') : '' }}",
-		end: "{{ evenement.dateEvenement ? evenement.dateEvenement|date('Y-m-d') : '' }}{{ evenement.heureFin ? 'T' ~ evenement.heureFin|date('H:i:s') : '' }}",
-		url: "{{ path('app_front_evenement_show', {'id': evenement.id}) }}",
-		extendedProps: {
-			description: "{{ evenement.description|slice(0, 100)|e('js') }}...",
-			likes: {{ evenement.likesCount }},
-			heureDebut: "{{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '-' }}",
-			heureFin: "{{ evenement.heureFin ? evenement.heureFin|date('H:i') : '-' }}",
-			image: "{% if evenement.image %}{{ asset('uploads/' ~ evenement.image) }}{% else %}{{ asset('assets/images/event/01.jpg') }}{% endif %}"
-		}
-	}{% if not loop.last %},{% endif %}
-	{% endfor %}
-];
+    if (!grid) return;
 
-function initCalendar() {
-	const calendarEl = document.getElementById('calendar');
-	const today = new Date().toISOString().split('T')[0];
-	
-	// Ajouter des classes selon la date
-	const eventsWithClasses = eventsData.map(event => {
-		let className = 'fc-event-future';
-		if (event.start < today) {
-			className = 'fc-event-past';
-		} else if (event.start === today) {
-			className = 'fc-event-today';
-		}
-		return { ...event, className };
-	});
-	
-	calendar = new FullCalendar.Calendar(calendarEl, {
-		initialView: 'dayGridMonth',
-		locale: 'fr',
-		headerToolbar: {
-			left: 'prev,next today',
-			center: 'title',
-			right: 'dayGridMonth,timeGridWeek,listWeek'
-		},
-		buttonText: {
-			today: "Aujourd'hui",
-			month: 'Mois',
-			week: 'Semaine',
-			list: 'Liste'
-		},
-		events: eventsWithClasses,
-		eventClick: function(info) {
-			info.jsEvent.preventDefault();
-			if (info.event.url) {
-				window.location.href = info.event.url;
-			}
-		},
-		eventDidMount: function(info) {
-			// Tooltip au survol avec les horaires
-			const heureDebut = info.event.extendedProps.heureDebut || '';
-			const heureFin = info.event.extendedProps.heureFin || '';
-			const horaires = heureDebut && heureFin ? ' (' + heureDebut + ' - ' + heureFin + ')' : '';
-			info.el.setAttribute('title', info.event.title + horaires + ' - Cliquez pour voir les détails');
-		},
-		displayEventTime: true,
-		eventTimeFormat: {
-			hour: '2-digit',
-			minute: '2-digit',
-			hour12: false
-		},
-		height: 'auto',
-		aspectRatio: 1.8
-	});
-}
+    var items = Array.prototype.slice.call(grid.querySelectorAll('.event-item'));
+    var total = items.length;
 
-function switchView(view) {
-	const listView = document.getElementById('events-grid');
-	const calendarView = document.getElementById('calendar-section');
-	const searchSection = document.getElementById('search-section');
-	const sortSection = document.getElementById('sort-section');
-	const btnList = document.getElementById('btn-list-view');
-	const btnCalendar = document.getElementById('btn-calendar-view');
-	
-	if (view === 'list') {
-		listView.style.display = 'flex';
-		calendarView.style.display = 'none';
-		searchSection.style.display = 'block';
-		sortSection.style.display = 'block';
-		btnList.classList.add('active');
-		btnCalendar.classList.remove('active');
-	} else {
-		listView.style.display = 'none';
-		calendarView.style.display = 'block';
-		searchSection.style.display = 'none';
-		sortSection.style.display = 'none';
-		btnList.classList.remove('active');
-		btnCalendar.classList.add('active');
-		
-		// Initialiser le calendrier si pas encore fait
-		if (!calendar) {
-			initCalendar();
-		}
-		calendar.render();
-	}
-}
+    function applyFilters() {
+        var query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+        var mode = sortSelect ? sortSelect.value : 'date_desc';
 
-// Fonction de recherche des événements (côté client, sans rechargement)
-function searchEvents(query) {
-	const cards = document.querySelectorAll('.event-card');
-	const searchTerm = query.toLowerCase().trim();
-	let visibleCount = 0;
-	
-	cards.forEach(card => {
-		const title = card.dataset.title || '';
-		const description = card.querySelector('.card-text')?.textContent.toLowerCase() || '';
-		
-		if (searchTerm === '' || title.includes(searchTerm) || description.includes(searchTerm)) {
-			card.style.display = '';
-			visibleCount++;
-		} else {
-			card.style.display = 'none';
-		}
-	});
-	
-	// Afficher un message si aucun résultat
-	let noResultMsg = document.getElementById('no-results-message');
-	if (visibleCount === 0 && searchTerm !== '') {
-		if (!noResultMsg) {
-			noResultMsg = document.createElement('div');
-			noResultMsg.id = 'no-results-message';
-			noResultMsg.className = 'col-12';
-			noResultMsg.innerHTML = `
-				<div class="no-results-card">
-					<div class="no-results-icon">
-						<i class="bi bi-search"></i>
-					</div>
-					<h4>Aucun événement trouvé</h4>
-					<p>Aucun résultat pour "<strong class="search-term">${searchTerm}</strong>"</p>
-					<button class="btn btn-outline-primary btn-sm" onclick="clearSearch()">
-						<i class="bi bi-arrow-counterclockwise me-1"></i>Effacer la recherche
-					</button>
-				</div>
-			`;
-			document.getElementById('events-grid').appendChild(noResultMsg);
-		} else {
-			noResultMsg.querySelector('.search-term').textContent = searchTerm;
-			noResultMsg.style.display = '';
-		}
-	} else if (noResultMsg) {
-		noResultMsg.style.display = 'none';
-	}
-}
+        items.sort(function (a, b) {
+            var aDate = a.dataset.date || '';
+            var bDate = b.dataset.date || '';
+            var aTitle = a.dataset.title || '';
+            var bTitle = b.dataset.title || '';
+            var aLikes = parseInt(a.dataset.likes || '0', 10);
+            var bLikes = parseInt(b.dataset.likes || '0', 10);
 
-function clearSearch() {
-	const searchInput = document.getElementById('search-input');
-	searchInput.value = '';
-	searchEvents('');
-	searchInput.focus();
-}
+            if (mode === 'date_asc') return aDate.localeCompare(bDate);
+            if (mode === 'likes_desc') return bLikes - aLikes;
+            if (mode === 'title_asc') return aTitle.localeCompare(bTitle);
+            if (mode === 'title_desc') return bTitle.localeCompare(aTitle);
+            return bDate.localeCompare(aDate);
+        });
 
-// Fonction de tri des événements (côté client, sans rechargement)
-function sortEvents(sortType) {
-	const grid = document.getElementById('events-grid');
-	const cards = Array.from(grid.querySelectorAll('.event-card'));
-	
-	// Mettre à jour les boutons actifs
-	document.querySelectorAll('.sort-btn').forEach(btn => {
-		btn.classList.remove('btn-primary', 'btn-success', 'btn-secondary');
-		btn.classList.add('btn-outline-primary', 'btn-outline-success', 'btn-outline-secondary');
-		
-		if (btn.dataset.sort === sortType) {
-			btn.classList.remove('btn-outline-primary', 'btn-outline-success', 'btn-outline-secondary');
-			if (sortType === 'likes') {
-				btn.classList.add('btn-success');
-			} else if (sortType.startsWith('title')) {
-				btn.classList.add('btn-secondary');
-			} else {
-				btn.classList.add('btn-primary');
-			}
-		}
-	});
-	
-	// Trier les cartes
-	cards.sort((a, b) => {
-		switch(sortType) {
-			case 'date_desc':
-				return b.dataset.date.localeCompare(a.dataset.date);
-			case 'date_asc':
-				return a.dataset.date.localeCompare(b.dataset.date);
-			case 'likes':
-				return parseInt(b.dataset.likes) - parseInt(a.dataset.likes);
-			case 'title_asc':
-				return a.dataset.title.localeCompare(b.dataset.title);
-			case 'title_desc':
-				return b.dataset.title.localeCompare(a.dataset.title);
-			default:
-				return 0;
-		}
-	});
-	
-	// Réorganiser les cartes dans le DOM
-	cards.forEach(card => grid.appendChild(card));
-}
+        items.forEach(function (item) { grid.appendChild(item); });
+
+        var visible = 0;
+        items.forEach(function (item) {
+            var haystack = ((item.dataset.title || '') + ' ' + (item.dataset.description || '')).toLowerCase();
+            var show = query === '' || haystack.indexOf(query) !== -1;
+            item.style.display = show ? '' : 'none';
+            if (show) visible += 1;
+        });
+
+        if (countNode) {
+            countNode.textContent = visible + ' evenement(s)';
+        }
+
+        if (noResults) {
+            noResults.classList.toggle('d-none', visible !== 0 || total === 0);
+        }
+    }
+
+    if (searchInput) searchInput.addEventListener('input', applyFilters);
+    if (searchBtn) searchBtn.addEventListener('click', applyFilters);
+    if (sortSelect) sortSelect.addEventListener('change', applyFilters);
+    applyFilters();
+})();
 
 function reactToEvent(eventId, type, e) {
-	// Empêcher la propagation vers le lien stretched-link
-	e.preventDefault();
-	e.stopPropagation();
-	
-	const url = `/interaction/${type}/${eventId}`;
-	
-	fetch(url, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-Requested-With': 'XMLHttpRequest'
-		}
-	})
-	.then(response => response.json())
-	.then(data => {
-		if (data.success) {
-			// Mettre à jour les compteurs
-			document.querySelector('.likes-count-' + eventId).textContent = data.likes;
-			document.querySelector('.dislikes-count-' + eventId).textContent = data.dislikes;
-			
-			// Mettre à jour les styles des boutons
-			const likeBtn = document.querySelector('.like-btn-' + eventId);
-			const dislikeBtn = document.querySelector('.dislike-btn-' + eventId);
-			
-			// Reset des boutons
-			likeBtn.classList.remove('active-like');
-			dislikeBtn.classList.remove('active-dislike');
-			
-			// Appliquer le nouveau style
-			if (data.userReaction === 'like') {
-				likeBtn.classList.add('active-like');
-			} else if (data.userReaction === 'dislike') {
-				dislikeBtn.classList.add('active-dislike');
-			}
-		}
-	})
-	.catch(error => {
-		console.error('Erreur:', error);
-	});
+    e.preventDefault();
+    e.stopPropagation();
+
+    fetch('/interaction/' + type + '/' + eventId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(function (response) { return response.json(); })
+    .then(function (data) {
+        if (!data.success) return;
+
+        var likesCount = document.querySelector('.likes-count-' + eventId);
+        var dislikesCount = document.querySelector('.dislikes-count-' + eventId);
+        var likeBtn = document.querySelector('.like-btn-' + eventId);
+        var dislikeBtn = document.querySelector('.dislike-btn-' + eventId);
+
+        if (likesCount) likesCount.textContent = data.likes;
+        if (dislikesCount) dislikesCount.textContent = data.dislikes;
+        if (likeBtn) likeBtn.classList.remove('active-like');
+        if (dislikeBtn) dislikeBtn.classList.remove('active-dislike');
+        if (data.userReaction === 'like' && likeBtn) likeBtn.classList.add('active-like');
+        if (data.userReaction === 'dislike' && dislikeBtn) dislikeBtn.classList.add('active-dislike');
+    });
 }
 
 function toggleFavorite(eventId, e) {
-	// Empêcher la propagation vers le lien stretched-link
-	e.preventDefault();
-	e.stopPropagation();
-	
-	const url = `/interaction/favorite/${eventId}`;
-	
-	fetch(url, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-Requested-With': 'XMLHttpRequest'
-		}
-	})
-	.then(response => response.json())
-	.then(data => {
-		if (data.success) {
-			// Mettre à jour le style du bouton
-			const favoriteBtn = document.querySelector('.favorite-btn-' + eventId);
-			const heartIcon = favoriteBtn.querySelector('i');
-			
-			if (data.isFavorite) {
-				favoriteBtn.classList.add('active-favorite');
-				// Changer l'icône en cœur plein
-				heartIcon.classList.remove('far');
-				heartIcon.classList.add('fas');
-			} else {
-				favoriteBtn.classList.remove('active-favorite');
-				// Changer l'icône en cœur vide
-				heartIcon.classList.remove('fas');
-				heartIcon.classList.add('far');
-			}
-			
-			// Mettre à jour le badge des favoris dans la navbar
-			updateFavoritesBadge(data.totalUserFavorites);
-		}
-	})
-	.catch(error => {
-		console.error('Erreur:', error);
-	});
+    e.preventDefault();
+    e.stopPropagation();
+
+    fetch('/interaction/favorite/' + eventId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(function (response) { return response.json(); })
+    .then(function (data) {
+        if (!data.success) return;
+
+        var favoriteBtn = document.querySelector('.favorite-btn-' + eventId);
+        if (!favoriteBtn) return;
+
+        var heartIcon = favoriteBtn.querySelector('i');
+        if (data.isFavorite) {
+            favoriteBtn.classList.add('active-favorite');
+            if (heartIcon) {
+                heartIcon.classList.remove('far');
+                heartIcon.classList.add('fas');
+            }
+        } else {
+            favoriteBtn.classList.remove('active-favorite');
+            if (heartIcon) {
+                heartIcon.classList.remove('fas');
+                heartIcon.classList.add('far');
+            }
+        }
+
+        updateFavoritesBadge(data.totalUserFavorites);
+    });
 }
 
-// Fonction pour mettre à jour le badge des favoris
 function updateFavoritesBadge(count) {
-	const navFavIcon = document.querySelector('.nav-favorites-icon');
-	if (!navFavIcon) return;
-	
-	let badge = navFavIcon.querySelector('.favorites-badge');
-	
-	if (count > 0) {
-		const displayCount = count > 99 ? '99+' : count;
-		if (badge) {
-			badge.textContent = displayCount;
-		} else {
-			badge = document.createElement('span');
-			badge.className = 'favorites-badge';
-			badge.textContent = displayCount;
-			navFavIcon.appendChild(badge);
-		}
-	} else {
-		if (badge) {
-			badge.remove();
-		}
-	}
-}
-</script>
+    var navFavIcon = document.querySelector('.nav-favorites-icon');
+    if (!navFavIcon) return;
 
-<!-- Script pour charger le modal de réservation -->
-<script>
+    var badge = navFavIcon.querySelector('.favorites-badge');
+    if (count > 0) {
+        var displayCount = count > 99 ? '99+' : count;
+        if (badge) {
+            badge.textContent = displayCount;
+        } else {
+            badge = document.createElement('span');
+            badge.className = 'favorites-badge';
+            badge.textContent = displayCount;
+            navFavIcon.appendChild(badge);
+        }
+    } else if (badge) {
+        badge.remove();
+    }
+}
+
 function loadReservationModal(evenementId) {
-	// Vérifier si le modal existe déjà
-	let modalElement = document.getElementById('reservationModal' + evenementId);
-	
-	if (modalElement) {
-		// Le modal existe déjà, juste l'afficher
-		const modal = new bootstrap.Modal(modalElement);
-		modal.show();
-		return;
-	}
-	
-	// Charger le formulaire via AJAX
-	fetch('/reservation/participer/' + evenementId, {
-		method: 'GET',
-		headers: {
-			'X-Requested-With': 'XMLHttpRequest'
-		}
-	})
-	.then(response => response.text())
-	.then(html => {
-		// Créer un conteneur temporaire pour parser le HTML
-		const tempDiv = document.createElement('div');
-		tempDiv.innerHTML = html;
-		
-		// Extraire le modal du HTML
-		const modalHtml = tempDiv.querySelector('.modal');
-		if (modalHtml) {
-			// Ajouter le modal au body
-			document.body.appendChild(modalHtml);
-			
-			// Afficher le modal
-			const modal = new bootstrap.Modal(modalHtml);
-			modal.show();
-			
-			// Nettoyer après fermeture
-			modalHtml.addEventListener('hidden.bs.modal', function() {
-				modalHtml.remove();
-			});
-		}
-	})
-	.catch(error => {
-		console.error('Erreur lors du chargement du formulaire:', error);
-		alert('Une erreur est survenue lors du chargement du formulaire.');
-	});
+    var modalElement = document.getElementById('reservationModal' + evenementId);
+    if (modalElement) {
+        var modal = new bootstrap.Modal(modalElement);
+        modal.show();
+        return;
+    }
+
+    fetch('/reservation/participer/' + evenementId, {
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function (response) { return response.text(); })
+    .then(function (html) {
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        var modalHtml = tempDiv.querySelector('.modal');
+        if (!modalHtml) return;
+
+        document.body.appendChild(modalHtml);
+        var modal = new bootstrap.Modal(modalHtml);
+        modal.show();
+        modalHtml.addEventListener('hidden.bs.modal', function () {
+            modalHtml.remove();
+        });
+    })
+    .catch(function () {
+        alert('Erreur lors du chargement du formulaire.');
+    });
 }
 </script>
 {% endblock %}

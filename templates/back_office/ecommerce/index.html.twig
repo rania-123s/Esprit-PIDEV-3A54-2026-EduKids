@@ -1,57 +1,327 @@
 {% extends 'back_office/ecommerce_base.html.twig' %}
 
-{% block title %}E-commerce Éducatif - Admin{% endblock %}
+{% block title %}E-commerce Educatif - Admin{% endblock %}
 
 {% block body %}
-<div class="container-fluid p-4">
-    <h1 class="h3 mb-1 ecommerce-admin-header">E-commerce Éducatif</h1>
-    <p class="text-body mb-4" style="color: #4b5563 !important;">Gérez vos produits, catégories, commandes et avis.</p>
-    <div class="row g-4">
-        <div class="col-md-4 col-lg-3">
-            <div class="card ecommerce-admin-card h-100">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="bi bi-basket me-2 text-primary"></i>Produits</h5>
-                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Gérer le catalogue des produits éducatifs (CRUD).</p>
-                    <a href="{{ path('ecommerce_admin_produit_index') }}" class="btn btn-primary rounded-pill px-4">Gérer les produits</a>
-                </div>
+<style>
+    .ecommerce-index-tuned .card {
+        border-radius: 14px;
+        overflow: hidden;
+        animation: panelIn 0.45s ease both;
+    }
+
+    .ecommerce-index-tuned .card-header {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .ecommerce-index-tuned .form-control,
+    .ecommerce-index-tuned .form-select {
+        border-radius: 10px;
+    }
+
+    .ecommerce-index-tuned .table thead th {
+        font-weight: 700;
+        letter-spacing: 0.2px;
+    }
+
+    .ecommerce-index-tuned .table tbody tr {
+        transition: background-color 0.2s ease;
+        animation: rowIn 0.35s ease both;
+    }
+
+    .ecommerce-index-tuned .table tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.04);
+    }
+
+    .ecommerce-index-tuned .results-meta {
+        font-size: 0.85rem;
+        color: #6c757d;
+        animation: fadeInSoft 0.45s ease both;
+    }
+
+    .ecommerce-index-tuned .row.mb-3 {
+        animation: slideDownIn 0.45s ease both;
+    }
+
+    .ecommerce-index-tuned .row.g-4.mb-4 > div {
+        animation: riseIn 0.45s ease both;
+    }
+
+    .ecommerce-index-tuned .row.g-4.mb-4 > div:nth-child(2) {
+        animation-delay: 0.08s;
+    }
+
+    .ecommerce-index-tuned .row.g-4.mb-4 > div:nth-child(3) {
+        animation-delay: 0.16s;
+    }
+
+    .ecommerce-index-tuned .card-header .fa-search {
+        transition: transform 0.2s ease;
+    }
+
+    .ecommerce-index-tuned .card-header .btn:hover .fa-search {
+        transform: scale(1.15);
+    }
+
+    .ecommerce-index-tuned .btn-outline-secondary {
+        animation: pulseSoft 1.7s ease-in-out infinite;
+    }
+
+    .ecommerce-index-tuned .table tbody tr:nth-child(1) { animation-delay: 0.02s; }
+    .ecommerce-index-tuned .table tbody tr:nth-child(2) { animation-delay: 0.05s; }
+    .ecommerce-index-tuned .table tbody tr:nth-child(3) { animation-delay: 0.08s; }
+    .ecommerce-index-tuned .table tbody tr:nth-child(4) { animation-delay: 0.11s; }
+    .ecommerce-index-tuned .table tbody tr:nth-child(5) { animation-delay: 0.14s; }
+
+    @keyframes slideDownIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes riseIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes panelIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInSoft {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes rowIn {
+        from { opacity: 0; transform: translateX(8px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulseSoft {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(108, 117, 125, 0.12); }
+        50% { box-shadow: 0 0 0 6px rgba(108, 117, 125, 0.04); }
+    }
+
+    @media (max-width: 768px) {
+        .ecommerce-index-tuned .card-header .row > div {
+            width: 100%;
+        }
+    }
+</style>
+
+{% set modules = [
+    {
+        title: 'Produits',
+        area: 'Catalogue',
+        description: 'Gerer le catalogue des produits educatifs (CRUD).',
+        route: 'ecommerce_admin_produit_index',
+        cta: 'Gerer les produits',
+        icon: 'bi-basket'
+    },
+    {
+        title: 'Categories',
+        area: 'Structure',
+        description: 'Creer et gerer les categories de produits.',
+        route: 'ecommerce_admin_category_index',
+        cta: 'Gerer les categories',
+        icon: 'bi-tags'
+    },
+    {
+        title: 'Commandes',
+        area: 'Ventes',
+        description: 'Liste des commandes et mise a jour des statuts.',
+        route: 'ecommerce_admin_commande_index',
+        cta: 'Voir les commandes',
+        icon: 'bi-cart-check'
+    },
+    {
+        title: 'Avis',
+        area: 'Moderation',
+        description: 'Moderer les avis clients (approuver / rejeter).',
+        route: 'ecommerce_admin_review_index',
+        cta: 'Moderer les avis',
+        icon: 'bi-chat-quote'
+    },
+    {
+        title: 'Statistiques',
+        area: 'Analytics',
+        description: 'Tableau de bord, export et ventes par periode.',
+        route: 'ecommerce_admin_analytics',
+        cta: 'Tableau de bord',
+        icon: 'bi-graph-up'
+    }
+] %}
+
+<div class="ecommerce-index-tuned">
+    <div class="row mb-3">
+        <div class="col-12 d-sm-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-2 mb-sm-0 ecommerce-admin-header">E-commerce Educatif</h1>
+            <a href="{{ path('ecommerce_admin_produit_new') }}" class="btn btn-sm btn-primary mb-0">Ajouter un produit</a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-lg-4">
+            <div class="text-center p-4 bg-primary bg-opacity-10 border border-primary rounded-3">
+                <h6>Total Produits</h6>
+                <h2 class="mb-0 fs-1 text-primary">{{ totalProduits }}</h2>
             </div>
         </div>
-        <div class="col-md-4 col-lg-3">
-            <div class="card ecommerce-admin-card h-100">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="bi bi-chat-quote me-2 text-primary"></i>Avis</h5>
-                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Modérer les avis clients (approuver / rejeter).</p>
-                    <a href="{{ path('ecommerce_admin_review_index') }}" class="btn btn-primary rounded-pill px-4">Modérer les avis</a>
-                </div>
+
+        <div class="col-sm-6 col-lg-4">
+            <div class="text-center p-4 bg-success bg-opacity-10 border border-success rounded-3">
+                <h6>Total Commandes</h6>
+                <h2 class="mb-0 fs-1 text-success">{{ totalCommandes }}</h2>
             </div>
         </div>
-        <div class="col-md-4 col-lg-3">
-            <div class="card ecommerce-admin-card h-100">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="bi bi-tags me-2 text-primary"></i>Catégories</h5>
-                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Créer et gérer les catégories de produits.</p>
-                    <a href="{{ path('ecommerce_admin_category_index') }}" class="btn btn-primary rounded-pill px-4">Gérer les catégories</a>
-                </div>
+
+        <div class="col-sm-6 col-lg-4">
+            <div class="text-center p-4 bg-warning bg-opacity-15 border border-warning rounded-3">
+                <h6>Avis en attente</h6>
+                <h2 class="mb-0 fs-1 text-warning">{{ pendingReviews }}</h2>
             </div>
         </div>
-        <div class="col-md-4 col-lg-3">
-            <div class="card ecommerce-admin-card h-100">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="bi bi-cart-check me-2 text-primary"></i>Commandes</h5>
-                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Liste des commandes et mise à jour des statuts.</p>
-                    <a href="{{ path('ecommerce_admin_commande_index') }}" class="btn btn-primary rounded-pill px-4">Voir les commandes</a>
+    </div>
+
+    <div class="card bg-transparent border">
+        <div class="card-header bg-light border-bottom">
+            <div class="row g-3 align-items-center justify-content-between">
+                <div class="col-md-8">
+                    <div class="rounded position-relative">
+                        <input id="moduleSearch" class="form-control bg-body" type="search" placeholder="Rechercher un module..." aria-label="Search">
+                        <button type="button" class="btn bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y me-2" aria-label="Rechercher">
+                            <i class="fas fa-search fs-6 text-primary"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <select id="moduleSort" class="form-select js-choice border-0 z-index-9" aria-label="Tri modules">
+                        <option value="default">Default</option>
+                        <option value="a-z">Titre A-Z</option>
+                        <option value="z-a">Titre Z-A</option>
+                        <option value="area">Par domaine</option>
+                    </select>
+                </div>
+
+                <div class="col-md-1 text-md-end">
+                    <button id="moduleReset" type="button" class="btn btn-sm btn-outline-secondary">Reset</button>
                 </div>
             </div>
+
+            <div class="results-meta mt-2" id="moduleMeta">
+                {{ modules|length }} module(s) | categories: {{ totalCategories }}
+            </div>
         </div>
-        <div class="col-md-4 col-lg-3">
-            <div class="card ecommerce-admin-card h-100">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="bi bi-graph-up me-2 text-primary"></i>Statistiques</h5>
-                    <p class="card-text small mb-3" style="color: #4b5563 !important;">Tableau de bord, export et ventes par période.</p>
-                    <a href="{{ path('ecommerce_admin_analytics') }}" class="btn btn-primary rounded-pill px-4">Tableau de bord</a>
-                </div>
+
+        <div class="card-body">
+            <div class="table-responsive border-0 rounded-3">
+                <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="border-0 rounded-start">Module</th>
+                            <th scope="col" class="border-0">Domaine</th>
+                            <th scope="col" class="border-0">Description</th>
+                            <th scope="col" class="border-0 rounded-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="moduleTableBody">
+                        {% for module in modules %}
+                            <tr class="module-row" data-title="{{ module.title|lower }}" data-area="{{ module.area|lower }}" data-index="{{ loop.index0 }}">
+                                <td>
+                                    <div class="d-flex align-items-center position-relative">
+                                        <span class="rounded bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="bi {{ module.icon }}"></i>
+                                        </span>
+                                        <h6 class="table-responsive-title mb-0 ms-2">{{ module.title }}</h6>
+                                    </div>
+                                </td>
+                                <td><span class="badge text-bg-primary">{{ module.area }}</span></td>
+                                <td>{{ module.description }}</td>
+                                <td>
+                                    <a href="{{ path(module.route) }}" class="btn btn-sm btn-primary-soft me-1 mb-1 mb-md-0">{{ module.cta }}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr id="moduleNoResult" style="display:none;">
+                            <td colspan="4">Aucun module trouve.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer bg-transparent pt-0">
+            <div class="d-sm-flex justify-content-sm-between align-items-sm-center">
+                <p class="mb-0 text-center text-sm-start" id="moduleFooter">
+                    Affichage de {{ modules|length }} module(s)
+                </p>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+(function() {
+    var searchInput = document.getElementById('moduleSearch');
+    var sortSelect = document.getElementById('moduleSort');
+    var resetBtn = document.getElementById('moduleReset');
+    var tbody = document.getElementById('moduleTableBody');
+    var noResult = document.getElementById('moduleNoResult');
+    var meta = document.getElementById('moduleMeta');
+    var footer = document.getElementById('moduleFooter');
+    if (!tbody) return;
+
+    var rows = Array.prototype.slice.call(tbody.querySelectorAll('.module-row'));
+
+    function compareRows(a, b, mode) {
+        var titleA = (a.getAttribute('data-title') || '');
+        var titleB = (b.getAttribute('data-title') || '');
+        var areaA = (a.getAttribute('data-area') || '');
+        var areaB = (b.getAttribute('data-area') || '');
+        var idxA = parseInt(a.getAttribute('data-index') || '0', 10);
+        var idxB = parseInt(b.getAttribute('data-index') || '0', 10);
+
+        if (mode === 'a-z') return titleA.localeCompare(titleB);
+        if (mode === 'z-a') return titleB.localeCompare(titleA);
+        if (mode === 'area') return areaA.localeCompare(areaB) || titleA.localeCompare(titleB);
+        return idxA - idxB;
+    }
+
+    function applyFilters() {
+        var searchValue = (searchInput && searchInput.value ? searchInput.value : '').toLowerCase().trim();
+        var sortValue = sortSelect ? sortSelect.value : 'default';
+        var visibleCount = 0;
+
+        rows.sort(function(a, b) { return compareRows(a, b, sortValue); });
+        rows.forEach(function(row) { tbody.appendChild(row); });
+
+        rows.forEach(function(row) {
+            var title = (row.getAttribute('data-title') || '').toLowerCase();
+            var area = (row.getAttribute('data-area') || '').toLowerCase();
+            var visible = searchValue === '' || title.indexOf(searchValue) !== -1 || area.indexOf(searchValue) !== -1;
+            row.style.display = visible ? '' : 'none';
+            if (visible) visibleCount++;
+        });
+
+        if (noResult) noResult.style.display = visibleCount === 0 ? '' : 'none';
+        if (meta) meta.textContent = visibleCount + ' module(s) | categories: {{ totalCategories }}';
+        if (footer) footer.textContent = 'Affichage de ' + visibleCount + ' module(s)';
+    }
+
+    if (searchInput) searchInput.addEventListener('input', applyFilters);
+    if (sortSelect) sortSelect.addEventListener('change', applyFilters);
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+            if (searchInput) searchInput.value = '';
+            if (sortSelect) sortSelect.value = 'default';
+            applyFilters();
+        });
+    }
+
+    applyFilters();
+})();
+</script>
 {% endblock %}
