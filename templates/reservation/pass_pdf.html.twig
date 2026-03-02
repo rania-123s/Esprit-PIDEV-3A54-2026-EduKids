@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pass - {{ evenement.titre }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            background: white;
+            padding: 0;
+        }
+        
+        .pass-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .pass-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .pass-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .pass-header .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .pass-body {
+            padding: 40px;
+        }
+        
+        .event-info {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+        
+        .event-info h2 {
+            color: #28a745;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 12px;
+            align-items: flex-start;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #495057;
+            min-width: 150px;
+            margin-right: 15px;
+        }
+        
+        .info-value {
+            color: #212529;
+            flex: 1;
+        }
+        
+        .info-icon {
+            width: 20px;
+            margin-right: 8px;
+            color: #28a745;
+        }
+        
+        .reservation-details {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+        
+        .reservation-details h3 {
+            color: #007bff;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .qr-section {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-top: 2px dashed #dee2e6;
+        }
+        
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            background: white;
+            border: 3px solid #28a745;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        
+        .qr-code canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        .reservation-id {
+            font-size: 18px;
+            font-weight: bold;
+            color: #28a745;
+            letter-spacing: 2px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #6c757d;
+            font-size: 12px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .pass-container {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+            
+            @page {
+                margin: 0.5cm;
+                size: A4;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="pass-container">
+        <div class="pass-header">
+            <h1>🎫 PASS ÉVÉNEMENT</h1>
+            <div class="subtitle">Votre billet d'entrée</div>
+        </div>
+        
+        <div class="pass-body">
+            <!-- Informations de l'événement -->
+            <div class="event-info">
+                <h2>{{ evenement.titre }}</h2>
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-calendar info-icon"></i>Date :
+                    </span>
+                    <span class="info-value">
+                        {{ evenement.dateEvenement ? evenement.dateEvenement|date('d/m/Y') : 'Non définie' }}
+                    </span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-clock info-icon"></i>Heure :
+                    </span>
+                    <span class="info-value">
+                        {{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '-' }} - {{ evenement.heureFin ? evenement.heureFin|date('H:i') : '-' }}
+                    </span>
+                </div>
+                
+                {% if evenement.localisation %}
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-map-marker-alt info-icon"></i>Localisation :
+                    </span>
+                    <span class="info-value">
+                        {{ evenement.localisation }}
+                    </span>
+                </div>
+                {% endif %}
+                
+                {% if evenement.typeEvenement %}
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-tag info-icon"></i>Type :
+                    </span>
+                    <span class="info-value">
+                        {{ evenement.typeEvenementLabel }}
+                    </span>
+                </div>
+                {% endif %}
+                
+                {% if evenement.description %}
+                <div class="info-row" style="flex-direction: column;">
+                    <span class="info-label" style="margin-bottom: 8px;">
+                        <i class="fas fa-align-left info-icon"></i>Description :
+                    </span>
+                    <span class="info-value">
+                        {{ evenement.description }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Détails de la réservation -->
+            <div class="reservation-details">
+                <h3>📋 Détails de votre réservation</h3>
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-user info-icon"></i>Nom complet :
+                    </span>
+                    <span class="info-value">
+                        {{ reservation.prenom }} {{ reservation.nom }}
+                    </span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-envelope info-icon"></i>Email :
+                    </span>
+                    <span class="info-value">
+                        {{ reservation.email }}
+                    </span>
+                </div>
+                
+                {% if reservation.telephone %}
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-phone info-icon"></i>Téléphone :
+                    </span>
+                    <span class="info-value">
+                        {{ reservation.telephone }}
+                    </span>
+                </div>
+                {% endif %}
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-users info-icon"></i>Nombre de places :
+                    </span>
+                    <span class="info-value">
+                        <strong>{{ reservation.nbPlacesTotal }} place(s)</strong>
+                        <span class="badge badge-info">{{ reservation.nbAdultes }} adulte(s)</span>
+                        {% if reservation.nbEnfants > 0 %}
+                        <span class="badge badge-success">{{ reservation.nbEnfants }} enfant(s)</span>
+                        {% endif %}
+                    </span>
+                </div>
+                
+                {% if evenement.nbPlacesDisponibles is not null %}
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-info-circle info-icon"></i>Places restantes :
+                    </span>
+                    <span class="info-value">
+                        <strong style="color: #28a745;">{{ evenement.nbPlacesRestantes }} place(s)</strong> sur {{ evenement.nbPlacesDisponibles }}
+                    </span>
+                </div>
+                {% endif %}
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-calendar-check info-icon"></i>Date de réservation :
+                    </span>
+                    <span class="info-value">
+                        {{ reservation.dateReservation ? reservation.dateReservation|date('d/m/Y à H:i') : '-' }}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Code QR / ID de réservation -->
+            <div class="qr-section">
+                <div class="qr-code">
+                    <canvas id="qrcode"></canvas>
+                </div>
+                <div class="reservation-id" style="margin-top: 15px;">#{{ '%06d'|format(reservation.id) }}</div>
+                <p style="color: #6c757d; font-size: 14px; margin-top: 10px;">
+                    Présentez ce pass à l'entrée de l'événement
+                </p>
+                <p style="color: #6c757d; font-size: 12px; margin-top: 5px;">
+                    ID Réservation: {{ reservation.id }}
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Important :</strong> Veuillez présenter ce document à l'entrée de l'événement.</p>
+            <p style="margin-top: 10px;">Généré le {{ 'now'|date('d/m/Y à H:i') }}</p>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <script>
+        // Générer le QR code
+        window.addEventListener('load', function() {
+            const qrCanvas = document.getElementById('qrcode');
+            if (!qrCanvas) {
+                console.error('Élément QR code non trouvé');
+                setTimeout(function() {
+                    window.print();
+                }, 500);
+                return;
+            }
+            
+            const qrData = {
+                id: {{ reservation.id }},
+                event: '{{ evenement.titre|e('js') }}',
+                user: '{{ reservation.prenom|e('js') }} {{ reservation.nom|e('js') }}',
+                date: '{{ evenement.dateEvenement ? evenement.dateEvenement|date('Y-m-d') : '' }}',
+                places: {{ reservation.nbPlacesTotal }}
+            };
+            
+            const qrText = JSON.stringify(qrData);
+            
+            try {
+                QRCode.toCanvas(qrCanvas, qrText, {
+                    width: 180,
+                    margin: 2,
+                    color: {
+                        dark: '#28a745',
+                        light: '#ffffff'
+                    },
+                    errorCorrectionLevel: 'M'
+                }, function (error) {
+                    if (error) {
+                        console.error('Erreur lors de la génération du QR code:', error);
+                        qrCanvas.parentElement.innerHTML = 
+                            '<div style="text-align: center; padding: 20px; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;"><div style="font-size: 48px; margin-bottom: 10px;">🎫</div><div class="reservation-id">#{{ '%06d'|format(reservation.id) }}</div></div>';
+                    }
+                    // Attendre que le QR code soit généré avant d'imprimer
+                    setTimeout(function() {
+                        window.print();
+                    }, 1000);
+                });
+            } catch (e) {
+                console.error('Exception lors de la génération du QR code:', e);
+                qrCanvas.parentElement.innerHTML = 
+                    '<div style="text-align: center; padding: 20px; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;"><div style="font-size: 48px; margin-bottom: 10px;">🎫</div><div class="reservation-id">#{{ '%06d'|format(reservation.id) }}</div></div>';
+                setTimeout(function() {
+                    window.print();
+                }, 500);
+            }
+        });
+        
+        // Auto-impression en PDF au chargement (si QR code échoue)
+        window.onload = function() {
+            // Le QR code gère déjà l'impression
+        };
+        
+        // Après impression, fermer la fenêtre (optionnel)
+        window.onafterprint = function() {
+            // Optionnel : fermer la fenêtre après impression
+            // window.close();
+        };
+    </script>
+</body>
+</html>

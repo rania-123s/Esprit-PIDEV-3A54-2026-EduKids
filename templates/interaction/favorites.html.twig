@@ -1,0 +1,89 @@
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}Mes Favoris - EduKids{% endblock %}
+
+{% block body %}
+<section class="pt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Header -->
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h1 class="mb-0"><i class="fas fa-heart text-danger me-2"></i>Mes Favoris</h1>
+                    <a href="{{ path('app_front_evenement_index') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-1"></i>Retour aux événements
+                    </a>
+                </div>
+                
+                {% if favorites is empty %}
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-heart-broken fa-4x text-muted mb-3"></i>
+                            <h4 class="text-muted">Aucun favori pour le moment</h4>
+                            <p class="text-muted mb-4">Vous n'avez pas encore ajouté d'événements à vos favoris.</p>
+                            <a href="{{ path('app_front_evenement_index') }}" class="btn btn-primary">
+                                <i class="bi bi-calendar-event me-1"></i>Découvrir les événements
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-4">Vous avez {{ favorites|length }} événement(s) en favoris</p>
+                    <div class="row g-4">
+                        {% for interaction in favorites %}
+                            {% set evenement = interaction.evenement %}
+                            <div class="col-sm-6 col-lg-4">
+                                <div class="card shadow h-100 overflow-hidden">
+                                    <!-- Image -->
+                                    <div class="position-relative">
+                                        {% if evenement.image %}
+                                            <img src="{{ asset('uploads/' ~ evenement.image) }}" class="card-img-top" alt="{{ evenement.titre }}" style="height: 200px; object-fit: cover;">
+                                        {% else %}
+                                            <img src="{{ asset('assets/images/event/' ~ ('%02d'|format((loop.index % 18) == 0 ? 18 : (loop.index % 18))) ~ '.jpg') }}" class="card-img-top" alt="{{ evenement.titre }}" style="height: 200px; object-fit: cover;">
+                                        {% endif %}
+                                        <!-- Date badge -->
+                                        <div class="position-absolute top-0 start-0 m-3">
+                                            <span class="badge bg-dark bg-opacity-75 text-white">
+                                                <i class="bi bi-calendar3 me-1"></i>
+                                                {{ evenement.dateEvenement ? evenement.dateEvenement|date('d M Y') : 'À définir' }}
+                                            </span>
+                                        </div>
+                                        <!-- Favorite icon -->
+                                        <div class="position-absolute top-0 end-0 m-3">
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-heart"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ evenement.titre }}</h5>
+                                        <p class="card-text text-muted small">
+                                            {{ evenement.description|slice(0, 100) }}{% if evenement.description|length > 100 %}...{% endif %}
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="card-footer bg-white border-top">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <span class="text-success small">
+                                                    <i class="fas fa-thumbs-up"></i> {{ evenement.likesCount }}
+                                                </span>
+                                                <span class="text-danger small">
+                                                    <i class="fas fa-thumbs-down"></i> {{ evenement.dislikesCount }}
+                                                </span>
+                                            </div>
+                                            <a href="{{ path('app_front_evenement_show', {'id': evenement.id}) }}" class="btn btn-sm btn-primary">
+                                                Voir détails <i class="bi bi-arrow-right ms-1"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

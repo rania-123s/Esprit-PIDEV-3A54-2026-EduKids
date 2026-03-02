@@ -1,0 +1,472 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Statistiques des Événements{% endblock %}
+
+{% block body %}
+<div class="dashboard-content-one">
+    <!-- Page Title -->
+    <div class="card height-auto mb-4">
+        <div class="card-body">
+            <div class="heading-layout1">
+                <div class="item-title">
+                    <h3><i class="fas fa-chart-line text-primary me-2"></i> Statistiques des Événements</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques Globales -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card card-body bg-primary bg-opacity-10 p-4 h-100 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0 fw-bold">{{ totalEvents }}</h2>
+                        <span class="mb-0 h6 fw-light">Total Événements</span>
+                    </div>
+                    <div class="icon-lg rounded-circle bg-primary text-white">
+                        <i class="fas fa-calendar-event"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card card-body bg-success bg-opacity-10 p-4 h-100 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0 fw-bold">{{ totalLikes }}</h2>
+                        <span class="mb-0 h6 fw-light">Total Likes</span>
+                    </div>
+                    <div class="icon-lg rounded-circle bg-success text-white">
+                        <i class="fas fa-thumbs-up"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card card-body bg-danger bg-opacity-10 p-4 h-100 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0 fw-bold">{{ totalDislikes }}</h2>
+                        <span class="mb-0 h6 fw-light">Total Dislikes</span>
+                    </div>
+                    <div class="icon-lg rounded-circle bg-danger text-white">
+                        <i class="fas fa-thumbs-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card card-body bg-warning bg-opacity-10 p-4 h-100 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0 fw-bold">{{ totalFavorites }}</h2>
+                        <span class="mb-0 h6 fw-light">Total Favoris</span>
+                    </div>
+                    <div class="icon-lg rounded-circle bg-warning text-white">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques en Courbes -->
+    <div class="row g-4 mb-4">
+        <!-- Graphique des Événements avec le Plus de Likes -->
+        <div class="col-lg-6">
+            <div class="card shadow h-100">
+                <div class="card-header bg-success bg-opacity-10 border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-thumbs-up text-success me-2"></i>
+                        Top 10 - Événements avec le Plus de Likes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if mostLiked|length > 0 %}
+                        <div id="chartLikes" style="min-height: 350px;"></div>
+                    {% else %}
+                        <p class="text-muted text-center py-5">Aucun événement avec des likes</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphique des Événements avec le Plus de Dislikes -->
+        <div class="col-lg-6">
+            <div class="card shadow h-100">
+                <div class="card-header bg-danger bg-opacity-10 border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-thumbs-down text-danger me-2"></i>
+                        Top 10 - Événements avec le Plus de Dislikes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if mostDisliked|length > 0 %}
+                        <div id="chartDislikes" style="min-height: 350px;"></div>
+                    {% else %}
+                        <p class="text-muted text-center py-5">Aucun événement avec des dislikes</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphique des Événements les Plus Favoris -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-warning bg-opacity-10 border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-heart text-warning me-2"></i>
+                        Top 10 - Événements les Plus Ajoutés aux Favoris
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if mostFavorited|length > 0 %}
+                        <div id="chartFavorites" style="min-height: 400px;"></div>
+                    {% else %}
+                        <p class="text-muted text-center py-5">Aucun événement en favoris</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton Retour -->
+    <div class="mt-4">
+        <a href="{{ path('app_evenement_index') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fonction pour décoder toutes les entités HTML
+    function decodeHtmlEntities(str) {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = str;
+        let decoded = textarea.value;
+        // Décoder aussi les entités numériques comme &#039;
+        decoded = decoded.replace(/&#(\d+);/g, function(match, dec) {
+            return String.fromCharCode(dec);
+        });
+        decoded = decoded.replace(/&#x([a-f\d]+);/gi, function(match, hex) {
+            return String.fromCharCode(parseInt(hex, 16));
+        });
+        return decoded;
+    }
+
+    // Données pour les graphiques avec décodage des entités HTML
+    const likesData = {
+        labels: [
+            {% for evenement in mostLiked %}
+            decodeHtmlEntities({{ (evenement.titre|slice(0, 25) ~ (evenement.titre|length > 25 ? '...' : ''))|json_encode|raw }}){% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        values: [
+            {% for evenement in mostLiked %}
+            {{ evenement.likesCount }}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+
+    const dislikesData = {
+        labels: [
+            {% for evenement in mostDisliked %}
+            decodeHtmlEntities({{ (evenement.titre|slice(0, 25) ~ (evenement.titre|length > 25 ? '...' : ''))|json_encode|raw }}){% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        values: [
+            {% for evenement in mostDisliked %}
+            {{ evenement.dislikesCount }}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+
+    const favoritesData = {
+        labels: [
+            {% for evenement in mostFavorited %}
+            decodeHtmlEntities({{ (evenement.titre|slice(0, 25) ~ (evenement.titre|length > 25 ? '...' : ''))|json_encode|raw }}){% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        values: [
+            {% for evenement in mostFavorited %}
+            {{ evenement.favoritesCount }}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+
+    // Fonction pour obtenir les valeurs uniques pour l'axe Y
+    function getUniqueValues(values) {
+        const unique = [...new Set(values)];
+        unique.sort((a, b) => a - b);
+        return unique;
+    }
+
+    // Calculer les valeurs uniques pour chaque graphique
+    const likesUniqueValues = getUniqueValues(likesData.values);
+    const dislikesUniqueValues = getUniqueValues(dislikesData.values);
+    const favoritesUniqueValues = getUniqueValues(favoritesData.values);
+
+    // Graphique des Likes
+    {% if mostLiked|length > 0 %}
+    var optionsLikes = {
+        series: [{
+            name: 'Likes',
+            data: likesData.values
+        }],
+        chart: {
+            type: 'line',
+            height: 350,
+            toolbar: {
+                show: true
+            },
+            zoom: {
+                enabled: true
+            }
+        },
+        colors: ['#28a745'],
+        stroke: {
+            curve: 'smooth',
+            width: 3
+        },
+        markers: {
+            size: 6,
+            colors: ['#28a745'],
+            strokeColors: '#fff',
+            strokeWidth: 2,
+            hover: {
+                size: 8
+            }
+        },
+        xaxis: {
+            categories: likesData.labels,
+            labels: {
+                rotate: -45,
+                rotateAlways: true,
+                style: {
+                    fontSize: '12px'
+                }
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Nombre de Likes'
+            },
+            min: 0,
+            max: Math.max(...likesData.values) > 0 ? Math.max(...likesData.values) : 1,
+            tickAmount: likesUniqueValues.length > 0 ? likesUniqueValues.length : 2,
+            decimalsInFloat: 0,
+            forceNiceScale: false,
+            labels: {
+                formatter: function(val) {
+                    const intVal = Math.floor(val);
+                    // Afficher seulement si c'est une valeur qui existe dans les données
+                    return likesUniqueValues.includes(intVal) ? intVal : '';
+                }
+            }
+        },
+        grid: {
+            borderColor: '#e7e7e7',
+            row: {
+                colors: ['#f3f3f3', 'transparent'],
+                opacity: 0.5
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return val + " likes"
+                }
+            }
+        },
+        title: {
+            text: 'Classement des Événements par Nombre de Likes',
+            align: 'left',
+            style: {
+                fontSize: '16px',
+                fontWeight: 600
+            }
+        }
+    };
+    var chartLikes = new ApexCharts(document.querySelector("#chartLikes"), optionsLikes);
+    chartLikes.render();
+    {% endif %}
+
+    // Graphique des Dislikes
+    {% if mostDisliked|length > 0 %}
+    var optionsDislikes = {
+        series: [{
+            name: 'Dislikes',
+            data: dislikesData.values
+        }],
+        chart: {
+            type: 'line',
+            height: 350,
+            toolbar: {
+                show: true
+            },
+            zoom: {
+                enabled: true
+            }
+        },
+        colors: ['#dc3545'],
+        stroke: {
+            curve: 'smooth',
+            width: 3
+        },
+        markers: {
+            size: 6,
+            colors: ['#dc3545'],
+            strokeColors: '#fff',
+            strokeWidth: 2,
+            hover: {
+                size: 8
+            }
+        },
+        xaxis: {
+            categories: dislikesData.labels,
+            labels: {
+                rotate: -45,
+                rotateAlways: true,
+                style: {
+                    fontSize: '12px'
+                }
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Nombre de Dislikes'
+            },
+            min: 0,
+            max: Math.max(...dislikesData.values) > 0 ? Math.max(...dislikesData.values) : 1,
+            tickAmount: dislikesUniqueValues.length > 0 ? dislikesUniqueValues.length : 2,
+            decimalsInFloat: 0,
+            forceNiceScale: false,
+            labels: {
+                formatter: function(val) {
+                    const intVal = Math.floor(val);
+                    // Afficher seulement si c'est une valeur qui existe dans les données
+                    return dislikesUniqueValues.includes(intVal) ? intVal : '';
+                }
+            }
+        },
+        grid: {
+            borderColor: '#e7e7e7',
+            row: {
+                colors: ['#f3f3f3', 'transparent'],
+                opacity: 0.5
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return val + " dislikes"
+                }
+            }
+        },
+        title: {
+            text: 'Classement des Événements par Nombre de Dislikes',
+            align: 'left',
+            style: {
+                fontSize: '16px',
+                fontWeight: 600
+            }
+        }
+    };
+    var chartDislikes = new ApexCharts(document.querySelector("#chartDislikes"), optionsDislikes);
+    chartDislikes.render();
+    {% endif %}
+
+    // Graphique des Favoris
+    {% if mostFavorited|length > 0 %}
+    var optionsFavorites = {
+        series: [{
+            name: 'Favoris',
+            data: favoritesData.values
+        }],
+        chart: {
+            type: 'line',
+            height: 400,
+            toolbar: {
+                show: true
+            },
+            zoom: {
+                enabled: true
+            }
+        },
+        colors: ['#ffc107'],
+        stroke: {
+            curve: 'smooth',
+            width: 3
+        },
+        markers: {
+            size: 6,
+            colors: ['#ffc107'],
+            strokeColors: '#fff',
+            strokeWidth: 2,
+            hover: {
+                size: 8
+            }
+        },
+        xaxis: {
+            categories: favoritesData.labels,
+            labels: {
+                rotate: -45,
+                rotateAlways: true,
+                style: {
+                    fontSize: '12px'
+                }
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Nombre de Favoris'
+            },
+            min: 0,
+            max: Math.max(...favoritesData.values) > 0 ? Math.max(...favoritesData.values) : 1,
+            tickAmount: favoritesUniqueValues.length > 0 ? favoritesUniqueValues.length : 2,
+            decimalsInFloat: 0,
+            forceNiceScale: false,
+            labels: {
+                formatter: function(val) {
+                    const intVal = Math.floor(val);
+                    // Afficher seulement si c'est une valeur qui existe dans les données
+                    return favoritesUniqueValues.includes(intVal) ? intVal : '';
+                }
+            }
+        },
+        grid: {
+            borderColor: '#e7e7e7',
+            row: {
+                colors: ['#f3f3f3', 'transparent'],
+                opacity: 0.5
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return val + " favoris"
+                }
+            }
+        },
+        title: {
+            text: 'Classement des Événements par Nombre de Favoris',
+            align: 'left',
+            style: {
+                fontSize: '16px',
+                fontWeight: 600
+            }
+        }
+    };
+    var chartFavorites = new ApexCharts(document.querySelector("#chartFavorites"), optionsFavorites);
+    chartFavorites.render();
+    {% endif %}
+});
+</script>
+{% endblock %}

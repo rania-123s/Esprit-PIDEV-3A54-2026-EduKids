@@ -1,0 +1,173 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Nouvelle Ressource{% endblock %}
+
+{% block body %}
+<div class="dashboard-content-one">
+    <!-- Breadcubs Area Start Here -->
+    <div class="breadcrumbs-area">
+        <h3>Ressources</h3>
+        <ul>
+            <li>
+                <a href="{{ path('app_admin_page') }}">Accueil</a>
+            </li>
+            <li>
+                <a href="{{ path('app_ressource_index') }}">Ressources</a>
+            </li>
+            <li>Nouvelle</li>
+        </ul>
+    </div>
+    <!-- Breadcubs Area End Here -->
+
+    <!-- Add New Ressource Area Start Here -->
+    <div class="card height-auto">
+        <div class="card-body">
+            <div class="heading-layout1 mb-4">
+                <div class="item-title">
+                    <h3><i class="fas fa-plus-circle text-success me-2"></i> Ajouter une Nouvelle Ressource</h3>
+                </div>
+            </div>
+            
+            {{ form_start(form, {'attr': {'class': 'new-added-form', 'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+                <div class="row">
+                    <!-- Événement et Type -->
+                    <div class="col-xl-6 col-lg-6 col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-calendar-alt text-primary me-1"></i> Événement <span class="text-danger">*</span>
+                        </label>
+                        {{ form_widget(form.evenement, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                        {% if form.evenement.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.evenement.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-xl-6 col-lg-6 col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-folder text-primary me-1"></i> Type de ressource <span class="text-danger">*</span>
+                        </label>
+                        {{ form_widget(form.typeRessource, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                        {% if form.typeRessource.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.typeRessource.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Nom -->
+                    <div class="col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-tag text-primary me-1"></i> Nom de la ressource <span class="text-danger">*</span>
+                        </label>
+                        {{ form_widget(form.nom, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                        {% if form.nom.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.nom.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-align-left text-primary me-1"></i> Description
+                        </label>
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+                        {% if form.description.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.description.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Dates -->
+                    <div class="col-xl-6 col-lg-6 col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-play text-success me-1"></i> Date et heure de début
+                        </label>
+                        {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.dateDebut.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.dateDebut.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-xl-6 col-lg-6 col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-stop text-danger me-1"></i> Date et heure de fin
+                        </label>
+                        {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.dateFin.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.dateFin.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Fichier Upload -->
+                    <div class="col-xl-6 col-lg-6 col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-cloud-upload-alt text-primary me-1"></i> Télécharger un fichier
+                        </label>
+                        <div class="custom-file-upload">
+                            {{ form_widget(form.fichierUpload, {'attr': {'class': 'form-control', 'id': 'fichierUpload'}}) }}
+                        </div>
+                        {% if form.fichierUpload.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.fichierUpload.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle me-1"></i> Formats acceptés: PDF, Word, Excel, PowerPoint, Images (max 10 Mo)
+                        </small>
+                    </div>
+                    
+                    <!-- Quantité -->
+                    <div class="col-xl-6 col-lg-6 col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-cubes text-primary me-1"></i> Quantité
+                        </label>
+                        {{ form_widget(form.quantite, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.quantite.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.quantite.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Nombre d'unités disponibles (facultatif)</small>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div class="col-12 form-group mt-4">
+                        <hr class="mb-4">
+                        <button type="submit" class="btn-fill-lg btn-gradient-yellow btn-hover-bluedark me-2">
+                            <i class="fas fa-save me-1"></i> Enregistrer la ressource
+                        </button>
+                        <a href="{{ path('app_ressource_index') }}" class="btn-fill-lg bg-blue-dark btn-hover-yellow">
+                            <i class="fas fa-times me-1"></i> Annuler
+                        </a>
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+    <!-- Add New Ressource Area End Here -->
+</div>
+{% endblock %}

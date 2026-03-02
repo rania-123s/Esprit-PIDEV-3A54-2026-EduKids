@@ -1,0 +1,271 @@
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}{{ evenement.titre }}{% endblock %}
+
+{% block body %}
+<!-- =======================
+Page Banner START -->
+<section class="py-4 py-lg-5 bg-light">
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+				<div class="d-flex justify-content-between align-items-center flex-wrap">
+					<div>
+						<h1 class="mb-2">{{ evenement.titre }}</h1>
+						<!-- Breadcrumb -->
+						<nav aria-label="breadcrumb">
+							<ol class="breadcrumb mb-0">
+								<li class="breadcrumb-item"><a href="{{ path('app_home_page') }}">Accueil</a></li>
+								<li class="breadcrumb-item"><a href="{{ path('app_front_evenement_index') }}">Événements</a></li>
+								<li class="breadcrumb-item active" aria-current="page">{{ evenement.titre }}</li>
+							</ol>
+						</nav>
+					</div>
+					<div class="mt-3 mt-md-0">
+						<span class="badge bg-primary px-3 py-2 fs-6">
+							<i class="bi bi-calendar3 me-2"></i>
+							{{ evenement.dateEvenement ? evenement.dateEvenement|date('d/m/Y') : 'Date à définir' }}
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<!-- =======================
+Page Banner END -->
+
+<!-- =======================
+Event Detail START -->
+<section class="pt-0 pt-lg-5">
+	<div class="container">
+		<div class="row g-4 g-lg-5">
+			
+			<!-- Main content START -->
+			<div class="col-lg-8">
+				<div class="card shadow">
+					<!-- Featured image -->
+					<div class="rounded-top overflow-hidden">
+						{% if evenement.image %}
+							<img src="{{ asset('uploads/' ~ evenement.image) }}" class="card-img-top" alt="{{ evenement.titre }}" style="height: 300px; object-fit: cover;">
+						{% else %}
+							<img src="{{ asset('assets/images/event/01.jpg') }}" class="card-img-top" alt="{{ evenement.titre }}" style="height: 300px; object-fit: cover;">
+						{% endif %}
+					</div>
+					
+					<!-- Card body -->
+					<div class="card-body p-4">
+						<!-- Title -->
+						<h2 class="mb-3">
+							<i class="bi bi-calendar-event text-primary me-2"></i>
+							{{ evenement.titre }}
+						</h2>
+						
+						<!-- Meta info -->
+						<div class="d-flex flex-wrap gap-2 mb-4">
+							<span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+								<i class="fas fa-calendar me-2"></i>
+								{{ evenement.dateEvenement ? evenement.dateEvenement|date('d/m/Y') : 'Date à définir' }}
+							</span>
+							<span class="badge bg-success bg-opacity-10 text-success px-3 py-2">
+								<i class="fas fa-box me-2"></i>
+								{{ evenement.ressources|length }} ressource(s)
+							</span>
+						</div>
+						
+						<!-- Description -->
+						<div class="bg-light p-4 rounded-3 mb-4">
+							<h5 class="mb-3"><i class="bi bi-text-paragraph me-2 text-primary"></i>Description de l'événement</h5>
+							<p class="mb-0">{{ evenement.description|nl2br }}</p>
+						</div>
+						
+						<!-- Ressources section -->
+						{% if evenement.ressources|length > 0 %}
+						<hr class="my-4">
+						<h4 class="mb-4">
+							<i class="fas fa-box-open me-2 text-warning"></i>
+							Ressources de l'événement 
+							<span class="badge bg-warning text-dark ms-2">{{ evenement.ressources|length }}</span>
+						</h4>
+						
+						<div class="row g-3">
+							{% for ressource in evenement.ressources %}
+							<div class="col-md-6">
+								<div class="card border h-100 shadow-sm">
+									<div class="card-header bg-light py-2">
+										<!-- Type badge -->
+										<span class="badge 
+											{% if ressource.typeRessource == 'activite' %}bg-primary
+											{% elseif ressource.typeRessource == 'pause' %}bg-warning text-dark
+											{% elseif ressource.typeRessource == 'document' %}bg-info
+											{% else %}bg-secondary{% endif %}">
+											{% if ressource.typeRessource == 'activite' %}
+												<i class="fas fa-running me-1"></i>
+											{% elseif ressource.typeRessource == 'pause' %}
+												<i class="fas fa-coffee me-1"></i>
+											{% elseif ressource.typeRessource == 'document' %}
+												<i class="fas fa-file-alt me-1"></i>
+											{% else %}
+												<i class="fas fa-tools me-1"></i>
+											{% endif %}
+											{{ ressource.typeRessource|capitalize }}
+										</span>
+									</div>
+									
+									<div class="card-body">
+										<h6 class="card-title mb-2">
+											<i class="bi bi-tag text-primary me-1"></i>
+											{{ ressource.nom }}
+										</h6>
+										
+										{% if ressource.description %}
+										<p class="card-text small text-muted mb-3">{{ ressource.description }}</p>
+										{% endif %}
+										
+										<!-- Dates -->
+										{% if ressource.dateDebut or ressource.dateFin %}
+										<div class="mb-2">
+											{% if ressource.dateDebut %}
+											<div class="small mb-1">
+												<i class="fas fa-play text-success me-2"></i>
+												<strong>Début:</strong> {{ ressource.dateDebut|date('d/m/Y à H:i') }}
+											</div>
+											{% endif %}
+											{% if ressource.dateFin %}
+											<div class="small">
+												<i class="fas fa-stop text-danger me-2"></i>
+												<strong>Fin:</strong> {{ ressource.dateFin|date('d/m/Y à H:i') }}
+											</div>
+											{% endif %}
+										</div>
+										{% endif %}
+										
+										<!-- Quantité -->
+										{% if ressource.quantite %}
+										<div class="mb-2">
+											<span class="badge bg-light text-dark border">
+												<i class="fas fa-cubes me-1"></i>
+												Quantité : {{ ressource.quantite }}
+											</span>
+										</div>
+										{% endif %}
+										
+										<!-- Fichier -->
+										{% if ressource.fichier %}
+										<div class="mt-3 pt-2 border-top">
+											<a href="{{ asset('uploads/' ~ ressource.fichier) }}" 
+											   class="btn btn-sm btn-outline-success w-100" 
+											   target="_blank"
+											   download>
+												<i class="fas fa-download me-2"></i> Télécharger le fichier
+											</a>
+											<small class="text-muted d-block text-center mt-1">{{ ressource.fichier }}</small>
+										</div>
+										{% endif %}
+									</div>
+								</div>
+							</div>
+							{% endfor %}
+						</div>
+						{% else %}
+						<div class="alert alert-info">
+							<i class="bi bi-info-circle me-2"></i>
+							Aucune ressource n'est associée à cet événement pour le moment.
+						</div>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+			<!-- Main content END -->
+			
+			<!-- Sidebar START -->
+			<div class="col-lg-4">
+				<!-- Event info card -->
+				<div class="card shadow mb-4">
+					<div class="card-header bg-primary">
+						<h5 class="card-title text-white mb-0">
+							<i class="fas fa-info-circle me-2"></i>Informations
+						</h5>
+					</div>
+					<div class="card-body">
+						<ul class="list-group list-group-flush">
+							<li class="list-group-item d-flex justify-content-between align-items-center px-0">
+								<span><i class="fas fa-calendar text-primary me-2"></i>Date</span>
+								<span class="fw-bold">{{ evenement.dateEvenement ? evenement.dateEvenement|date('d/m/Y') : 'N/A' }}</span>
+							</li>
+							<li class="list-group-item d-flex justify-content-between align-items-center px-0">
+								<span><i class="fas fa-box text-primary me-2"></i>Ressources</span>
+								<span class="badge bg-primary rounded-pill">{{ evenement.ressources|length }}</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+				
+				<!-- Types de ressources -->
+				{% if evenement.ressources|length > 0 %}
+				<div class="card shadow mb-4">
+					<div class="card-header bg-light">
+						<h5 class="card-title mb-0">
+							<i class="fas fa-tags me-2 text-primary"></i>Répartition des ressources
+						</h5>
+					</div>
+					<div class="card-body">
+						{% set activites = evenement.ressources|filter(r => r.typeRessource == 'activite')|length %}
+						{% set pauses = evenement.ressources|filter(r => r.typeRessource == 'pause')|length %}
+						{% set docs = evenement.ressources|filter(r => r.typeRessource == 'document')|length %}
+						{% set materiels = evenement.ressources|filter(r => r.typeRessource == 'materiel')|length %}
+						
+						{% if activites > 0 %}
+						<div class="d-flex justify-content-between align-items-center mb-2">
+							<span class="badge bg-primary">
+								<i class="fas fa-running me-1"></i>Activités
+							</span>
+							<span class="fw-bold">{{ activites }}</span>
+						</div>
+						{% endif %}
+						
+						{% if pauses > 0 %}
+						<div class="d-flex justify-content-between align-items-center mb-2">
+							<span class="badge bg-warning text-dark">
+								<i class="fas fa-coffee me-1"></i>Pauses
+							</span>
+							<span class="fw-bold">{{ pauses }}</span>
+						</div>
+						{% endif %}
+						
+						{% if docs > 0 %}
+						<div class="d-flex justify-content-between align-items-center mb-2">
+							<span class="badge bg-info">
+								<i class="fas fa-file-alt me-1"></i>Documents
+							</span>
+							<span class="fw-bold">{{ docs }}</span>
+						</div>
+						{% endif %}
+						
+						{% if materiels > 0 %}
+						<div class="d-flex justify-content-between align-items-center mb-2">
+							<span class="badge bg-secondary">
+								<i class="fas fa-tools me-1"></i>Matériels
+							</span>
+							<span class="fw-bold">{{ materiels }}</span>
+						</div>
+						{% endif %}
+					</div>
+				</div>
+				{% endif %}
+				
+				<!-- Back button -->
+				<div class="d-grid">
+					<a href="{{ path('app_front_evenement_index') }}" class="btn btn-primary">
+						<i class="fas fa-arrow-left me-2"></i>Retour aux événements
+					</a>
+				</div>
+			</div>
+			<!-- Sidebar END -->
+			
+		</div>
+	</div>
+</section>
+<!-- =======================
+Event Detail END -->
+{% endblock %}

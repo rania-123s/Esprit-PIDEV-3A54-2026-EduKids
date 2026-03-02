@@ -1,0 +1,129 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Détails du Programme{% endblock %}
+
+{% block body %}
+<div class="dashboard-content-one">
+
+    <!-- Programme Details Area Start Here -->
+    <div class="card height-auto">
+        <div class="card-body">
+            <div class="heading-layout1 mb-4">
+                <div class="item-title">
+                    <h3><i class="fas fa-clipboard-list text-info me-2"></i> Détails du Programme</h3>
+                </div>
+                <div class="dropdown">
+                    <span class="badge bg-primary px-3 py-2">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        {{ programme.evenement.titre }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="single-info-details">
+                <div class="item-content">
+                    <!-- Header avec événement -->
+                    <div class="item-header mb-4 pb-3 border-bottom">
+                        <h2 class="text-dark">
+                            <i class="fas fa-calendar-event text-primary me-2"></i>
+                            Programme de : {{ programme.evenement.titre }}
+                        </h2>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-calendar-day me-1"></i>
+                            Date de l'événement : {{ programme.evenement.dateEvenement ? programme.evenement.dateEvenement|date('d/m/Y') : 'Non définie' }}
+                        </p>
+                    </div>
+                    
+                    <!-- Pause -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning text-dark py-2">
+                                    <i class="fas fa-coffee me-2"></i> <strong>Horaires de Pause</strong>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-md-4">
+                                            <h5 class="text-success mb-1">{{ programme.pauseDebut|date('H:i') }}</h5>
+                                            <small class="text-muted">Début</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h5 class="text-dark mb-1">{{ programme.dureePause }} min</h5>
+                                            <small class="text-muted">Durée</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h5 class="text-danger mb-1">{{ programme.pauseFin|date('H:i') }}</h5>
+                                            <small class="text-muted">Fin</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Activités -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white py-2">
+                                    <i class="fas fa-running me-2"></i> <strong>Activités Prévues</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-0" style="white-space: pre-line;">{{ programme.activites }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Documents et Matériels -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-info h-100">
+                                <div class="card-header bg-info text-white py-2">
+                                    <i class="fas fa-file-alt me-2"></i> <strong>Documents Requis</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-0" style="white-space: pre-line;">{{ programme.documentsRequis }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-secondary h-100">
+                                <div class="card-header bg-secondary text-white py-2">
+                                    <i class="fas fa-tools me-2"></i> <strong>Matériels Requis</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-0" style="white-space: pre-line;">{{ programme.materielsRequis }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="mt-5 pt-4 border-top d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="{{ path('app_programme_edit', {'id': programme.id}) }}" 
+                               class="btn btn-outline-warning px-4 py-2 me-2">
+                                <i class="fas fa-edit me-1"></i> Modifier
+                            </a>
+                            <form method="post" action="{{ path('app_programme_delete', {'id': programme.id}) }}" 
+                                  style="display: inline-block;" 
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce programme ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ programme.id) }}">
+                                <button type="submit" class="btn btn-outline-danger px-4 py-2">
+                                    <i class="fas fa-trash-alt me-1"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                        <a href="{{ path('app_programme_index') }}" 
+                           class="btn btn-outline-primary px-4 py-2">
+                            <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Programme Details Area End Here -->
+</div>
+{% endblock %}

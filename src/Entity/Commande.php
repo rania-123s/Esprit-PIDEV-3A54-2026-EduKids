@@ -14,7 +14,7 @@ class Commande
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'commandes')]
-    private ?User $user = null;
+    private ?User $user_id = null;
 
     #[ORM\Column]
     private ?\DateTime $date = null;
@@ -30,14 +30,14 @@ class Commande
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getUserId(): ?User
     {
-        return $this->user;
+        return $this->user_id;
     }
 
-    public function setUser(?User $user): static
+    public function setUserId(?User $user_id): static
     {
-        $this->user = $user;
+        $this->user_id = $user_id;
 
         return $this;
     }

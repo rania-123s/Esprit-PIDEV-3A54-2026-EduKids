@@ -1,0 +1,233 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Détails de l'Événement{% endblock %}
+
+{% block body %}
+<div class="dashboard-content-one">
+    <!-- Breadcubs Area Start Here -->
+    <div class="breadcrumbs-area">
+        <h3>Événements</h3>
+        <ul>
+            <li>
+                <a href="{{ path('app_admin_page') }}">Accueil</a>
+            </li>
+            <li>
+                <a href="{{ path('app_evenement_index') }}">Événements</a>
+            </li>
+            <li>Détails</li>
+        </ul>
+    </div>
+    <!-- Breadcubs Area End Here -->
+
+    <!-- Event Details Area Start Here -->
+    <div class="card height-auto">
+        <div class="card-body">
+            <div class="heading-layout1 mb-4">
+                <div class="item-title">
+                    <h3><i class="fas fa-info-circle text-info me-2"></i> Détails de l'Événement</h3>
+                </div>
+                <div class="dropdown">
+                    <span class="badge bg-primary px-3 py-2">
+                        <i class="fas fa-calendar-day me-1"></i>
+                        {{ evenement.dateEvenement ? evenement.dateEvenement|date('d/m/Y') : 'Date non définie' }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="single-info-details">
+                <div class="item-content">
+                    <!-- Image -->
+                    {% if evenement.image %}
+                    <div class="mb-4">
+                        <img src="{{ asset('uploads/' ~ evenement.image) }}" alt="{{ evenement.titre }}" class="img-fluid rounded" style="max-height: 300px; width: 100%; object-fit: cover;">
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Header avec titre -->
+                    <div class="item-header mb-4 pb-3 border-bottom">
+                        <h2 class="text-dark">
+                            <i class="fas fa-calendar-alt text-primary me-2"></i>
+                            {{ evenement.titre }}
+                        </h2>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Informations principales -->
+                        <div class="col-lg-6">
+                            <div class="info-table">
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-bold text-muted" style="width: 40%;">
+                                                <i class="fas fa-calendar text-primary me-2"></i> Date
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-light text-dark px-3 py-2">
+                                                    {{ evenement.dateEvenement ? evenement.dateEvenement|date('d/m/Y') : '-' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold text-muted">
+                                                <i class="fas fa-boxes text-info me-2"></i> Ressources
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info rounded-pill px-3 py-2">
+                                                    {{ evenement.ressources|length }} ressource(s)
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Stats -->
+                        <div class="col-lg-6">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="p-3 bg-light rounded">
+                                        <h3 class="text-primary mb-0">{{ evenement.ressources|filter(r => r.typeRessource == 'activite')|length }}</h3>
+                                        <small class="text-muted">Activités</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-3 bg-light rounded">
+                                        <h3 class="text-warning mb-0">{{ evenement.ressources|filter(r => r.typeRessource == 'pause')|length }}</h3>
+                                        <small class="text-muted">Pauses</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-3 bg-light rounded">
+                                        <h3 class="text-info mb-0">{{ evenement.ressources|filter(r => r.typeRessource == 'document')|length }}</h3>
+                                        <small class="text-muted">Documents</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mt-4 p-4 bg-light rounded">
+                        <h5 class="text-muted mb-3">
+                            <i class="fas fa-align-left me-2"></i> Description
+                        </h5>
+                        <p class="mb-0">{{ evenement.description|nl2br }}</p>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="mt-5 pt-4 border-top">
+                        <a href="{{ path('app_evenement_edit', {'id': evenement.id}) }}" 
+                           class="btn-fill-lg btn-gradient-yellow btn-hover-bluedark me-2">
+                            <i class="fas fa-edit me-1"></i> Modifier
+                        </a>
+                        <a href="{{ path('app_evenement_index') }}" 
+                           class="btn-fill-lg bg-blue-dark btn-hover-yellow me-2">
+                            <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                        </a>
+                        <form method="post" action="{{ path('app_evenement_delete', {'id': evenement.id}) }}" 
+                              style="display: inline-block;" 
+                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evenement.id) }}">
+                            <button type="submit" class="btn btn-outline-danger px-4 py-2">
+                                <i class="fas fa-trash-alt me-1"></i> Supprimer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Event Details Area End Here -->
+
+    <!-- Ressources de l'Événement -->
+    {% if evenement.ressources|length > 0 %}
+    <div class="card height-auto mt-4">
+        <div class="card-body">
+            <div class="heading-layout1 mb-4">
+                <div class="item-title">
+                    <h3><i class="fas fa-boxes text-info me-2"></i> Ressources de cet Événement</h3>
+                </div>
+                <div class="dropdown">
+                    <a href="{{ path('app_ressource_new') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i> Ajouter
+                    </a>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="text-center" style="width: 50px;">#</th>
+                            <th><i class="fas fa-tag me-1"></i> Nom</th>
+                            <th class="text-center"><i class="fas fa-folder me-1"></i> Type</th>
+                            <th class="text-center"><i class="fas fa-play me-1"></i> Début</th>
+                            <th class="text-center"><i class="fas fa-stop me-1"></i> Fin</th>
+                            <th class="text-center"><i class="fas fa-cubes me-1"></i> Qté</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ressource in evenement.ressources %}
+                        <tr>
+                            <td class="text-center text-muted">{{ loop.index }}</td>
+                            <td>
+                                <strong>{{ ressource.nom }}</strong>
+                                {% if ressource.fichier %}
+                                    <span class="badge bg-success ms-1" title="Fichier attaché">
+                                        <i class="fas fa-paperclip"></i>
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% set typeColors = {
+                                    'activite': 'primary',
+                                    'pause': 'warning',
+                                    'document': 'info',
+                                    'materiel': 'secondary'
+                                } %}
+                                <span class="badge bg-{{ typeColors[ressource.typeRessource] ?? 'secondary' }}">
+                                    {{ ressource.typeRessource|capitalize }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                {{ ressource.dateDebut ? ressource.dateDebut|date('d/m/Y H:i') : '-' }}
+                            </td>
+                            <td class="text-center">
+                                {{ ressource.dateFin ? ressource.dateFin|date('d/m/Y H:i') : '-' }}
+                            </td>
+                            <td class="text-center">
+                                {{ ressource.quantite ?? '-' }}
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ path('app_ressource_show', {'id': ressource.id}) }}" 
+                                   class="btn btn-sm btn-outline-info" title="Voir">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ path('app_ressource_edit', {'id': ressource.id}) }}" 
+                                   class="btn btn-sm btn-outline-warning" title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card height-auto mt-4">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Aucune ressource pour cet événement</h5>
+            <p class="text-muted mb-3">Ajoutez des activités, pauses ou documents à cet événement</p>
+            <a href="{{ path('app_ressource_new') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-1"></i> Ajouter une ressource
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

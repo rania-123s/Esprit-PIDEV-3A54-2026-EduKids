@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="en">
 
-<!-- Mirrored from eduport.webestica.com/admin-dashboard.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 07 Nov 2023 13:15:29 GMT -->
 <head>
-	<title>{% block title %}Eduport- LMS, Education and Course Theme{% endblock %}</title>
+	<title>Eduport - Gestion des Événements</title>
 
 	<!-- Meta Tags -->
 	<meta charset="utf-8">
@@ -11,21 +10,68 @@
 	<meta name="author" content="Webestica.com">
 	<meta name="description" content="Eduport- LMS, Education and Course Theme">
 
-		<!-- Dark mode -->
-		<script>
-			(() => {
-				const storedTheme = localStorage.getItem('theme');
-				const isValidTheme = storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'auto';
-				const preferredTheme = isValidTheme ? storedTheme : 'auto';
-				const resolvedTheme = preferredTheme === 'auto'
-					? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-					: preferredTheme;
-				document.documentElement.setAttribute('data-bs-theme', resolvedTheme);
-			})();
-		</script>
+	<!-- Dark mode -->
+	<script>
+		const storedTheme = localStorage.getItem('theme')
+ 
+		const getPreferredTheme = () => {
+			if (storedTheme) {
+				return storedTheme
+			}
+			return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'light'
+		}
+
+		const setTheme = function (theme) {
+			if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+				document.documentElement.setAttribute('data-bs-theme', 'dark')
+			} else {
+				document.documentElement.setAttribute('data-bs-theme', theme)
+			}
+		}
+
+		setTheme(getPreferredTheme())
+
+		window.addEventListener('DOMContentLoaded', () => {
+		    var el = document.querySelector('.theme-icon-active');
+			if(el != 'undefined' && el != null) {
+				const showActiveTheme = theme => {
+				const activeThemeIcon = document.querySelector('.theme-icon-active use')
+				const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
+				const svgOfActiveBtn = btnToActive.querySelector('.mode-switch use').getAttribute('href')
+
+				document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
+					element.classList.remove('active')
+				})
+
+				btnToActive.classList.add('active')
+				activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+			}
+
+			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+				if (storedTheme !== 'light' || storedTheme !== 'dark') {
+					setTheme(getPreferredTheme())
+				}
+			})
+
+			showActiveTheme(getPreferredTheme())
+
+			document.querySelectorAll('[data-bs-theme-value]')
+				.forEach(toggle => {
+					toggle.addEventListener('click', () => {
+						const theme = toggle.getAttribute('data-bs-theme-value')
+						localStorage.setItem('theme', theme)
+						setTheme(theme)
+						showActiveTheme(theme)
+					})
+				})
+
+			}
+		})
+		
+	</script>
 
 	<!-- Favicon -->
-	<link rel="shortcut icon" href="assets/images/favicon.ico">
+	<link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
 
 	<!-- Google Font -->
 	<link rel="preconnect" href="https://fonts.googleapis.com/">
@@ -40,73 +86,10 @@
 
 	<!-- Theme CSS -->
 	<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
-	{% block stylesheets %}{% endblock %}
-
-	<!-- Dropdown Styles -->
-	<style>
-		.dropdown-menu {
-			z-index: 1050 !important;
-		}
-
-		.navbar .dropdown-menu {
-			z-index: 1050 !important;
-		}
-
-		.page-content-wrapper {
-			position: relative;
-			z-index: 1;
-		}
-
-		/* Ensure profile dropdown is always visible */
-		#profileDropdown {
-			position: relative;
-			z-index: 1040;
-		}
-
-		#profileDropdown ~ .dropdown-menu {
-			z-index: 1050 !important;
-		}
-	</style>
-
-	<!-- JS (base includes) -->
-	<script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
-	<script src="{{ asset('assets/vendor/purecounterjs/dist/purecounter_vanilla.js') }}"></script>
-	<script src="{{ asset('assets/vendor/apexcharts/js/apexcharts.min.js') }}"></script>
-	<script src="{{ asset('assets/vendor/overlay-scrollbar/js/overlayscrollbars.min.js') }}"></script>
-	<script src="{{ asset('assets/js/functions.js') }}"></script>
-
-	<!-- Dropdown Initialization -->
-	<script>
-		// Wait for Bootstrap to be available and initialize dropdowns
-		function initDropdowns() {
-			if (typeof bootstrap === 'undefined') {
-				setTimeout(initDropdowns, 50);
-				return;
-			}
-			
-			document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function(el) {
-				// Only create if not already initialized
-				if (!bootstrap.Dropdown.getInstance(el)) {
-					new bootstrap.Dropdown(el);
-				}
-			});
-		}
-
-		// Initialize after DOM content is loaded
-		if (document.readyState !== 'loading') {
-			initDropdowns();
-		} else {
-			document.addEventListener('DOMContentLoaded', initDropdowns);
-		}
-
-		// Also initialize after a short delay to ensure everything is loaded
-		setTimeout(initDropdowns, 500);
-	</script>
 
 </head>
 
 <body>
-
 
 <!-- **************** MAIN CONTENT START **************** -->
 <main>
@@ -116,36 +99,39 @@
 
 	<!-- Navbar brand for xl START -->
 	<div class="d-flex align-items-center">
-		<a class="navbar-brand text-white" href="{{ path('app_cours_index') }}" style="margin : 0px">
-			<img class="navbar-brand-item"  src="{{ asset('assets/images/logo.png') }}" alt="Logo" style="width: 60px; height: 60px;">
+		<a class="navbar-brand" href="{{ path('app_admin_page') }}">
+			<img class="navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="">
 		</a>
-		<span class="text-white fw-bold ms-2 fs-4" style="text-transform: uppercase; letter-spacing: 1px;">EduKids</span>
 	</div>
 	<!-- Navbar brand for xl END -->
 	
 	<div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" data-bs-backdrop="true" tabindex="-1" id="offcanvasSidebar">
-		<div class="offcanvas-body sidebar-content d-flex flex-column bg-dark">			<!-- Sidebar menu START -->
+		<div class="offcanvas-body sidebar-content d-flex flex-column bg-dark">
+
+			<!-- Sidebar menu START -->
 			<ul class="navbar-nav flex-column" id="navbar-sidebar">
-				{% set currentRoute = app.request.attributes.get('_route') %}
-				{% set isCoursesGroup = currentRoute starts with 'app_cours_' or currentRoute starts with 'app_lecon_' %}
+				
+				<!-- Menu item 1 -->
+				<li class="nav-item"><a href="{{ path('app_admin_page') }}" class="nav-link active"><i class="bi bi-house fa-fw me-2"></i>Dashboard</a></li>
+				
+				<!-- Title -->
 				<li class="nav-item ms-2 my-2">Pages</li>
+
+				<!-- menu item 2 - EVENTS -->
 				<li class="nav-item">
 					<a class="nav-link" data-bs-toggle="collapse" href="#collapsepage" role="button" aria-expanded="false" aria-controls="collapsepage">
-						<i class="bi bi-basket fa-fw me-2"></i>Courses
+						<i class="bi bi-calendar-event fa-fw me-2"></i>Events
 					</a>
 					<!-- Submenu -->
 					<ul class="nav collapse flex-column" id="collapsepage" data-bs-parent="#navbar-sidebar">
-						<li class="nav-item"> <a class="nav-link" href="admin-course-list.html">All Courses</a></li>
-						<li class="nav-item"> <a class="nav-link" href="admin-course-category.html">Course Category</a></li>
-						<li class="nav-item"> <a class="nav-link" href="admin-course-detail.html">Course Detail</a></li>
+						<li class="nav-item"> <a class="nav-link" href="#">All Events</a></li>
+						<li class="nav-item"> <a class="nav-link" href="#">Event Category</a></li>
+						<li class="nav-item"> <a class="nav-link" href="#">Event Detail</a></li>
 					</ul>
 				</li>
 
 				<!-- Menu item 3 -->
-				<li class="nav-item"> <a class="nav-link" href="admin-student-list.html"><i class="fas fa-user-graduate fa-fw me-2"></i>Students</a></li>
-
-				<!-- Utilisateur (Users) -->
-				<li class="nav-item"> <a class="nav-link" href="{{ path('admin_user_index') }}"><i class="fas fa-users fa-fw me-2"></i>Utilisateur</a></li>
+				<li class="nav-item"> <a class="nav-link" href="#"><i class="fas fa-user-graduate fa-fw me-2"></i>Students</a></li>
 
 				<!-- Menu item 4 -->
 				<li class="nav-item">
@@ -154,41 +140,24 @@
 					</a>
 					<!-- Submenu -->
 					<ul class="nav collapse flex-column" id="collapseinstructors" data-bs-parent="#navbar-sidebar">
-						<li class="nav-item"> <a class="nav-link" href="admin-instructor-list.html">Instructors</a></li>
-						<li class="nav-item"> <a class="nav-link" href="admin-instructor-detail.html">Instructor Detail</a></li>
+						<li class="nav-item"> <a class="nav-link" href="#">Instructors</a></li>
+						<li class="nav-item"> <a class="nav-link" href="#">Instructor Detail</a></li>
 						<li class="nav-item"> 
-							<a class="nav-link" href="admin-instructor-request.html">Instructor requests
+							<a class="nav-link" href="#">Instructor requests
 								<span class="badge text-bg-success rounded-circle ms-2">2</span>
-					<a class="nav-link d-flex align-items-center {{ isCoursesGroup ? '' : 'collapsed' }}"
-					   data-bs-toggle="collapse"
-					   href="#coursesMenu"
-					   role="button"
-					   aria-expanded="{{ isCoursesGroup ? 'true' : 'false' }}"
-					   aria-controls="coursesMenu">
-						<span><i class="bi bi-collection-play fa-fw me-2"></i>Courses</span>
-					</a>
-					<ul class="nav flex-column collapse {{ isCoursesGroup ? 'show' : '' }}" id="coursesMenu">
-						<li class="nav-item">
-							<a class="nav-link ps-4 {{ currentRoute starts with 'app_cours_' ? 'active' : '' }}" href="{{ path('app_cours_index') }}">
-								<i class="bi bi-basket fa-fw me-2"></i>Cours
-							</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link ps-4 {{ currentRoute starts with 'app_lecon_' ? 'active' : '' }}" href="{{ path('app_lecon_index') }}">
-								<i class="bi bi-journal-text fa-fw me-2"></i>Lecons
 							</a>
 						</li>
 					</ul>
 				</li>
 				
 				<!-- Menu item 5 -->
-				<li class="nav-item"> <a class="nav-link" href="admin-review.html"><i class="far fa-comment-dots fa-fw me-2"></i>Reviews</a></li>
+				<li class="nav-item"> <a class="nav-link" href="#"><i class="far fa-comment-dots fa-fw me-2"></i>Reviews</a></li>
 
 				<!-- Menu item 6 -->
-				<li class="nav-item"> <a class="nav-link" href="admin-earning.html"><i class="far fa-chart-bar fa-fw me-2"></i>Earnings</a></li>
+				<li class="nav-item"> <a class="nav-link" href="#"><i class="far fa-chart-bar fa-fw me-2"></i>Earnings</a></li>
 
 				<!-- Menu item 7 -->
-				<li class="nav-item"> <a class="nav-link" href="admin-setting.html"><i class="fas fa-user-cog fa-fw me-2"></i>Admin Settings</a></li>
+				<li class="nav-item"> <a class="nav-link" href="#"><i class="fas fa-user-cog fa-fw me-2"></i>Admin Settings</a></li>
 
 				<!-- Menu item 8 -->
 				<li class="nav-item">
@@ -197,10 +166,10 @@
 					</a>
 					<!-- Submenu -->
 					<ul class="nav collapse flex-column" id="collapseauthentication" data-bs-parent="#navbar-sidebar">
-						<li class="nav-item"> <a class="nav-link" href="sign-up.html">Sign Up</a></li>
-						<li class="nav-item"> <a class="nav-link" href="sign-in.html">Sign In</a></li>
-						<li class="nav-item"> <a class="nav-link" href="forgot-password.html">Forgot Password</a></li>
-						<li class="nav-item"> <a class="nav-link" href="admin-error-404.html">Error 404</a></li>
+						<li class="nav-item"> <a class="nav-link" href="#">Sign Up</a></li>
+						<li class="nav-item"> <a class="nav-link" href="#">Sign In</a></li>
+						<li class="nav-item"> <a class="nav-link" href="#">Forgot Password</a></li>
+						<li class="nav-item"> <a class="nav-link" href="#">Error 404</a></li>
 					</ul>
 				</li>
 
@@ -208,21 +177,23 @@
 				<li class="nav-item ms-2 my-2">Documentation</li>
 
 				<!-- Menu item 9 -->
-				<li class="nav-item"> <a class="nav-link" href="docs/index.html"><i class="far fa-clipboard fa-fw me-2"></i>Documentation</a></li>
+				<li class="nav-item"> <a class="nav-link" href="#"><i class="far fa-clipboard fa-fw me-2"></i>Documentation</a></li>
 
 				<!-- Menu item 10 -->
-				<li class="nav-item"> <a class="nav-link" href="docs/changelog.html"><i class="fas fa-sitemap fa-fw me-2"></i>Changelog</a></li>
+				<li class="nav-item"> <a class="nav-link" href="#"><i class="fas fa-sitemap fa-fw me-2"></i>Changelog</a></li>
 			</ul>
-			<!-- Sidebar menu end -->			<!-- Sidebar footer START -->
+			<!-- Sidebar menu end -->
+
+			<!-- Sidebar footer START -->
 			<div class="px-3 mt-auto pt-3">
 				<div class="d-flex align-items-center justify-content-between text-primary-hover">
-						<a class="h5 mb-0 text-body" href="admin-setting.html" data-bs-toggle="tooltip" data-bs-placement="top" title="Settings">
+						<a class="h5 mb-0 text-body" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="Settings">
 							<i class="bi bi-gear-fill"></i>
 						</a>
-						<a class="h5 mb-0 text-body" href="index.html" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">
+						<a class="h5 mb-0 text-body" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">
 							<i class="bi bi-globe"></i>
 						</a>
-						<a class="h5 mb-0 text-body" href="{{ path('app_logout', {'_csrf_token': csrf_token('logout')}) }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Sign out">
+						<a class="h5 mb-0 text-body" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="Sign out">
 							<i class="bi bi-power"></i>
 						</a>
 				</div>
@@ -242,12 +213,13 @@
 		<div class="container-fluid p-0">
 			<div class="d-flex align-items-center w-100">
 
-					<!-- Logo START -->
-					<div class="d-flex align-items-center d-xl-none">
-						<a class="navbar-brand" href="{{ path('app_cours_index') }}">
-							<img class="navbar-brand-item h-30px" src="{{ asset('assets/images/logo.png') }}" alt="EduKids logo">
-						</a>
-					</div>
+				<!-- Logo START -->
+				<div class="d-flex align-items-center d-xl-none">
+					<a class="navbar-brand" href="{{ path('app_admin_page') }}">
+						<img class="light-mode-item navbar-brand-item h-30px" src="{{ asset('assets/images/logo-mobile.svg') }}" alt="">
+						<img class="dark-mode-item navbar-brand-item h-30px" src="{{ asset('assets/images/logo-mobile-light.svg') }}" alt="">
+					</a>
+				</div>
 				<!-- Logo END -->
 
 				<!-- Toggler for sidebar START -->
@@ -315,12 +287,12 @@
 												<a href="#" class="list-group-item-action border-0 border-bottom d-flex p-3">
 													<div class="me-3">
 														<div class="avatar avatar-md">
-															<img class="avatar-img rounded-circle" src="assets/images/avatar/08.jpg" alt="avatar">
+															<img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/08.jpg') }}" alt="avatar">
 														</div>
 													</div>
 													<div>
-														<p class="text-body small m-0">Congratulate <b>Joan Wallace</b> for graduating from <b>Microverse university</b></p>
-														<u class="small">Say congrats</u>
+														<p class="text-body small m-0">New event registration from <b>Joan Wallace</b></p>
+														<u class="small">View details</u>
 													</div>
 												</a>
 											</li>
@@ -330,44 +302,13 @@
 												<a href="#" class="list-group-item-action border-0 border-bottom d-flex p-3">
 													<div class="me-3">
 														<div class="avatar avatar-md">
-															<img class="avatar-img rounded-circle" src="assets/images/avatar/02.jpg" alt="avatar">
+															<img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/02.jpg') }}" alt="avatar">
 														</div>
 													</div>
 													<div>
-														<h6 class="mb-1">Larry Lawson Added a new course</h6>
-														<p class="small text-body m-0">What's new! Find out about new features</p>
+														<h6 class="mb-1">Larry Lawson Added a new event</h6>
+														<p class="small text-body m-0">What's new! Find out about new events</p>
 														<u class="small">View detail</u>
-													</div>
-												</a>
-											</li>
-
-											<!-- Notif item -->
-											<li>
-												<a href="#" class="list-group-item-action border-0 border-bottom d-flex p-3">
-													<div class="me-3">
-														<div class="avatar avatar-md">
-															<img class="avatar-img rounded-circle" src="assets/images/avatar/05.jpg" alt="avatar">
-														</div>
-													</div>
-													<div>
-														<h6 class="mb-1">New request to apply for Instructor</h6>
-														<u class="small">View detail</u>
-													</div>
-												</a>
-											</li>
-
-											<!-- Notif item -->
-											<li>
-												<a href="#" class="list-group-item-action border-0 border-bottom d-flex p-3">
-													<div class="me-3">
-														<div class="avatar avatar-md">
-															<img class="avatar-img rounded-circle" src="assets/images/avatar/03.jpg" alt="avatar">
-														</div>
-													</div>
-													<div>
-														<h6 class="mb-1">Update v2.3 completed successfully</h6>
-														<p class="small text-body m-0">What's new! Find out about new features</p>
-														<small class="text-body">5 min ago</small>
 													</div>
 												</a>
 											</li>
@@ -387,36 +328,35 @@
 						<li class="nav-item ms-2 ms-md-3 dropdown">
 							<!-- Avatar -->
 							<a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
-								<img class="avatar-img rounded-circle" src="assets/images/avatar/01.jpg" alt="avatar">
+								<img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
 							</a>
 
 							<!-- Profile dropdown START -->
 							<ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
 								<!-- Profile info -->
-								{% if app.user %}
-					<li class="px-3 mb-3">
-						<div class="d-flex align-items-center">
-							<!-- Avatar -->
-							
-							<div>
-								<a class="h6" href="#">{{ app.user.firstName }} {{ app.user.lastName }}</a>
-								<p class="small m-0">{{ app.user.email }}</p>
-							</div>
-						</div>
-					</li>
-					{% endif %}
-                <li> <hr class="dropdown-divider"></li>
+								<li class="px-3">
+									<div class="d-flex align-items-center">
+										<!-- Avatar -->
+										<div class="avatar me-3 mb-3">
+											<img class="avatar-img rounded-circle shadow" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+										</div>
+										<div>
+											<a class="h6 mt-2 mt-sm-0" href="#">Admin User</a>
+											<p class="small m-0">admin@eduport.com</p>
+										</div>
+									</div>
+								</li>
+								<li> <hr class="dropdown-divider"></li>
 								<!-- Links -->
-								<li><a class="dropdown-item" href="{{ path('user_profile_edit') }}"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
-								<li><a class="dropdown-item" href="{{ path('user_profile_settings') }}"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
-								<li><a class="dropdown-item" href="{{ path('user_profile_help') }}"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
-								<li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('app_logout', {'_csrf_token': csrf_token('logout')}) }}"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
+								<li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
+								<li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
+								<li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
+								<li><a class="dropdown-item bg-danger-soft-hover" href="#"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
 								<li> <hr class="dropdown-divider"></li>
 
 								<!-- Dark mode options START -->
 								<li>
 									<div class="bg-light dark-mode-switch theme-icon-active d-flex align-items-center p-1 rounded mt-2">
-										<!-- <span>Mode:</span> -->
 										<button type="button" class="btn btn-sm mb-0" data-bs-theme-value="light">
 											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sun fa-fw mode-switch" viewBox="0 0 16 16">
 												<path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
@@ -453,23 +393,11 @@
 
 	<!-- Page main content START -->
 	<div class="page-content-wrapper border">
-
 		{% block body %}{% endblock %}
-
 	</div>
+	<!-- Page main content END -->
+</div>
 <!-- Page content END -->
-
-</main>
-<!-- **************** MAIN CONTENT END **************** -->
-
-<!-- Back to top -->
-
-{% block javascripts %}{% endblock %}
-
-</body>
-
-<!-- Mirrored from eduport.webestica.com/admin-dashboard.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 07 Nov 2023 13:15:39 GMT -->
-
 
 </main>
 <!-- **************** MAIN CONTENT END **************** -->
@@ -485,47 +413,8 @@
 <script src="{{ asset('assets/vendor/apexcharts/js/apexcharts.min.js') }}"></script>
 <script src="{{ asset('assets/vendor/overlay-scrollbar/js/overlayscrollbars.min.js') }}"></script>
 
-	<!-- Template Functions -->
-	<script src="{{ asset('assets/js/functions.js') }}"></script>
-	<script src="{{ asset('assets/js/theme.js') }}"></script>
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-	(function () {
-		const flashData = document.getElementById('flash-data');
-		if (!flashData || !window.Swal) return;
-
-		const items = Array.from(flashData.querySelectorAll('.flash-item')).map((el) => ({
-			type: el.dataset.type || 'success',
-			title: el.dataset.title || 'Succes',
-			message: el.dataset.message || ''
-		}));
-
-		if (!items.length) return;
-
-		const showAlerts = async () => {
-			for (const item of items) {
-				await Swal.fire({
-					icon: item.type,
-					title: item.title,
-					text: item.message,
-					confirmButtonText: 'OK',
-					confirmButtonColor: '#0d6efd',
-					allowOutsideClick: true,
-					width: '42rem',
-					padding: '2rem 1.5rem',
-					backdrop: 'rgba(15,23,42,0.55)'
-				});
-			}
-		};
-
-		showAlerts();
-	})();
-</script>
-
+<!-- Template Functions -->
+<script src="{{ asset('assets/js/functions.js') }}"></script>
 
 </body>
-
 </html>
-
-
-

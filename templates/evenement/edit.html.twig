@@ -1,0 +1,181 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Modifier l'Événement{% endblock %}
+
+{% block body %}
+<div class="dashboard-content-one">
+    <!-- Breadcubs Area Start Here -->
+    <div class="breadcrumbs-area">
+        <h3>Événements</h3>
+        <ul>
+            <li>
+                <a href="{{ path('app_admin_page') }}">Accueil</a>
+            </li>
+            <li>
+                <a href="{{ path('app_evenement_index') }}">Événements</a>
+            </li>
+            <li>Modifier</li>
+        </ul>
+    </div>
+    <!-- Breadcubs Area End Here -->
+
+    <!-- Edit Event Area Start Here -->
+    <div class="card height-auto">
+        <div class="card-body">
+            <div class="heading-layout1 mb-4">
+                <div class="item-title">
+                    <h3><i class="fas fa-edit text-warning me-2"></i> Modifier l'Événement</h3>
+                </div>
+                <div class="dropdown">
+                    <span class="badge bg-secondary px-3 py-2">
+                        <i class="fas fa-info-circle me-1"></i> {{ evenement.titre }}
+                    </span>
+                </div>
+            </div>
+            
+            {{ form_start(form, {'attr': {'class': 'new-added-form', 'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+                <div class="row">
+                    <!-- Titre -->
+                    <div class="col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-heading text-primary me-1"></i> Titre de l'événement <span class="text-danger">*</span>
+                        </label>
+                        {{ form_widget(form.titre, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                        {% if form.titre.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.titre.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-align-left text-primary me-1"></i> Description <span class="text-danger">*</span>
+                        </label>
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 6}}) }}
+                        {% if form.description.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.description.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Date -->
+                    <div class="col-xl-6 col-lg-6 col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-calendar-alt text-primary me-1"></i> Date de l'événement <span class="text-danger">*</span>
+                        </label>
+                        {{ form_widget(form.dateEvenement, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                        {% if form.dateEvenement.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.dateEvenement.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Image -->
+                    <div class="col-xl-6 col-lg-6 col-12 form-group mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-image text-primary me-1"></i> Image de l'événement
+                            {% if not evenement.image %}<span class="text-danger">*</span>{% endif %}
+                        </label>
+                        
+                        <!-- Current image - Affichage en premier -->
+                        {% if evenement.image %}
+                        <div class="mb-3 p-3 bg-success bg-opacity-10 rounded border border-success">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <strong class="text-success">Image actuelle :</strong>
+                            </div>
+                            <img src="{{ asset('uploads/' ~ evenement.image) }}" alt="{{ evenement.titre }}" class="img-thumbnail" style="max-height: 150px;">
+                            <div class="mt-2">
+                                <small class="text-muted">{{ evenement.image }}</small>
+                            </div>
+                        </div>
+                        <label class="form-label small text-muted">Changer l'image (facultatif) :</label>
+                        {% else %}
+                        <div class="mb-3 p-3 bg-warning bg-opacity-10 rounded border border-warning">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                <span class="text-warning"><strong>Aucune image</strong> - Veuillez en ajouter une</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {{ form_widget(form.imageUpload, {'attr': {'class': 'form-control', 'id': 'imageUpload', 'onchange': 'previewImage(this)'}}) }}
+                        {% if form.imageUpload.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.imageUpload.vars.errors %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle me-1"></i> Formats acceptés: JPEG, PNG, GIF, WebP (max 5 Mo)
+                        </small>
+                        
+                        <!-- Preview new image -->
+                        <div id="imagePreview" class="mt-3 p-3 bg-info bg-opacity-10 rounded border border-info" style="display: none;">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-eye text-info me-2"></i>
+                                <strong class="text-info">Aperçu de la nouvelle image :</strong>
+                            </div>
+                            <img id="previewImg" src="" alt="Aperçu" class="img-thumbnail" style="max-height: 150px;">
+                        </div>
+                    </div>
+                    
+                    <!-- Info sur les ressources -->
+                    <div class="col-12 form-group mb-4">
+                        <div class="alert alert-secondary mb-0">
+                            <i class="fas fa-boxes me-2"></i>
+                            <strong>Ressources associées :</strong> {{ evenement.ressources|length }} ressource(s)
+                            {% if evenement.ressources|length > 0 %}
+                                <a href="{{ path('app_ressource_index') }}" class="float-end text-dark">
+                                    <i class="fas fa-external-link-alt"></i> Gérer
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div class="col-12 form-group mt-4">
+                        <hr class="mb-4">
+                        <button type="submit" class="btn-fill-lg btn-gradient-yellow btn-hover-bluedark me-2">
+                            <i class="fas fa-save me-1"></i> Enregistrer les modifications
+                        </button>
+                        <a href="{{ path('app_evenement_index') }}" class="btn-fill-lg bg-blue-dark btn-hover-yellow">
+                            <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                        </a>
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+    <!-- Edit Event Area End Here -->
+</div>
+
+<script>
+function previewImage(input) {
+    var preview = document.getElementById('imagePreview');
+    var previewImg = document.getElementById('previewImg');
+    
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

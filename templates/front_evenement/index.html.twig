@@ -1,0 +1,272 @@
+{% extends 'base_frontoffice.html.twig' %}
+
+{% block title %}Nos Événements{% endblock %}
+
+{% block body %}
+<!-- =======================
+Main Banner START -->
+<section class="pt-0">
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+				<!-- Card START -->
+				<div class="card bg-dark rounded-3 p-4 p-sm-5 mt-4" style="background:url({{ asset('assets/images/pattern/05.png') }}) no-repeat center center; background-size:cover;">
+					<div class="card-body">
+						<div class="row align-items-center">
+							<!-- Left content START -->
+							<div class="col-lg-7">
+								<!-- Badge -->
+								<span class="badge bg-primary bg-opacity-10 text-primary mb-3"><i class="bi bi-calendar-event me-2"></i>Plateforme d'Événements</span>
+								<!-- Title -->
+								<h1 class="text-white display-5 mb-3">Découvrez nos <span class="text-warning">Événements</span></h1>
+								<p class="text-white">Explorez tous nos événements et participez à des expériences uniques. Conférences, ateliers, formations et bien plus encore !</p>
+								<!-- Button -->
+								<div class="d-sm-flex align-items-center mt-4">
+									<a href="#events" class="btn btn-warning me-2 mb-2 mb-sm-0">
+										<i class="bi bi-calendar-check me-2"></i>Voir les événements
+									</a>
+									<span class="badge bg-white text-dark px-3 py-2 mb-0">
+										<i class="bi bi-collection me-1"></i> {{ evenements|length }} événement(s) disponible(s)
+									</span>
+								</div>
+							</div>
+							<!-- Left content END -->
+
+							<!-- Right content START -->
+							<div class="col-lg-5 text-center mt-4 mt-lg-0">
+								<img src="{{ asset('assets/images/element/14.svg') }}" class="h-300px" alt="">
+							</div>
+							<!-- Right content END -->
+						</div>
+					</div>
+				</div>
+				<!-- Card END -->
+			</div>
+		</div>
+	</div>
+</section>
+<!-- =======================
+Main Banner END -->
+
+<!-- =======================
+Counter boxes START -->
+<section class="pt-0 pt-md-5">
+	<div class="container">
+		<div class="row g-4">
+			<!-- Counter item -->
+			<div class="col-sm-6 col-xl-3">
+				<div class="d-flex justify-content-center align-items-center p-4 bg-warning bg-opacity-15 rounded-3">
+					<span class="display-6 lh-1 text-warning mb-0"><i class="bi bi-calendar-event"></i></span>
+					<div class="ms-4">
+						<div class="d-flex">
+							<h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="{{ evenements|length }}">{{ evenements|length }}</h5>
+						</div>
+						<p class="mb-0 h6 fw-light">Événements</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Counter item -->
+			<div class="col-sm-6 col-xl-3">
+				<div class="d-flex justify-content-center align-items-center p-4 bg-purple bg-opacity-10 rounded-3">
+					<span class="display-6 lh-1 text-purple mb-0"><i class="fas fa-running"></i></span>
+					<div class="ms-4">
+						<div class="d-flex">
+							{% set totalActivites = 0 %}
+							{% for e in evenements %}
+								{% for r in e.ressources %}
+									{% if r.typeRessource == 'activite' %}
+										{% set totalActivites = totalActivites + 1 %}
+									{% endif %}
+								{% endfor %}
+							{% endfor %}
+							<h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="{{ totalActivites }}">{{ totalActivites }}</h5>
+						</div>
+						<p class="mb-0 h6 fw-light">Activités</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Counter item -->
+			<div class="col-sm-6 col-xl-3">
+				<div class="d-flex justify-content-center align-items-center p-4 bg-info bg-opacity-10 rounded-3">
+					<span class="display-6 lh-1 text-info mb-0"><i class="fas fa-file-alt"></i></span>
+					<div class="ms-4">
+						<div class="d-flex">
+							{% set totalDocs = 0 %}
+							{% for e in evenements %}
+								{% for r in e.ressources %}
+									{% if r.typeRessource == 'document' %}
+										{% set totalDocs = totalDocs + 1 %}
+									{% endif %}
+								{% endfor %}
+							{% endfor %}
+							<h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="{{ totalDocs }}">{{ totalDocs }}</h5>
+						</div>
+						<p class="mb-0 h6 fw-light">Documents</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Counter item -->
+			<div class="col-sm-6 col-xl-3">
+				<div class="d-flex justify-content-center align-items-center p-4 bg-success bg-opacity-10 rounded-3">
+					<span class="display-6 lh-1 text-success mb-0"><i class="fas fa-box"></i></span>
+					<div class="ms-4">
+						<div class="d-flex">
+							{% set totalRessources = 0 %}
+							{% for e in evenements %}
+								{% set totalRessources = totalRessources + e.ressources|length %}
+							{% endfor %}
+							<h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="{{ totalRessources }}">{{ totalRessources }}</h5>
+						</div>
+						<p class="mb-0 h6 fw-light">Ressources totales</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<!-- =======================
+Counter boxes END -->
+
+<!-- =======================
+Events List START -->
+<section id="events">
+	<div class="container">
+		<!-- Title -->
+		<div class="row mb-4">
+			<div class="col-lg-8 mx-auto text-center">
+				<h2 class="fs-1"><i class="bi bi-calendar-heart text-primary me-2"></i><span class="text-warning">Nos</span> Événements</h2>
+				<p class="mb-0">Découvrez tous les événements disponibles et leurs ressources associées.</p>
+			</div>
+		</div>
+
+		<!-- Events Grid -->
+		<div class="row g-4">
+			{% if evenements|length > 0 %}
+				{% for evenement in evenements %}
+				<div class="col-sm-6 col-lg-4 col-xl-4">
+					<div class="card shadow h-100 overflow-hidden">
+						<!-- Image avec overlay -->
+						<div class="position-relative">
+							{% if evenement.image %}
+								<img src="{{ asset('uploads/' ~ evenement.image) }}" class="card-img-top" alt="{{ evenement.titre }}" style="height: 200px; object-fit: cover;">
+							{% else %}
+								<img src="{{ asset('assets/images/event/' ~ (loop.index % 18 == 0 ? '18' : '%02d'|format(loop.index % 18)) ~ '.jpg') }}" class="card-img-top" alt="{{ evenement.titre }}" style="height: 200px; object-fit: cover;">
+							{% endif %}
+							<div class="position-absolute top-0 start-0 m-3">
+								<span class="badge bg-dark bg-opacity-75 text-white">
+									<i class="bi bi-calendar3 me-1"></i>
+									{{ evenement.dateEvenement ? evenement.dateEvenement|date('d M Y') : 'À définir' }}
+								</span>
+							</div>
+						</div>
+						
+						<div class="card-body">
+							<!-- Titre -->
+							<h5 class="card-title mb-2">
+								<a href="{{ path('app_front_evenement_show', {'id': evenement.id}) }}" class="text-decoration-none text-dark stretched-link">
+									{{ evenement.titre }}
+								</a>
+							</h5>
+							
+							<!-- Description -->
+							<p class="text-muted small mb-3">
+								{{ evenement.description|slice(0, 120) }}{% if evenement.description|length > 120 %}...{% endif %}
+							</p>
+							
+							<!-- Ressources badges -->
+							{% if evenement.ressources|length > 0 %}
+							<div class="d-flex flex-wrap gap-1 mb-2">
+								{% set activites = evenement.ressources|filter(r => r.typeRessource == 'activite')|length %}
+								{% set pauses = evenement.ressources|filter(r => r.typeRessource == 'pause')|length %}
+								{% set docs = evenement.ressources|filter(r => r.typeRessource == 'document')|length %}
+								{% set materiels = evenement.ressources|filter(r => r.typeRessource == 'materiel')|length %}
+								
+								{% if activites > 0 %}
+								<span class="badge bg-primary bg-opacity-10 text-primary">
+									<i class="fas fa-running me-1"></i>{{ activites }} activité(s)
+								</span>
+								{% endif %}
+								{% if pauses > 0 %}
+								<span class="badge bg-warning bg-opacity-10 text-warning">
+									<i class="fas fa-coffee me-1"></i>{{ pauses }} pause(s)
+								</span>
+								{% endif %}
+								{% if docs > 0 %}
+								<span class="badge bg-info bg-opacity-10 text-info">
+									<i class="fas fa-file-alt me-1"></i>{{ docs }} document(s)
+								</span>
+								{% endif %}
+								{% if materiels > 0 %}
+								<span class="badge bg-secondary bg-opacity-10 text-secondary">
+									<i class="fas fa-tools me-1"></i>{{ materiels }} matériel(s)
+								</span>
+								{% endif %}
+							</div>
+							{% endif %}
+						</div>
+						
+						<div class="card-footer bg-white border-top">
+							<div class="d-flex justify-content-between align-items-center">
+								<span class="small text-muted">
+									<i class="bi bi-box me-1"></i>{{ evenement.ressources|length }} ressource(s)
+								</span>
+								<a href="{{ path('app_front_evenement_show', {'id': evenement.id}) }}" class="btn btn-sm btn-primary">
+									Voir détails <i class="bi bi-arrow-right ms-1"></i>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				{% endfor %}
+			{% else %}
+				<div class="col-12">
+					<div class="card shadow-sm">
+						<div class="card-body text-center py-5">
+							<i class="bi bi-calendar-x fa-4x text-muted mb-3" style="font-size: 4rem;"></i>
+							<h4 class="text-muted">Aucun événement disponible</h4>
+							<p class="text-muted mb-0">
+								Il n'y a pas encore d'événements. Revenez bientôt !
+							</p>
+						</div>
+					</div>
+				</div>
+			{% endif %}
+		</div>
+	</div>
+</section>
+<!-- =======================
+Events List END -->
+
+<!-- =======================
+CTA START -->
+<section class="pt-5 mt-5">
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+				<div class="card bg-primary rounded-3 p-4 p-sm-5" style="background:url({{ asset('assets/images/pattern/05.png') }}) no-repeat center center; background-size:cover;">
+					<div class="card-body">
+						<div class="row align-items-center">
+							<div class="col-lg-8">
+								<h3 class="text-white mb-2">
+									<i class="bi bi-info-circle me-2"></i>Besoin de plus d'informations ?
+								</h3>
+								<p class="text-white mb-0">Contactez-nous pour en savoir plus sur nos événements et comment y participer.</p>
+							</div>
+							<div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+								<a href="{{ path('app_home_page') }}" class="btn btn-warning mb-0">
+									<i class="bi bi-house me-1"></i>Accueil
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<!-- =======================
+CTA END -->
+{% endblock %}

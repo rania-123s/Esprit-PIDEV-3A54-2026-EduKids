@@ -12,17 +12,6 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        login:
-            pattern: ^/api/login
-            stateless: true
-            json_login:
-                check_path: /api/login_check
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
-        api:
-            pattern: ^/api
-            stateless: true
-            jwt: ~
         main:
             lazy: true
             provider: app_user_provider
@@ -43,7 +32,6 @@ security:
             logout:
                 path: app_logout
                 target: app_login
-                csrf_token_generator: security.csrf.token_manager
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -61,15 +49,15 @@ security:
         - { path: ^/verify-otp$, roles: PUBLIC_ACCESS }
         - { path: ^/reset-password$, roles: PUBLIC_ACCESS }
         
-        # API authentication
-        - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
-        
         # Admin area - only for administrators
         - { path: ^/admin, roles: ROLE_ADMIN }
         
         # User profile area - requires authentication
         - { path: ^/profile, roles: ROLE_USER }
+
+        # Public pages
+        - { path: ^/$, roles: PUBLIC_ACCESS }
+        - { path: ^/evenements, roles: PUBLIC_ACCESS }
 
 when@test:
     security:

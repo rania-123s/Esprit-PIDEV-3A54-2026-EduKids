@@ -1,0 +1,187 @@
+{% extends 'base_backoffice.html.twig' %}
+
+{% block title %}Détails de la Ressource{% endblock %}
+
+{% block body %}
+<div class="dashboard-content-one">
+    <!-- Breadcubs Area Start Here -->
+    <div class="breadcrumbs-area">
+        <h3>Ressources</h3>
+        <ul>
+            <li>
+                <a href="{{ path('app_admin_page') }}">Accueil</a>
+            </li>
+            <li>
+                <a href="{{ path('app_ressource_index') }}">Ressources</a>
+            </li>
+            <li>Détails</li>
+        </ul>
+    </div>
+    <!-- Breadcubs Area End Here -->
+
+    <!-- Ressource Details Area Start Here -->
+    <div class="card height-auto">
+        <div class="card-body">
+            <div class="heading-layout1 mb-4">
+                <div class="item-title">
+                    <h3><i class="fas fa-info-circle text-info me-2"></i> Détails de la Ressource</h3>
+                </div>
+                <div class="dropdown">
+                    {% set typeColors = {
+                        'activite': 'primary',
+                        'pause': 'warning',
+                        'document': 'info',
+                        'materiel': 'secondary'
+                    } %}
+                    {% set typeIcons = {
+                        'activite': 'fa-running',
+                        'pause': 'fa-coffee',
+                        'document': 'fa-file-alt',
+                        'materiel': 'fa-tools'
+                    } %}
+                    <span class="badge bg-{{ typeColors[ressource.typeRessource] ?? 'secondary' }} px-3 py-2">
+                        <i class="fas {{ typeIcons[ressource.typeRessource] ?? 'fa-box' }} me-1"></i>
+                        {{ ressource.typeRessource|capitalize }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="single-info-details">
+                <div class="item-content">
+                    <!-- Header avec nom -->
+                    <div class="item-header mb-4 pb-3 border-bottom">
+                        <h2 class="text-dark">
+                            <i class="fas fa-tag text-primary me-2"></i>
+                            {{ ressource.nom }}
+                        </h2>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Colonne gauche -->
+                        <div class="col-lg-6">
+                            <div class="info-table">
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-bold text-muted" style="width: 40%;">
+                                                <i class="fas fa-calendar-alt text-primary me-2"></i> Événement
+                                            </td>
+                                            <td>
+                                                {% if ressource.evenement %}
+                                                    <a href="{{ path('app_evenement_show', {'id': ressource.evenement.id}) }}" class="text-decoration-none">
+                                                        <strong>{{ ressource.evenement.titre }}</strong>
+                                                    </a>
+                                                {% else %}
+                                                    <span class="text-muted">Non assigné</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold text-muted">
+                                                <i class="fas fa-play text-success me-2"></i> Date de début
+                                            </td>
+                                            <td>
+                                                {% if ressource.dateDebut %}
+                                                    <span class="badge bg-light text-dark px-3 py-2">
+                                                        {{ ressource.dateDebut|date('d/m/Y à H:i') }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-muted">Non définie</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold text-muted">
+                                                <i class="fas fa-stop text-danger me-2"></i> Date de fin
+                                            </td>
+                                            <td>
+                                                {% if ressource.dateFin %}
+                                                    <span class="badge bg-light text-dark px-3 py-2">
+                                                        {{ ressource.dateFin|date('d/m/Y à H:i') }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-muted">Non définie</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold text-muted">
+                                                <i class="fas fa-cubes text-info me-2"></i> Quantité
+                                            </td>
+                                            <td>
+                                                {% if ressource.quantite is not null %}
+                                                    <span class="badge bg-dark rounded-pill px-3 py-2">{{ ressource.quantite }} unité(s)</span>
+                                                {% else %}
+                                                    <span class="text-muted">Non spécifiée</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Colonne droite -->
+                        <div class="col-lg-6">
+                            <div class="info-table">
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-bold text-muted" style="width: 40%;">
+                                                <i class="fas fa-paperclip text-primary me-2"></i> Fichier
+                                            </td>
+                                            <td>
+                                                {% if ressource.fichier %}
+                                                    <a href="{{ asset('uploads/' ~ ressource.fichier) }}" 
+                                                       target="_blank" 
+                                                       class="btn btn-sm btn-outline-success">
+                                                        <i class="fas fa-download me-1"></i> Télécharger
+                                                    </a>
+                                                    <small class="d-block text-muted mt-1">{{ ressource.fichier }}</small>
+                                                {% else %}
+                                                    <span class="text-muted">Aucun fichier</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    {% if ressource.description %}
+                    <div class="mt-4 p-4 bg-light rounded">
+                        <h5 class="text-muted mb-3">
+                            <i class="fas fa-align-left me-2"></i> Description
+                        </h5>
+                        <p class="mb-0">{{ ressource.description|nl2br }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Actions -->
+                    <div class="mt-5 pt-4 border-top">
+                        <a href="{{ path('app_ressource_edit', {'id': ressource.id}) }}" 
+                           class="btn-fill-lg btn-gradient-yellow btn-hover-bluedark me-2">
+                            <i class="fas fa-edit me-1"></i> Modifier
+                        </a>
+                        <a href="{{ path('app_ressource_index') }}" 
+                           class="btn-fill-lg bg-blue-dark btn-hover-yellow me-2">
+                            <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                        </a>
+                        <form method="post" action="{{ path('app_ressource_delete', {'id': ressource.id}) }}" 
+                              style="display: inline-block;" 
+                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette ressource ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ressource.id) }}">
+                            <button type="submit" class="btn btn-outline-danger px-4 py-2">
+                                <i class="fas fa-trash-alt me-1"></i> Supprimer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Ressource Details Area End Here -->
+</div>
+{% endblock %}
