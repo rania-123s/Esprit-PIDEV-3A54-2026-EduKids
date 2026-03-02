@@ -94,7 +94,7 @@ class Evenement
     #[Assert\GreaterThanOrEqual(value: 0, message: 'Le nombre de places disponibles doit être positif ou nul.')]
     private ?int $nbPlacesDisponibles = null;
 
-    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'evenement', cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'evenement', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $reservations;
 
     public function __construct()

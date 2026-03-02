@@ -17,7 +17,7 @@ class Ressource
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'ressources')]
-    #[ORM\JoinColumn(name: 'id_evenement', referencedColumnName: 'id_evenement', nullable: false)]
+    #[ORM\JoinColumn(name: 'evenement_id', referencedColumnName: 'id_evenement', nullable: false)]
     #[Assert\NotNull(message: 'L\'événement est obligatoire.')]
     private ?Evenement $evenement = null;
 

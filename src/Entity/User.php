@@ -56,7 +56,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, UserCoursProgress>
      */
-    #[ORM\OneToMany(targetEntity: UserCoursProgress::class, mappedBy: 'user', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: UserCoursProgress::class, mappedBy: 'user')]
     private Collection $userCoursProgress;
 
     public function __construct()

@@ -22,7 +22,7 @@ class ProgrammeRepository extends ServiceEntityRepository
     public function findAllWithEvenements(): array
     {
         return $this->createQueryBuilder('p')
-            ->leftJoin('p.evenement', 'e')
+            ->innerJoin('p.evenement', 'e')
             ->addSelect('e')
             ->orderBy('e.dateEvenement', 'ASC')
             ->getQuery()

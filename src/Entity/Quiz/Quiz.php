@@ -57,7 +57,7 @@ class Quiz
     /**
      * @var Collection<int, QuizAttempt>
      */
-    #[ORM\OneToMany(targetEntity: QuizAttempt::class, mappedBy: 'quiz', cascade: ['remove'])]
+    #[ORM\OneToMany(targetEntity: QuizAttempt::class, mappedBy: 'quiz', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $attempts;
 
     public function __construct()

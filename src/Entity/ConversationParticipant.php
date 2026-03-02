@@ -31,11 +31,11 @@ class ConversationParticipant
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Conversation::class, inversedBy: 'participants')]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Conversation $conversation = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
     #[ORM\Column(length: 16, options: ['default' => self::ROLE_MEMBER])]

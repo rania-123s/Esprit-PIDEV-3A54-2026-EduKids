@@ -21,7 +21,7 @@ class Reservation
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: Evenement::class, inversedBy: 'reservations')]
-    #[ORM\JoinColumn(name: 'id_evenement', referencedColumnName: 'id_evenement', nullable: false)]
+    #[ORM\JoinColumn(name: 'evenement_id', referencedColumnName: 'id_evenement', nullable: false)]
     private ?Evenement $evenement = null;
 
     #[ORM\Column(length: 255)]

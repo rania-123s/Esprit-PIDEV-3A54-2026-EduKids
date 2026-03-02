@@ -8,6 +8,10 @@ doctrine:
 
         profiling_collect_backtrace: '%kernel.debug%'
         use_savepoints: true
+
+        # MySQL strict mode + timezone UTC (aligns with PHP)
+        options:
+            !php/const PDO::MYSQL_ATTR_INIT_COMMAND: "SET SESSION sql_mode = 'STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'; SET SESSION time_zone = '+00:00'"
     orm:
         auto_generate_proxy_classes: true
         enable_lazy_ghost_objects: true

@@ -52,7 +52,7 @@ class Cours
     /**
      * @var Collection<int, UserCoursProgress>
      */
-    #[ORM\OneToMany(targetEntity: UserCoursProgress::class, mappedBy: 'cours', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: UserCoursProgress::class, mappedBy: 'cours')]
     private Collection $progress;
 
     public function __construct()
