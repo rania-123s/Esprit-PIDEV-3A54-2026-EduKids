@@ -175,17 +175,13 @@ PROMPT;
     {
         $normalized = [];
         foreach ($messages as $message) {
-            if (!is_array($message)) {
-                continue;
-            }
-
-            $content = trim((string) ($message['content'] ?? ''));
+            $content = trim((string) $message['content']);
             if ($content === '') {
                 continue;
             }
 
             $normalized[] = [
-                'id' => trim((string) ($message['id'] ?? '')),
+                'id' => trim((string) $message['id']),
                 'senderName' => trim((string) ($message['senderName'] ?? 'Utilisateur')) ?: 'Utilisateur',
                 'content' => mb_substr($content, 0, 600),
             ];
@@ -568,9 +564,12 @@ PROMPT;
     {
         $lines = [];
         foreach ($messages as $message) {
-            $id = trim((string) ($message['id'] ?? ''));
-            $senderName = trim((string) ($message['senderName'] ?? 'Utilisateur')) ?: 'Utilisateur';
-            $content = trim((string) ($message['content'] ?? ''));
+            $id = trim((string) $message['id']);
+            $senderName = trim((string) $message['senderName']);
+            if ($senderName === '') {
+                $senderName = 'Utilisateur';
+            }
+            $content = trim((string) $message['content']);
             if ($content === '') {
                 continue;
             }

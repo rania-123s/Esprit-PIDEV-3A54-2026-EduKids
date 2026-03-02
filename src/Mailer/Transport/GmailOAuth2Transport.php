@@ -15,6 +15,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class GmailOAuth2Transport extends AbstractTransport
 {
+    private ?EventDispatcherInterface $eventDispatcher;
+    private ?LoggerInterface $transportLogger;
+
     public function __construct(
         private string $clientId,
         #[\SensitiveParameter] private string $clientSecret,
@@ -24,13 +27,15 @@ class GmailOAuth2Transport extends AbstractTransport
         ?EventDispatcherInterface $dispatcher = null,
         ?LoggerInterface $logger = null,
     ) {
+        $this->eventDispatcher = $dispatcher;
+        $this->transportLogger = $logger;
         parent::__construct($dispatcher, $logger);
     }
 
     protected function doSend(SentMessage $message): void
     {
         $accessToken = $this->fetchAccessToken();
-        $smtp = new EsmtpTransport('smtp.gmail.com', 465, true, $this->dispatcher, $this->logger);
+        $smtp = new EsmtpTransport('smtp.gmail.com', 465, true, $this->eventDispatcher, $this->transportLogger);
         $smtp->setUsername($this->userEmail);
         $smtp->setPassword($accessToken);
         $smtp->setAuthenticators([new XOAuth2Authenticator()]);

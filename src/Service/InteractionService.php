@@ -73,11 +73,17 @@ class InteractionService
 
     private function updateCounter(Evenement $evenement, string $type, int $delta): void
     {
-        match ($type) {
-            UserEvenementInteraction::TYPE_LIKE => $delta > 0 ? $evenement->incrementLikes() : $evenement->decrementLikes(),
-            UserEvenementInteraction::TYPE_DISLIKE => $delta > 0 ? $evenement->incrementDislikes() : $evenement->decrementDislikes(),
-            UserEvenementInteraction::TYPE_FAVORITE => $delta > 0 ? $evenement->incrementFavorites() : $evenement->decrementFavorites(),
-        };
+        switch ($type) {
+            case UserEvenementInteraction::TYPE_LIKE:
+                $delta > 0 ? $evenement->incrementLikes() : $evenement->decrementLikes();
+                break;
+            case UserEvenementInteraction::TYPE_DISLIKE:
+                $delta > 0 ? $evenement->incrementDislikes() : $evenement->decrementDislikes();
+                break;
+            case UserEvenementInteraction::TYPE_FAVORITE:
+                $delta > 0 ? $evenement->incrementFavorites() : $evenement->decrementFavorites();
+                break;
+        }
     }
 
     public function getUserInteractions(User $user, Evenement $evenement): array

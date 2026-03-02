@@ -337,7 +337,7 @@ Génère maintenant le programme d'activités :";
             } catch (\Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface $e) {
                 $lastException = $e;
                 $response = $e->getResponse();
-                $errorContent = $response ? $response->getContent(false) : 'No response';
+                $errorContent = $response->getContent(false);
                 try {
                     $errorData = json_decode($errorContent, true);
                     $errorMessage = $errorData['error']['message'] ?? $errorContent;

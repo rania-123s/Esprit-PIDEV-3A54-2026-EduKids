@@ -3,106 +3,460 @@
 {% block title %}{{ question.id ? 'Modifier' : 'Nouvelle' }} question - {{ quiz.titre }}{% endblock %}
 
 {% block body %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="{{ path('quiz_admin_quiz_list') }}">Quiz</a></li>
-            <li class="breadcrumb-item"><a href="{{ path('quiz_admin_question_list', { id: quiz.id }) }}">{{ quiz.titre }}</a></li>
-            <li class="breadcrumb-item active">{{ question.id ? 'Modifier la question' : 'Nouvelle question' }}</li>
-        </ol>
-    </nav>
+<style>
+    .quiz-question-page {
+        --ink: #0f172a;
+        --muted: #5b667a;
+        --line: #d7dfeb;
+        --surface: #ffffff;
+        --brand: #0ea5a3;
+        --brand-dark: #0b7f7d;
+        --hero-a: #0f766e;
+        --hero-b: #155e75;
+        --hero-c: #1d4ed8;
+        font-family: "Heebo", sans-serif;
+    }
 
-    <div class="row">
-        <div class="col-xl-9 col-lg-10 mx-auto">
-            <div class="card ecommerce-admin-card shadow-sm border-0 overflow-hidden">
-                <div class="card-header bg-light border-0 py-3 px-4">
-                    <h5 class="mb-0 fw-bold" style="color: #1f2937 !important;">
-                        <i class="bi bi-patch-question text-primary me-2"></i>
-                        {{ question.id ? 'Modifier la question' : 'Ajouter une question' }}
-                    </h5>
-                    <p class="small mb-0 mt-1" style="color: #6b7280 !important;">Énoncé, type (QCM ou texte), et pour un QCM : ajoutez des options et cochez la bonne réponse.</p>
-                </div>
+    .quiz-question-page .create-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        margin: 1.75rem 1rem 0;
+        padding: 3.25rem 1.25rem;
+        background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c));
+        color: #fff;
+        box-shadow: 0 24px 60px rgba(2, 44, 34, 0.24);
+    }
 
-                <div class="card-body p-4">
-                    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'question-form'}}) }}
+    .quiz-question-page .create-hero::before,
+    .quiz-question-page .create-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
 
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Énoncé de la question <span class="text-danger">*</span></label>
-                        {{ form_widget(form.texte, {'attr': {'class': 'form-control form-control-lg', 'rows': 3, 'placeholder': 'Ex: Quelle est la capitale de la France ?'}}) }}
-                        {{ form_errors(form.texte) }}
-                        <div class="form-text small">Phrase claire et complète. Maximum 2000 caractères.</div>
-                    </div>
+    .quiz-question-page .create-hero::before {
+        width: 240px;
+        height: 240px;
+        right: -70px;
+        top: -70px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.33), rgba(255, 255, 255, 0));
+    }
 
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Type de question <span class="text-danger">*</span></label>
-                        {{ form_widget(form.type, {'attr': {'class': 'form-select form-select-lg question-type-select'}}) }}
-                        {{ form_errors(form.type) }}
-                        <div class="form-text small">QCM = plusieurs choix, une seule bonne réponse. Texte = réponse libre.</div>
-                    </div>
+    .quiz-question-page .create-hero::after {
+        width: 200px;
+        height: 200px;
+        left: -55px;
+        bottom: -80px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.45), rgba(245, 158, 11, 0));
+    }
 
-                    {% set option_prototype = form_widget(form.questionOptions.vars.prototype) %}
-                    {% set is_qcm_type = question.type is defined ? (question.type == 'qcm') : true %}
-                    <div id="question-options-block" class="mb-4" style="display: {{ is_qcm_type ? 'block' : 'none' }};">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label fw-semibold mb-0">Options du QCM</label>
-                            <button type="button" class="btn btn-sm btn-outline-primary" id="add-option-btn" onclick="typeof window.addQuizOption === 'function' && window.addQuizOption(event);">
-                                <i class="bi bi-plus-lg me-1"></i> Ajouter une option
-                            </button>
-                        </div>
-                        <script type="text/template" id="option-prototype">{{ option_prototype|raw }}</script>
-                        <div id="options-list" data-index="{{ form.questionOptions|length }}" data-prototype="{{ option_prototype|e('html_attr') }}">
-                            {% for option in form.questionOptions %}
-                                <div class="option-entry row g-2 align-items-center border rounded-3 p-3 mb-2" style="border-color: #e5e7eb !important;">
-                                    <div class="col-num col-md-1 text-muted small">{{ loop.index }}</div>
-                                    <div class="col-texte col-md-6">{{ form_widget(option.texte, {'attr': {'class': 'form-control', 'placeholder': 'Texte de l\'option'}}) }}</div>
-                                    <div class="col-ordre col-md-2">{{ form_widget(option.ordre, {'attr': {'class': 'form-control form-control-sm', 'min': 0}}) }}</div>
-                                    <div class="col-correct col-md-2">
-                                        <div class="form-check">
-                                            {{ form_widget(option.correct, {'attr': {'class': 'form-check-input'}}) }}
-                                            <label class="form-check-label small" for="{{ option.correct.vars.id }}">Bonne réponse</label>
+    .quiz-question-page .create-hero h1 {
+        margin: 0;
+        font-size: clamp(1.75rem, 4vw, 2.7rem);
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+
+    .quiz-question-page .create-hero p {
+        margin: 0.85rem 0 0;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .quiz-question-page .create-shell {
+        padding: 1.75rem 1rem 2.2rem;
+    }
+
+    .quiz-question-page .breadcrumb-wrap {
+        margin-bottom: 1.2rem;
+    }
+
+    .quiz-question-page .breadcrumb {
+        margin: 0;
+        padding: 0.6rem 0.9rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .quiz-question-page .breadcrumb a {
+        color: #0b7f7d;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .quiz-question-page .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .quiz-question-page .create-card {
+        background: linear-gradient(170deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.96));
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 24px;
+        box-shadow: 0 22px 55px rgba(15, 23, 42, 0.1);
+        backdrop-filter: blur(2px);
+    }
+
+    .quiz-question-page .create-card-body {
+        padding: clamp(1.1rem, 2.8vw, 2.4rem);
+    }
+
+    .quiz-question-page .info-header {
+        text-align: center;
+        margin-bottom: 1.35rem;
+    }
+
+    .quiz-question-page .info-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(14, 165, 163, 0.12);
+        color: #0d7e7b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 0.55rem;
+    }
+
+    .quiz-question-page .create-heading {
+        color: var(--ink);
+        font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+        letter-spacing: 0.2px;
+    }
+
+    .quiz-question-page .info-subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+    }
+
+    .quiz-question-page .form-section {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 16px;
+        background: #fff;
+        padding: 1rem;
+    }
+
+    .quiz-question-page .form-section-title {
+        margin: 0 0 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .quiz-question-page .form-section-title i {
+        color: var(--brand-dark);
+    }
+
+    .quiz-question-page .field-label {
+        color: var(--ink);
+        font-size: 0.94rem;
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+    }
+
+    .quiz-question-page .modern-input {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 0.82rem 0.95rem;
+        font-size: 0.96rem;
+        color: var(--ink);
+        background: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .quiz-question-page .modern-input:focus {
+        border-color: rgba(14, 165, 163, 0.65);
+        box-shadow: 0 0 0 4px rgba(14, 165, 163, 0.14);
+        transform: translateY(-1px);
+    }
+
+    .quiz-question-page .form-note {
+        margin-top: 0.4rem;
+        color: var(--muted);
+        font-size: 0.83rem;
+    }
+
+    .quiz-question-page .options-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .quiz-question-page .option-entry {
+        border: 1px solid rgba(15, 23, 42, 0.1);
+        border-radius: 14px;
+        background: #fff;
+        padding: 0.8rem;
+    }
+
+    .quiz-question-page .option-entry .col-num {
+        font-weight: 700;
+        color: var(--muted);
+    }
+
+    .quiz-question-page .btn-add-option {
+        border-radius: 999px;
+        border: 1px solid rgba(14, 165, 163, 0.45);
+        color: #0f766e;
+        background: #fff;
+        font-weight: 600;
+    }
+
+    .quiz-question-page .btn-add-option:hover {
+        background: rgba(14, 165, 163, 0.1);
+        border-color: rgba(14, 165, 163, 0.65);
+        color: #0c5f5d;
+    }
+
+    .quiz-question-page .create-actions {
+        padding-top: 0.5rem;
+    }
+
+    .quiz-question-page .btn-cancel-modern {
+        border-radius: 13px;
+        border: 1px solid #c8d4e5;
+        background: #fff;
+        color: #344054;
+        font-weight: 600;
+    }
+
+    .quiz-question-page .btn-cancel-modern:hover {
+        background: #f8fafc;
+        border-color: #b8c8dc;
+        color: #1f2937;
+    }
+
+    .quiz-question-page .btn-create-modern {
+        border: 0;
+        border-radius: 13px;
+        padding: 0.9rem 1.4rem;
+        background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+        color: #fff;
+        font-weight: 700;
+        letter-spacing: 0.15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        box-shadow: 0 14px 28px rgba(11, 127, 125, 0.34);
+    }
+
+    .quiz-question-page .btn-create-modern:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.02);
+        box-shadow: 0 16px 30px rgba(11, 127, 125, 0.4);
+        color: #fff;
+    }
+
+    .quiz-question-page .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 1rem;
+        color: var(--brand-dark);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .quiz-question-page .back-link:hover {
+        color: #095957;
+        text-decoration: underline;
+    }
+
+    .quiz-question-page .reveal-up {
+        animation: revealUp 0.45s ease both;
+    }
+
+    .quiz-question-page .reveal-up.delay-1 {
+        animation-delay: 0.08s;
+    }
+
+    @keyframes revealUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .quiz-question-page .create-hero {
+            margin: 1rem 0.75rem 0;
+            border-radius: 18px;
+            padding: 2.3rem 1rem;
+        }
+
+        .quiz-question-page .create-shell {
+            padding: 1rem 0.75rem 1.5rem;
+        }
+
+        .quiz-question-page .options-toolbar {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<section class="quiz-question-page">
+    <div class="create-hero reveal-up">
+        <div class="container">
+            <h1>{{ question.id ? 'Modifier une question' : 'Ajouter une nouvelle question' }}</h1>
+            <p>Configurez rapidement l enonce, le type et les options de cette question.</p>
+        </div>
+    </div>
+
+    <div class="create-shell">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xl-9">
+                    <nav aria-label="breadcrumb" class="breadcrumb-wrap reveal-up">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{{ path('quiz_admin_quiz_list') }}">Quiz</a></li>
+                            <li class="breadcrumb-item"><a href="{{ path('quiz_admin_question_list', { id: quiz.id }) }}">{{ quiz.titre }}</a></li>
+                            <li class="breadcrumb-item active">{{ question.id ? 'Modifier la question' : 'Nouvelle question' }}</li>
+                        </ol>
+                    </nav>
+
+                    <div class="card create-card reveal-up delay-1">
+                        <div class="card-body create-card-body">
+                            <div class="info-header">
+                                <span class="info-kicker">
+                                    <i class="bi bi-ui-checks-grid"></i>
+                                    Gestion quiz
+                                </span>
+                                <h3 class="create-heading">{{ question.id ? 'Modifier la question' : 'Ajouter une question' }}</h3>
+                                <p class="info-subtitle">Enonce, type (QCM ou texte), et pour un QCM : ajoutez des options et cochez la bonne reponse.</p>
+                            </div>
+
+                            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'question-form'}}) }}
+
+                            <div class="row g-3 g-md-4">
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-chat-square-text"></i>
+                                            Informations principales
+                                        </h4>
+
+                                        <div class="mb-4">
+                                            <label class="form-label field-label">Enonce de la question <span class="text-danger">*</span></label>
+                                            {{ form_widget(form.texte, {'attr': {'class': 'modern-input form-control form-control-lg', 'rows': 3, 'placeholder': 'Ex: Quelle est la capitale de la France ?'}}) }}
+                                            {{ form_errors(form.texte) }}
+                                            <div class="form-note">Phrase claire et complete. Maximum 2000 caracteres.</div>
+                                        </div>
+
+                                        <div class="mb-0">
+                                            <label class="form-label field-label">Type de question <span class="text-danger">*</span></label>
+                                            {{ form_widget(form.type, {'attr': {'class': 'modern-input form-select form-select-lg question-type-select'}}) }}
+                                            {{ form_errors(form.type) }}
+                                            <div class="form-note">QCM = plusieurs choix, une seule bonne reponse. Texte = reponse libre.</div>
                                         </div>
                                     </div>
-                                    <div class="col-del col-md-1"><button type="button" class="btn btn-sm btn-outline-danger remove-option" title="Supprimer"><i class="bi bi-trash"></i></button></div>
                                 </div>
-                            {% endfor %}
+
+                                {% set option_prototype = form_widget(form.questionOptions.vars.prototype) %}
+                                {% set is_qcm_type = question.type is defined ? (question.type == 'qcm') : true %}
+                                <div class="col-12" id="question-options-block" style="display: {{ is_qcm_type ? 'block' : 'none' }};">
+                                    <div class="form-section">
+                                        <div class="options-toolbar">
+                                            <label class="form-label field-label mb-0">Options du QCM</label>
+                                            <button type="button" class="btn btn-sm btn-add-option" id="add-option-btn" onclick="typeof window.addQuizOption === 'function' && window.addQuizOption(event);">
+                                                <i class="bi bi-plus-lg me-1"></i> Ajouter une option
+                                            </button>
+                                        </div>
+
+                                        <script type="text/template" id="option-prototype">{{ option_prototype|raw }}</script>
+                                        <div id="options-list" data-index="{{ form.questionOptions|length }}" data-prototype="{{ option_prototype|e('html_attr') }}">
+                                            {% for option in form.questionOptions %}
+                                                <div class="option-entry row g-2 align-items-center mb-2">
+                                                    <div class="col-num col-md-1 text-muted small">{{ loop.index }}</div>
+                                                    <div class="col-texte col-md-6">{{ form_widget(option.texte, {'attr': {'class': 'modern-input form-control', 'placeholder': 'Texte de l\'option'}}) }}</div>
+                                                    <div class="col-ordre col-md-2">{{ form_widget(option.ordre, {'attr': {'class': 'modern-input form-control form-control-sm', 'min': 0}}) }}</div>
+                                                    <div class="col-correct col-md-2">
+                                                        <div class="form-check">
+                                                            {{ form_widget(option.correct, {'attr': {'class': 'form-check-input'}}) }}
+                                                            <label class="form-check-label small" for="{{ option.correct.vars.id }}">Bonne reponse</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-del col-md-1">
+                                                        <button type="button" class="btn btn-sm btn-outline-danger remove-option" title="Supprimer">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        {{ form_errors(form.questionOptions) }}
+                                        <div class="form-note">Cochez une seule "Bonne reponse" par question. Au moins 2 options pour un QCM.</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12" id="bonne-reponse-texte-block" style="display: {{ is_qcm_type ? 'none' : 'block' }};">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-pen"></i>
+                                            Reponse texte
+                                        </h4>
+                                        <label class="form-label field-label">Reponse attendue (texte)</label>
+                                        {{ form_widget(form.bonneReponse, {'attr': {'class': 'modern-input form-control', 'placeholder': 'Ex: Paris'}}) }}
+                                        {{ form_errors(form.bonneReponse) }}
+                                        <div class="form-note">La reponse exacte a comparer avec la saisie de l utilisateur.</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">
+                                            <i class="bi bi-sort-numeric-down"></i>
+                                            Ordre
+                                        </h4>
+                                        <label class="form-label field-label">Ordre d affichage</label>
+                                        {{ form_widget(form.ordre, {'attr': {'class': 'modern-input form-control', 'min': 0}}) }}
+                                        {{ form_errors(form.ordre) }}
+                                        <div class="form-note">0 = premiere question, 1 = deuxieme, etc.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="create-actions d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                                <a href="{{ path('quiz_admin_question_list', { id: quiz.id }) }}" class="btn btn-cancel-modern px-4">Retour</a>
+                                <button type="submit" class="btn btn-create-modern px-5 fw-semibold">Enregistrer la question</button>
+                            </div>
+
+                            {{ form_end(form) }}
                         </div>
-                        {{ form_errors(form.questionOptions) }}
-                        <div class="form-text small mt-1">Cochez une seule « Bonne réponse » par question. Au moins 2 options pour un QCM.</div>
                     </div>
 
-                    <div class="mb-4" id="bonne-reponse-texte-block" style="display: {{ is_qcm_type ? 'none' : 'block' }};">
-                        <label class="form-label fw-semibold">Réponse attendue (texte)</label>
-                        {{ form_widget(form.bonneReponse, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Paris'}}) }}
-                        {{ form_errors(form.bonneReponse) }}
-                        <div class="form-text small">La réponse exacte à comparer avec la saisie de l'utilisateur.</div>
+                    <div class="text-center">
+                        <a href="{{ path('quiz_admin_question_list', { id: quiz.id }) }}" class="back-link">
+                            <span aria-hidden="true">&larr;</span>
+                            Retour a la liste des questions
+                        </a>
                     </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Ordre d'affichage</label>
-                        {{ form_widget(form.ordre, {'attr': {'class': 'form-control', 'min': 0}}) }}
-                        {{ form_errors(form.ordre) }}
-                        <div class="form-text small">0 = première question, 1 = deuxième, etc.</div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
-                        <a href="{{ path('quiz_admin_question_list', { id: quiz.id }) }}" class="btn btn-outline-secondary rounded-pill px-4">Annuler</a>
-                        <button type="submit" class="btn btn-primary rounded-pill px-5 fw-semibold">
-                            <i class="bi bi-check-lg me-2"></i> Enregistrer la question
-                        </button>
-                    </div>
-
-                    {{ form_end(form) }}
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
 <script>
 (function() {
-    var form, typeSelect, optionsBlock, bonneReponseTexteBlock, optionsList, addOptionBtn, prototypeEl, prototype, formName, index;
+    var form, typeSelect, optionsBlock, bonneReponseTexteBlock, optionsList, prototypeEl, prototype, formName, index;
 
     function init() {
         form = document.getElementById('question-form');
@@ -111,7 +465,6 @@
         optionsBlock = document.getElementById('question-options-block');
         bonneReponseTexteBlock = document.getElementById('bonne-reponse-texte-block');
         optionsList = document.getElementById('options-list');
-        addOptionBtn = document.getElementById('add-option-btn');
 
         prototypeEl = document.getElementById('option-prototype');
         prototype = (prototypeEl && prototypeEl.textContent) ? prototypeEl.textContent.trim() : null;
@@ -169,14 +522,21 @@
         var errors = [];
         var texteField = form && form.querySelector('textarea[id*="texte"]');
         if (texteField && (texteField.value || '').trim().length === 0) {
-            errors.push('L\'énoncé de la question est obligatoire.');
+            errors.push('L enonce de la question est obligatoire.');
             texteField.classList.add('is-invalid');
-        } else if (texteField) texteField.classList.remove('is-invalid');
+        } else if (texteField) {
+            texteField.classList.remove('is-invalid');
+        }
+
         if (type === 'qcm' && optionsList) {
             var entries = optionsList.querySelectorAll('.option-entry');
-            var optionTexts = Array.from(entries).map(function(r) { var i = r.querySelector('input[type="text"]'); return i ? i.value.trim() : ''; }).filter(Boolean);
+            var optionTexts = Array.from(entries).map(function(r) {
+                var i = r.querySelector('input[type="text"]');
+                return i ? i.value.trim() : '';
+            }).filter(Boolean);
             if (optionTexts.length < 2) errors.push('Un QCM doit avoir au moins 2 options.');
         }
+
         if (errors.length > 0) {
             e.preventDefault();
             alert('Veuillez corriger :\n' + errors.join('\n'));
@@ -185,10 +545,10 @@
 
     function addOptionRow() {
         if (!optionsList) return;
+
         var currentIndex = index;
         var wrapper = document.createElement('div');
-        wrapper.className = 'option-entry row g-2 align-items-center border rounded-3 p-3 mb-2';
-        wrapper.style.borderColor = '#e5e7eb';
+        wrapper.className = 'option-entry row g-2 align-items-center mb-2';
 
         var texteInput, ordreInput, correctInput, formCheck;
         if (prototype && typeof prototype === 'string' && prototype.indexOf('__name__') !== -1) {
@@ -199,35 +559,41 @@
             ordreInput = tmp.querySelector('input[type="number"]');
             correctInput = tmp.querySelector('input[type="checkbox"]');
         }
+
         if (!texteInput || !ordreInput || !correctInput) {
             var prefix = formName + '[questionOptions][' + currentIndex + ']';
             texteInput = document.createElement('input');
             texteInput.type = 'text';
             texteInput.name = prefix + '[texte]';
             texteInput.id = formName + '_questionOptions_' + currentIndex + '_texte';
+
             ordreInput = document.createElement('input');
             ordreInput.type = 'number';
             ordreInput.name = prefix + '[ordre]';
             ordreInput.id = formName + '_questionOptions_' + currentIndex + '_ordre';
             ordreInput.value = currentIndex;
             ordreInput.min = 0;
+
             var hiddenCorrect = document.createElement('input');
             hiddenCorrect.type = 'hidden';
             hiddenCorrect.name = prefix + '[correct]';
             hiddenCorrect.value = '0';
+
             correctInput = document.createElement('input');
             correctInput.type = 'checkbox';
             correctInput.name = prefix + '[correct]';
             correctInput.value = '1';
             correctInput.id = formName + '_questionOptions_' + currentIndex + '_correct';
+
             formCheck = document.createElement('div');
             formCheck.className = 'form-check';
             formCheck.appendChild(hiddenCorrect);
             formCheck.appendChild(correctInput);
         }
-        texteInput.className = 'form-control';
-        texteInput.placeholder = 'Texte de l\'option';
-        ordreInput.className = 'form-control form-control-sm';
+
+        texteInput.className = 'modern-input form-control';
+        texteInput.placeholder = 'Texte de l option';
+        ordreInput.className = 'modern-input form-control form-control-sm';
         ordreInput.setAttribute('min', 0);
         if (ordreInput.value === '' || ordreInput.value === undefined) ordreInput.value = currentIndex;
         correctInput.className = 'form-check-input';
@@ -235,12 +601,15 @@
         var numCell = document.createElement('div');
         numCell.className = 'col-num col-md-1 text-muted small';
         numCell.textContent = (optionsList.querySelectorAll('.option-entry').length + 1);
+
         var colTexte = document.createElement('div');
         colTexte.className = 'col-texte col-md-6';
         colTexte.appendChild(texteInput);
+
         var colOrdre = document.createElement('div');
         colOrdre.className = 'col-ordre col-md-2';
         colOrdre.appendChild(ordreInput);
+
         var colCorrect = document.createElement('div');
         colCorrect.className = 'col-correct col-md-2';
         if (!formCheck) {
@@ -251,9 +620,10 @@
         var label = document.createElement('label');
         label.className = 'form-check-label small';
         label.htmlFor = correctInput.id || '';
-        label.textContent = 'Bonne réponse';
+        label.textContent = 'Bonne reponse';
         formCheck.appendChild(label);
         colCorrect.appendChild(formCheck);
+
         var delCell = document.createElement('div');
         delCell.className = 'col-del col-md-1';
         var delBtn = document.createElement('button');
@@ -266,12 +636,14 @@
             renumberRows();
         });
         delCell.appendChild(delBtn);
+
         wrapper.appendChild(numCell);
         wrapper.appendChild(colTexte);
         wrapper.appendChild(colOrdre);
         wrapper.appendChild(colCorrect);
         wrapper.appendChild(delCell);
         optionsList.appendChild(wrapper);
+
         index++;
         optionsList.setAttribute('data-index', index);
         renumberRows();

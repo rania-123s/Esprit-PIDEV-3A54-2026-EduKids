@@ -136,7 +136,7 @@ class MessageController extends AbstractController
             return $this->json(['error' => 'Invalid audio upload.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $size = (int) ($audioFile->getSize() ?? 0);
+        $size = (int) $audioFile->getSize();
         if ($size <= 0) {
             return $this->json(['error' => 'Uploaded audio is empty.'], Response::HTTP_BAD_REQUEST);
         }

@@ -8,7 +8,6 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpClient\Exception\ExceptionInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -16,6 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class LeconTutorController extends AbstractController
 {
     private array $binaryCache = [];
+    private bool $allowEnginePdfExtraction = false;
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
@@ -61,7 +61,13 @@ final class LeconTutorController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $context = $this->buildLessonContext($lecon);
+        $previousExtractionFlag = $this->allowEnginePdfExtraction;
+        $this->allowEnginePdfExtraction = true;
+        try {
+            $context = $this->buildLessonContext($lecon);
+        } finally {
+            $this->allowEnginePdfExtraction = $previousExtractionFlag;
+        }
         $summary = $this->summarizeLessonByLevel($context, $level);
 
         return $this->json([
@@ -90,8 +96,8 @@ final class LeconTutorController extends AbstractController
             ], Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
-        $pdfPath = (string) ($resolvedPdf['path'] ?? '');
-        $isTemporaryPdf = (bool) ($resolvedPdf['temporary'] ?? false);
+        $pdfPath = $resolvedPdf['path'];
+        $isTemporaryPdf = $resolvedPdf['temporary'];
 
         $sidecarPath = $this->getOcrSidecarPath((string) $mediaUrl);
         $sidecarDir = dirname($sidecarPath);
@@ -186,25 +192,87 @@ final class LeconTutorController extends AbstractController
         }
 
         if ($candidates === []) {
+            if (!$this->allowEnginePdfExtraction) {
+                return '';
+            }
+
+            $extractedWithEngine = $this->extractPdfTextWithAvailableEngines((string) $mediaUrl);
+            if ($extractedWithEngine !== '') {
+                return mb_substr($extractedWithEngine, 0, 6000);
+            }
+
             return '';
         }
 
         $text = $this->selectBestExtractedText($candidates);
         $text = $this->sanitizeUtf8($text);
 
-        if ($text === '') {
+        if (
+            $text !== ''
+            && $this->isUsefulExtractedText($text)
+            && !$this->isMostlyGibberish($text)
+        ) {
+            return mb_substr($text, 0, 6000);
+        }
+
+        if (!$this->allowEnginePdfExtraction) {
             return '';
         }
 
-        if (!$this->isUsefulExtractedText($text)) {
+        $extractedWithEngine = $this->extractPdfTextWithAvailableEngines((string) $mediaUrl);
+        if ($extractedWithEngine !== '') {
+            return mb_substr($extractedWithEngine, 0, 6000);
+        }
+
+        return '';
+    }
+
+    private function extractPdfTextWithAvailableEngines(string $mediaUrl): string
+    {
+        if (!$this->hasAnyOcrEngine()) {
             return '';
         }
 
-        if ($this->isMostlyGibberish($text)) {
+        try {
+            $resolvedPdf = $this->resolvePdfPathForOcr($mediaUrl);
+        } catch (\RuntimeException) {
             return '';
         }
 
-        return mb_substr($text, 0, 6000);
+        $pdfPath = $resolvedPdf['path'];
+        $isTemporaryPdf = $resolvedPdf['temporary'];
+        $sidecarPath = $this->getOcrSidecarPath($mediaUrl);
+        $sidecarDir = dirname($sidecarPath);
+
+        if (!is_dir($sidecarDir) && !@mkdir($sidecarDir, 0775, true) && !is_dir($sidecarDir)) {
+            if ($isTemporaryPdf) {
+                @unlink($pdfPath);
+            }
+
+            return '';
+        }
+
+        try {
+            $result = $this->runOcrPipeline($pdfPath, $sidecarPath);
+            if (($result['ok'] ?? false) !== true) {
+                return '';
+            }
+
+            $text = $this->sanitizeUtf8((string) (@file_get_contents($sidecarPath) ?: ''));
+            if ($text === '') {
+                return '';
+            }
+
+            if (!$this->isUsefulExtractedText($text) || $this->isMostlyGibberish($text)) {
+                return '';
+            }
+
+            return $text;
+        } finally {
+            if ($isTemporaryPdf) {
+                @unlink($pdfPath);
+            }
+        }
     }
 
     private function extractTextFromPdfStreams(string $pdfContent): string
@@ -215,8 +283,8 @@ final class LeconTutorController extends AbstractController
 
         $chunks = [];
         foreach ($matches as $match) {
-            $dict = (string) ($match[1] ?? '');
-            $stream = (string) ($match[2] ?? '');
+            $dict = (string) $match[1];
+            $stream = (string) $match[2];
             $decodedStream = $this->decodePdfStream($stream, $dict);
             if ($decodedStream === '') {
                 continue;
@@ -257,7 +325,7 @@ final class LeconTutorController extends AbstractController
             }
 
             preg_match_all('/[\p{L}\p{N}]/u', $normalized, $alnum);
-            $score = count($alnum[0] ?? []);
+            $score = count($alnum[0]);
             if ($score > $bestScore) {
                 $best = $normalized;
                 $bestScore = $score;
@@ -273,9 +341,9 @@ final class LeconTutorController extends AbstractController
             return $stream;
         }
 
-        $filterExpr = (string) ($filterMatch[1] ?? '');
+        $filterExpr = (string) $filterMatch[1];
         preg_match_all('/\/([A-Za-z0-9]+)/', $filterExpr, $nameMatches);
-        $filters = $nameMatches[1] ?? [];
+        $filters = $nameMatches[1];
         if ($filters === []) {
             return '';
         }
@@ -537,7 +605,7 @@ PROMPT;
             }
 
             return $answer;
-        } catch (ExceptionInterface|\Throwable $e) {
+        } catch (\Throwable $e) {
             return "Le tuteur IA est temporairement indisponible. Reessayez dans quelques instants.";
         }
     }
@@ -608,7 +676,7 @@ PROMPT;
             if ($summary !== '') {
                 return $summary;
             }
-        } catch (ExceptionInterface|\Throwable) {
+        } catch (\Throwable) {
             // Fallback local below.
         }
 
@@ -795,7 +863,7 @@ PROMPT;
             return '';
         }
 
-        $url = trim((string) ($matches[1] ?? ''));
+        $url = trim((string) $matches[1]);
         if ($url === '' || mb_strtolower($url) === 'n/a') {
             return '';
         }
@@ -809,7 +877,7 @@ PROMPT;
             return '';
         }
 
-        return trim((string) ($matches[1] ?? ''));
+        return trim((string) $matches[1]);
     }
 
     /**
@@ -958,11 +1026,6 @@ PROMPT;
     private function hasAnyOcrEngine(): bool
     {
         return $this->resolveCommandBinary('ocrmypdf') !== null || $this->resolveCommandBinary('pdftotext') !== null;
-    }
-
-    private function isCommandAvailable(string $command): bool
-    {
-        return $this->resolveCommandBinary($command) !== null;
     }
 
     private function resolveCommandBinary(string $command): ?string
@@ -1217,8 +1280,8 @@ PROMPT;
         }
 
         preg_match_all('/[\p{L}\p{N}]/u', $text, $letters);
-        $alnumCount = count($letters[0] ?? []);
-        $ratio = $length > 0 ? ($alnumCount / $length) : 0;
+        $alnumCount = count($letters[0]);
+        $ratio = $alnumCount / $length;
 
         return $ratio >= 0.30;
     }

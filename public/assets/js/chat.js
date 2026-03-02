@@ -157,6 +157,11 @@
     'text/plain',
   ]);
   const SUMMARY_SUPPORTED_EXTENSIONS = new Set(['pdf', 'docx', 'txt']);
+  const unreadConversationIds = new Set();
+  const originalDocumentTitle = document.title || 'Chat';
+  const notificationApiSupported = typeof window !== 'undefined' && 'Notification' in window;
+  const notificationIconUrl = '/assets/images/logo.png';
+  let incomingSoundContext = null;
 
   const escapeHtml = (value) => {
     const div = document.createElement('div');
@@ -301,6 +306,197 @@
 
     const senderName = String(message.senderName || '').trim() || 'Un membre';
     return `${senderName} a envoyé une pièce jointe`;
+  };
+
+  const isWindowConversationVisible = (conversationId) => {
+    const normalizedConversationId = normalizeId(conversationId);
+    if (normalizedConversationId === null) {
+      return false;
+    }
+
+    if (document.visibilityState !== 'visible' || !document.hasFocus()) {
+      return false;
+    }
+
+    return Number(activeConversationId) === normalizedConversationId;
+  };
+
+  const updateDocumentTitleWithUnreadCount = () => {
+    const unreadCount = unreadConversationIds.size;
+    document.title = unreadCount > 0
+      ? `(${unreadCount}) ${originalDocumentTitle}`
+      : originalDocumentTitle;
+  };
+
+  const markConversationAsUnread = (conversationId) => {
+    const normalizedConversationId = normalizeId(conversationId);
+    if (normalizedConversationId === null) {
+      return;
+    }
+
+    if (isWindowConversationVisible(normalizedConversationId)) {
+      return;
+    }
+
+    unreadConversationIds.add(normalizedConversationId);
+    updateDocumentTitleWithUnreadCount();
+    if (conversationListEl) {
+      renderConversations(lastConversations);
+    }
+  };
+
+  const clearConversationUnreadState = (conversationId) => {
+    const normalizedConversationId = normalizeId(conversationId);
+    if (normalizedConversationId === null) {
+      return;
+    }
+
+    if (!unreadConversationIds.delete(normalizedConversationId)) {
+      return;
+    }
+
+    updateDocumentTitleWithUnreadCount();
+    if (conversationListEl) {
+      renderConversations(lastConversations);
+    }
+  };
+
+  const requestBrowserNotificationPermission = () => {
+    if (!notificationApiSupported) {
+      return;
+    }
+
+    if (Notification.permission !== 'default') {
+      return;
+    }
+
+    try {
+      const permissionPromise = Notification.requestPermission();
+      if (permissionPromise && typeof permissionPromise.then === 'function') {
+        permissionPromise.catch(() => {
+          // ignore
+        });
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const primeBrowserNotificationPermission = () => {
+    if (!notificationApiSupported || Notification.permission !== 'default') {
+      return;
+    }
+
+    const prime = () => {
+      requestBrowserNotificationPermission();
+      document.removeEventListener('pointerdown', prime, true);
+      document.removeEventListener('keydown', prime, true);
+    };
+
+    document.addEventListener('pointerdown', prime, true);
+    document.addEventListener('keydown', prime, true);
+  };
+
+  const playIncomingMessageSound = () => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextConstructor) {
+      return;
+    }
+
+    try {
+      if (!incomingSoundContext) {
+        incomingSoundContext = new AudioContextConstructor();
+      }
+
+      if (incomingSoundContext.state === 'suspended') {
+        incomingSoundContext.resume().catch(() => {});
+      }
+
+      const oscillator = incomingSoundContext.createOscillator();
+      const gainNode = incomingSoundContext.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 880;
+      gainNode.gain.value = 0.0001;
+      oscillator.connect(gainNode);
+      gainNode.connect(incomingSoundContext.destination);
+
+      const now = incomingSoundContext.currentTime;
+      gainNode.gain.exponentialRampToValueAtTime(0.05, now + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+
+      oscillator.start(now);
+      oscillator.stop(now + 0.18);
+    } catch {
+      // ignore
+    }
+  };
+
+  const showIncomingBrowserNotification = (conversationId, message) => {
+    if (!notificationApiSupported || Notification.permission !== 'granted') {
+      return;
+    }
+
+    const normalizedConversationId = normalizeId(conversationId);
+    if (normalizedConversationId === null) {
+      return;
+    }
+
+    const conversation = getConversationById(normalizedConversationId);
+    const title = conversation?.title || 'Nouveau message';
+    const preview = toMessageExcerpt(buildMessagePreview(message), 90) || 'Vous avez recu un nouveau message.';
+
+    let browserNotification;
+    try {
+      browserNotification = new Notification(title, {
+        body: preview,
+        tag: `chat-conversation-${normalizedConversationId}`,
+        renotify: true,
+        icon: notificationIconUrl,
+        badge: notificationIconUrl,
+      });
+    } catch {
+      return;
+    }
+
+    browserNotification.onclick = () => {
+      browserNotification.close();
+      window.focus();
+      if (normalizeId(activeConversationId) === normalizedConversationId) {
+        clearConversationUnreadState(normalizedConversationId);
+        return;
+      }
+
+      const targetTitle = conversation?.title || 'Conversation';
+      void selectConversation(normalizedConversationId, targetTitle);
+    };
+
+    window.setTimeout(() => {
+      browserNotification.close();
+    }, 7000);
+  };
+
+  const maybeNotifyIncomingMessage = (conversationId, message) => {
+    const senderId = normalizeId(message?.senderId);
+    if (senderId !== null && userId !== null && senderId === userId) {
+      return;
+    }
+
+    const normalizedConversationId = normalizeId(conversationId);
+    if (normalizedConversationId === null) {
+      return;
+    }
+
+    if (isWindowConversationVisible(normalizedConversationId)) {
+      return;
+    }
+
+    markConversationAsUnread(normalizedConversationId);
+    playIncomingMessageSound();
+    showIncomingBrowserNotification(normalizedConversationId, message);
   };
 
   const setInputEnabled = (enabled) => {
@@ -1512,15 +1708,23 @@
       node.type = 'button';
       node.className = 'chat-conversation-item';
       node.dataset.id = item.id;
+      const isUnread = unreadConversationIds.has(Number(item.id));
+      if (isUnread) {
+        node.classList.add('has-unread');
+      }
       if (activeConversationId === Number(item.id)) {
         node.classList.add('active');
       }
 
       const badge = item.isGroup ? '<span class="chat-conversation-badge">Groupe</span>' : '';
+      const unreadBadge = isUnread ? '<span class="chat-conversation-unread-dot" aria-hidden="true"></span>' : '';
       node.innerHTML = `
         <div class="chat-conversation-title">
           <span>${escapeHtml(item.title || 'Conversation')}</span>
-          ${badge}
+          <span class="chat-conversation-title-meta">
+            ${unreadBadge}
+            ${badge}
+          </span>
         </div>
         <div class="chat-conversation-snippet">${escapeHtml(item.lastMessage || '')}</div>
         <div class="chat-conversation-time">${formatTime(item.lastMessageAt)}</div>
@@ -2159,6 +2363,7 @@
 
     activeConversationId = nextConversationId;
     const found = getConversationById(activeConversationId);
+    clearConversationUnreadState(activeConversationId);
 
     if (chatTitleEl) chatTitleEl.textContent = title || found?.title || 'Conversation';
     setInputEnabled(true);
@@ -3284,6 +3489,26 @@
     }
   });
 
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') {
+      return;
+    }
+
+    if (activeConversationId) {
+      clearConversationUnreadState(activeConversationId);
+    } else {
+      updateDocumentTitleWithUnreadCount();
+    }
+  });
+
+  window.addEventListener('focus', () => {
+    if (!activeConversationId) {
+      return;
+    }
+
+    clearConversationUnreadState(activeConversationId);
+  });
+
   window.addEventListener('pagehide', () => {
     if (voiceLongPressTimer) {
       clearTimeout(voiceLongPressTimer);
@@ -3314,6 +3539,7 @@
 
     if (payload.type.startsWith('message.')) {
       if (payload.type === 'message.created') {
+        maybeNotifyIncomingMessage(payload.conversationId, payload.message);
         removeRemoteTypingUser(payload.conversationId, payload?.message?.senderId);
         if (Number(payload.conversationId) === Number(activeConversationId)) {
           renderTypingIndicators();
@@ -3419,6 +3645,8 @@
     };
   };
 
+  primeBrowserNotificationPermission();
+  updateDocumentTitleWithUnreadCount();
   connectWebSocket();
 
   resetVoiceRecorder({ hidePanel: true, stopRecorder: false });

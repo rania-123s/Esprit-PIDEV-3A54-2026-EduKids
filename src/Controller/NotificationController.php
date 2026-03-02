@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Notification;
 use App\Entity\User;
 use App\Repository\NotificationRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,7 +17,10 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_USER')]
 class NotificationController extends AbstractController
 {
-    public function __construct(private readonly NotificationRepository $notificationRepository)
+    public function __construct(
+        private readonly NotificationRepository $notificationRepository,
+        private readonly EntityManagerInterface $em
+    )
     {
     }
 
@@ -57,7 +61,7 @@ class NotificationController extends AbstractController
 
         if (!$notification->isRead()) {
             $notification->setIsRead(true);
-            $this->notificationRepository->getEntityManager()->flush();
+            $this->em->flush();
         }
 
         return $this->json([
@@ -137,7 +141,7 @@ class NotificationController extends AbstractController
             $initials .= mb_strtoupper(mb_substr($part, 0, 1));
         }
 
-        return $initials !== '' ? $initials : 'U';
+        return $initials;
     }
 
     private function normalizeNotificationText(string $rawText, string $senderName): string

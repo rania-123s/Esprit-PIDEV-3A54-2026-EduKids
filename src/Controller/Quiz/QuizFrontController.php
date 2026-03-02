@@ -8,7 +8,6 @@ use App\Entity\Quiz\QuizAttempt;
 use App\Repository\Quiz\QuestionRepository;
 use App\Repository\Quiz\QuizRepository;
 use App\Repository\Quiz\QuizAttemptRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,7 +26,6 @@ class QuizFrontController extends AbstractController
         private QuizRepository $quizRepository,
         private QuestionRepository $questionRepository,
         private QuizAttemptRepository $attemptRepository,
-        private EntityManagerInterface $em,
         private HttpClientInterface $httpClient,
         private string $pollinationsApiKey = '',
     ) {

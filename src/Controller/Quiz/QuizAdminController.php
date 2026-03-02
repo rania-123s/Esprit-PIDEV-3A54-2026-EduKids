@@ -10,7 +10,6 @@ use App\Form\Quiz\QuizType;
 use App\Repository\Quiz\QuestionRepository;
 use App\Repository\Quiz\QuizAttemptRepository;
 use App\Repository\Quiz\QuizRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,7 +30,6 @@ class QuizAdminController extends AbstractController
         private QuizRepository $quizRepository,
         private QuestionRepository $questionRepository,
         private QuizAttemptRepository $attemptRepository,
-        private EntityManagerInterface $em,
         private HttpClientInterface $httpClient,
         private ?string $pollinationsApiKey = null,
         private ?string $openaiApiKey = null,

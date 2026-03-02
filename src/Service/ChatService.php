@@ -1017,7 +1017,7 @@ class ChatService
             throw new \InvalidArgumentException('Invalid uploaded file.');
         }
 
-        $size = (int) ($file->getSize() ?? 0);
+        $size = (int) $file->getSize();
         if ($size <= 0) {
             throw new \InvalidArgumentException('Uploaded file is empty.');
         }

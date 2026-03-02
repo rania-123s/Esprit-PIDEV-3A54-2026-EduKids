@@ -23,8 +23,8 @@ final class ConversationTest extends TestCase
         usleep(1000);
         $conversation->onPreUpdate();
         self::assertGreaterThanOrEqual(
-            (int) $previousUpdatedAt?->format('Uu'),
-            (int) $conversation->getUpdatedAt()?->format('Uu')
+            (int) $previousUpdatedAt->format('Uu'),
+            (int) $conversation->getUpdatedAt()->format('Uu')
         );
     }
 
@@ -59,4 +59,3 @@ final class ConversationTest extends TestCase
         self::assertNull($participant->getConversation());
     }
 }
-

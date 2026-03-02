@@ -4,11 +4,14 @@
 
 parameters:
     level: 4
+    treatPhpDocTypesAsCertain: false
     paths:
         - src
         - tests
     excludePaths:
         - tests/bootstrap.php
+    ignoreErrors:
+        - identifier: property.unusedType
     # Symfony : chemin vers le container (généré en dev)
     symfony:
         containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml

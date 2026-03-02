@@ -117,18 +117,14 @@ class AttachmentTextExtractor
         }
 
         $buffer = '';
-        if (preg_match_all('/\(([^()]*)\)\s*Tj/s', $raw, $matches) && isset($matches[1])) {
+        if (preg_match_all('/\(([^()]*)\)\s*Tj/s', $raw, $matches)) {
             $buffer = implode("\n", $matches[1]);
         }
 
-        if ($buffer === '' && preg_match_all('/\[(.*?)\]\s*TJ/s', $raw, $batchMatches) && isset($batchMatches[1])) {
+        if ($buffer === '' && preg_match_all('/\[(.*?)\]\s*TJ/s', $raw, $batchMatches)) {
             $fragments = [];
             foreach ($batchMatches[1] as $chunk) {
-                if (!is_string($chunk)) {
-                    continue;
-                }
-
-                if (preg_match_all('/\(([^()]*)\)/s', $chunk, $chunkMatches) && isset($chunkMatches[1])) {
+                if (preg_match_all('/\(([^()]*)\)/s', $chunk, $chunkMatches)) {
                     $fragments[] = implode(' ', $chunkMatches[1]);
                 }
             }

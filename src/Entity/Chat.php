@@ -103,7 +103,6 @@ class Chat
     {
         if (!$this->messages->contains($message)) {
             $this->messages->add($message);
-            $message->setChat($this);
         }
 
         return $this;
@@ -111,12 +110,7 @@ class Chat
 
     public function removeMessage(Message $message): static
     {
-        if ($this->messages->removeElement($message)) {
-            // set the owning side to null (unless already changed)
-            if ($message->getChat() === $this) {
-                $message->setChat(null);
-            }
-        }
+        $this->messages->removeElement($message);
 
         return $this;
     }

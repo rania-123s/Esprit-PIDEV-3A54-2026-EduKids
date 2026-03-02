@@ -57,6 +57,27 @@ class UserRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return User[]
+     */
+    public function searchUsers(?string $searchQuery = null): array
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->orderBy('u.lastName', 'ASC')
+            ->addOrderBy('u.firstName', 'ASC')
+            ->addOrderBy('u.email', 'ASC');
+
+        $searchQuery = trim((string) $searchQuery);
+        if ($searchQuery !== '') {
+            $term = '%' . addcslashes($searchQuery, '%_') . '%';
+            $qb
+                ->andWhere('u.firstName LIKE :term OR u.lastName LIKE :term OR u.email LIKE :term')
+                ->setParameter('term', $term);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
      * Search users with ROLE_PARENT by first name, last name or email.
      * Excludes the given user ID and returns at most $limit results.
      *

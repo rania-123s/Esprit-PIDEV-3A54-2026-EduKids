@@ -138,7 +138,7 @@ Keywords:";
         } catch (\Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface $e) {
             $this->logger->error('Gemini API client error: ' . $e->getMessage());
             $response = $e->getResponse();
-            $errorContent = $response ? $response->getContent(false) : 'No response';
+            $errorContent = $response->getContent(false);
             $this->logger->error('Gemini API error response: ' . $errorContent);
             return $this->getFallbackKeywords($titre, $description);
         } catch (\Symfony\Contracts\HttpClient\Exception\ExceptionInterface $e) {

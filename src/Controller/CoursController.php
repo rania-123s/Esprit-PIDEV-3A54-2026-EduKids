@@ -519,7 +519,7 @@ PROMPT;
         }
 
         if (preg_match('/```(?:json)?\s*(\{.*\})\s*```/si', $trimmed, $matches)) {
-            $decoded = json_decode((string) ($matches[1] ?? ''), true);
+            $decoded = json_decode((string) $matches[1], true);
             if (is_array($decoded)) {
                 return $decoded;
             }
@@ -953,20 +953,10 @@ SVG;
             ],
         ];
 
-        $count = count($profiles);
-        if ($count === 0) {
-            return [
-                'style' => 'modern educational illustration',
-                'scene' => 'colorful school environment',
-                'palette' => 'teal, blue, orange, white',
-                'mood' => 'uplifting and creative',
-            ];
-        }
-
         try {
-            $index = random_int(0, $count - 1);
+            $index = random_int(0, count($profiles) - 1);
         } catch (\Throwable) {
-            $index = abs(crc32(mb_strtolower($title . '|' . $subject))) % $count;
+            $index = abs(crc32(mb_strtolower($title . '|' . $subject))) % count($profiles);
         }
 
         return $profiles[$index];
@@ -1005,15 +995,10 @@ SVG;
             ['bg1' => '#e11d48', 'bg2' => '#7c3aed', 'bg3' => '#0f172a', 'shapeA' => '#ffe4e6', 'shapeB' => '#cffafe'],
         ];
 
-        $count = count($palettes);
-        if ($count === 0) {
-            return ['bg1' => '#0ea5a3', 'bg2' => '#2563eb', 'bg3' => '#1e293b', 'shapeA' => '#ffffff', 'shapeB' => '#f59e0b'];
-        }
-
         try {
-            $index = random_int(0, $count - 1);
+            $index = random_int(0, count($palettes) - 1);
         } catch (\Throwable) {
-            $index = abs(crc32(mb_strtolower($title . '|' . $subject))) % $count;
+            $index = abs(crc32(mb_strtolower($title . '|' . $subject))) % count($palettes);
         }
 
         return $palettes[$index];

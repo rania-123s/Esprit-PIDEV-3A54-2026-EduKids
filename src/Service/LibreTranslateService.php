@@ -59,13 +59,13 @@ class LibreTranslateService
         }
 
         if ($statusCode >= 400) {
-            $error = is_array($payload) ? (string) ($payload['error'] ?? '') : '';
+            $error = (string) ($payload['error'] ?? '');
             $message = $error !== '' ? $error : 'Translation service returned an error.';
 
             throw new \RuntimeException($message);
         }
 
-        $translatedText = is_array($payload) ? trim((string) ($payload['translatedText'] ?? '')) : '';
+        $translatedText = trim((string) ($payload['translatedText'] ?? ''));
         if ($translatedText === '') {
             throw new \RuntimeException('Empty translation response.');
         }

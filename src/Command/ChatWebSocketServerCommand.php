@@ -54,7 +54,7 @@ class ChatWebSocketServerCommand extends Command
         $output->writeln('<info>WebSocket endpoint: /ws?token=...</info>');
         $output->writeln('<info>Bridge endpoint: POST /publish</info>');
 
-        while (true) {
+        for (;;) {
             $readSockets = [$server];
             foreach ($this->clients as $client) {
                 $readSockets[] = $client['socket'];
@@ -279,7 +279,7 @@ class ChatWebSocketServerCommand extends Command
         $headerBlock = substr($buffer, 0, $headerEnd);
         $lines = explode("\r\n", $headerBlock);
         $requestLine = array_shift($lines);
-        if (!is_string($requestLine) || $requestLine === '') {
+        if ($requestLine === null || $requestLine === '') {
             return null;
         }
 

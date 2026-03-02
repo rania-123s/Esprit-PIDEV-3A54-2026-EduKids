@@ -153,36 +153,6 @@ class AttachmentSummaryAiService
     /**
      * @param array<string, mixed> $payload
      */
-    private function extractApiErrorMessage(array $payload): string
-    {
-        $error = $payload['error'] ?? null;
-        if (!is_array($error)) {
-            return '';
-        }
-
-        $message = $error['message'] ?? '';
-
-        return is_string($message) ? trim($message) : '';
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     */
-    private function extractApiErrorCode(array $payload): string
-    {
-        $error = $payload['error'] ?? null;
-        if (!is_array($error)) {
-            return '';
-        }
-
-        $code = $error['code'] ?? '';
-
-        return is_string($code) ? trim($code) : '';
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     */
     private function extractOutputText(array $payload): string
     {
         $choices = $payload['choices'] ?? null;
